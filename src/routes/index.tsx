@@ -215,6 +215,66 @@ function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; 
   );
 }
 
+const DUST = [
+  { left: "12%", top: "30%", delay: "0s" },
+  { left: "22%", top: "48%", delay: "0.4s" },
+  { left: "38%", top: "22%", delay: "1.1s" },
+  { left: "61%", top: "18%", delay: "0.2s" },
+  { left: "74%", top: "36%", delay: "0.8s" },
+  { left: "86%", top: "58%", delay: "1.4s" },
+  { left: "48%", top: "62%", delay: "0.6s" },
+  { left: "33%", top: "74%", delay: "1.6s" },
+];
+
+function LivingHangar() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  function aim(clientX: number, clientY: number) {
+    const el = ref.current;
+    if (!el) return;
+    const box = el.getBoundingClientRect();
+    const x = (clientX - box.left) / Math.max(1, box.width);
+    const y = (clientY - box.top) / Math.max(1, box.height);
+    el.style.setProperty("--hx", `${(x * 100).toFixed(2)}%`);
+    el.style.setProperty("--look-x", Math.max(-1, Math.min(1, (x - 0.5) * 2)).toFixed(3));
+    el.style.setProperty("--look-y", Math.max(-1, Math.min(1, (y - 0.38) * 2)).toFixed(3));
+    el.dataset.live = "1";
+  }
+
+  return (
+    <div
+      ref={ref}
+      className="hangar relative aspect-[1920/1048] w-full overflow-hidden bg-black"
+      onPointerEnter={(e) => aim(e.clientX, e.clientY)}
+      onPointerMove={(e) => aim(e.clientX, e.clientY)}
+      onPointerLeave={(e) => {
+        delete e.currentTarget.dataset.live;
+      }}
+    >
+      <img
+        src="/home/garage.jpg"
+        alt="Hangar de osso com carros na plataforma e um crânio de rex no teto"
+        className="hangar-plate pointer-events-none absolute inset-0 h-full w-full object-cover"
+      />
+      <div className="hangar-beam pointer-events-none absolute inset-0" />
+      <span className="eye eye-l" />
+      <span className="eye eye-r" />
+      <span className="holo holo-a" />
+      <span className="holo holo-b" />
+      <span className="holo holo-c" />
+      <span className="pad pad-a" />
+      <span className="pad pad-b" />
+      <span className="pad pad-c" />
+      <span className="visor visor-a" />
+      <span className="visor visor-b" />
+      <span className="visor visor-c" />
+      {DUST.map((bit) => (
+        <span key={bit.left} className="dust" style={{ left: bit.left, top: bit.top, animationDelay: bit.delay }} />
+      ))}
+    </div>
+  );
+}
+
 function Sobre() {
   return (
     <section id="sobre" className="scroll-mt-20 px-4 py-20">
@@ -263,11 +323,7 @@ function Garagem() {
     <section id="garagem" className="scroll-mt-20 border-y border-border bg-surface">
       <Reveal>
         <div className="overflow-hidden">
-          <img
-            src="/home/garage.jpg"
-            alt="Hangar de osso com carros na plataforma e um crânio de rex no teto"
-            className="art-drift max-h-[70vh] w-full object-cover object-center"
-          />
+          <LivingHangar />
         </div>
       </Reveal>
       <div className="mx-auto max-w-6xl px-4 py-14">
