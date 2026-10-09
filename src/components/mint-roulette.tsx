@@ -109,36 +109,43 @@ function RouletteWheel({
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.18;
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+    renderer.domElement.style.display = "block";
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x090b08, 9, 18);
-    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 40);
-    camera.position.set(0.2, 2.55, 8.1);
-    camera.lookAt(0, 0.2, 0);
+    scene.fog = new THREE.Fog(0x090b08, 18, 36);
+    const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 40);
+    camera.position.set(0, 0, 8);
+    camera.lookAt(0, 0, 0);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.42));
-    const key = new THREE.SpotLight(0xfff6df, 28, 24, 0.55, 0.35, 1);
-    key.position.set(2.4, 8.2, 4.2);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const key = new THREE.SpotLight(0xfff6df, 26, 28, 0.6, 0.4, 1);
+    key.position.set(0.4, 1.6, 8);
     scene.add(key);
-    const lime = new THREE.PointLight(0xd6ff3f, 10, 9);
-    lime.position.set(-2.4, 2.4, 2);
+    const lime = new THREE.PointLight(0xd6ff3f, 12, 12);
+    lime.position.set(-2.6, 1.4, 5);
     scene.add(lime);
-    const pink = new THREE.PointLight(0xff4bd8, 4, 7);
-    pink.position.set(2.6, 1.4, -1.2);
+    const pink = new THREE.PointLight(0xff4bd8, 6, 10);
+    pink.position.set(2.8, -1.2, 4.5);
     scene.add(pink);
+
+    const rig = new THREE.Group();
+    rig.rotation.x = -Math.PI / 2;
+    scene.add(rig);
 
     const steel = new THREE.MeshStandardMaterial({ color: 0x2a3124, metalness: 0.86, roughness: 0.28 });
     const brass = new THREE.MeshStandardMaterial({ color: 0xd7b15a, metalness: 0.8, roughness: 0.32 });
     const foot = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.45, 0.42, 48), steel);
     foot.position.y = -0.46;
-    scene.add(foot);
+    rig.add(foot);
     const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.48, 0.38, 24), steel);
     neck.position.y = -0.16;
-    scene.add(neck);
+    rig.add(neck);
 
     const wheel = new THREE.Group();
-    scene.add(wheel);
+    rig.add(wheel);
 
     const platter = new THREE.Mesh(
       new THREE.CylinderGeometry(2.28, 2.36, 0.42, 64),
@@ -263,7 +270,7 @@ function RouletteWheel({
     tip.position.z = -0.72;
     head.add(tip);
     pointer.add(head);
-    scene.add(pointer);
+    rig.add(pointer);
 
     const shadow = new THREE.Mesh(
       new THREE.CircleGeometry(2.5, 40),
@@ -271,14 +278,21 @@ function RouletteWheel({
     );
     shadow.rotation.x = -Math.PI / 2;
     shadow.position.y = -0.67;
-    scene.add(shadow);
+    rig.add(shadow);
 
     let frame = 0;
     const resize = () => {
       const w = el.clientWidth || 640;
-      const h = el.clientHeight || 420;
+      const h = el.clientHeight || 640;
       renderer.setSize(w, h, false);
       camera.aspect = w / Math.max(1, h);
+      const radius = 3.15;
+      const vFov = (camera.fov * Math.PI) / 180;
+      const fitH = radius / Math.tan(vFov / 2);
+      const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+      const fitW = radius / Math.tan(hFov / 2);
+      camera.position.set(0, 0, Math.max(fitH, fitW));
+      camera.lookAt(0, 0, 0);
       camera.updateProjectionMatrix();
     };
     resize();
@@ -335,7 +349,7 @@ function RouletteWheel({
     };
   }, []);
 
-  return <div ref={host} className="h-[420px] w-full" />;
+  return <div ref={host} className="mx-auto aspect-square w-full max-w-[min(92vw,560px)]" />;
 }
 
 export function MintRoulette({
@@ -367,19 +381,19 @@ export function MintRoulette({
   }
 
   return (
-    <div className="fixed inset-0 z-40 grid place-items-center overflow-y-auto bg-black/80 p-4">
-      <div className={`w-full max-w-3xl border bg-bg p-5 ${prize?.rarity === "Lendário" && phase === "won" ? "border-[#ffd24a]" : "border-border"}`}>
-        <div className="flex items-end justify-between gap-3">
+    <div className="fixed inset-0 z-40 grid place-items-center overflow-y-auto bg-black/80 p-3 sm:p-6">
+      <div className={`flex w-full max-w-xl flex-col items-center border bg-bg p-4 sm:p-5 ${prize?.rarity === "Lendário" && phase === "won" ? "border-[#ffd24a]" : "border-border"}`}>
+        <div className="flex w-full items-end justify-between gap-3">
           <div>
             <p className="text-xs tracking-widest text-primary">ROLETA</p>
             <h2 className="font-display text-5xl leading-none">Sorteio</h2>
           </div>
           <p className="font-display text-4xl leading-none text-primary">{under}</p>
         </div>
-        <div className="mt-3 overflow-hidden border border-border bg-black">
+        <div className="mt-3 flex w-full justify-center overflow-hidden border border-border bg-black">
           <RouletteWheel spinning={phase === "spin"} target={target} onDone={() => setPhase("won")} live={setUnder} />
         </div>
-        <ul className="mt-4 grid grid-cols-5 gap-1 text-center">
+        <ul className="mt-4 grid w-full grid-cols-5 gap-1 text-center">
           {RARITY_WHEEL.map((slice) => (
             <li key={slice.rarity} className={under === slice.rarity ? "text-primary" : ""}>
               <img src={ICONS[slice.rarity]} alt="" className="mx-auto size-8 object-contain" />
@@ -405,7 +419,7 @@ export function MintRoulette({
           </div>
         )}
         {phase !== "won" && (
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex w-full flex-wrap justify-center gap-2">
             <button
               type="button"
               disabled={phase !== "idle" || fossil < MINT_COST}
