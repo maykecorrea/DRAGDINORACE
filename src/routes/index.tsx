@@ -10,42 +10,14 @@ export const Route = createFileRoute("/")({
 });
 
 const CARS = [
-  {
-    tag: "#008",
-    name: "T-REX",
-    img: "/game/legend/car-trex.png",
-    spin: "/game/legend/spin-trex.mp4",
-    tone: "neon" as const,
-    stats: [
-      ["Velocidade", "92"],
-      ["Força bruta", "99"],
-      ["Raridade", "Lendário"],
-    ],
-  },
-  {
-    tag: "#001",
-    name: "PEPE",
-    img: "/game/legend/car-pepe.png",
-    spin: "/game/legend/spin-pepe.mp4",
-    tone: "ember" as const,
-    stats: [
-      ["Velocidade", "88"],
-      ["Força bruta", "96"],
-      ["Raridade", "Lendário"],
-    ],
-  },
-  {
-    tag: "#002",
-    name: "DOGE",
-    img: "/game/legend/car-doge.png",
-    spin: "/game/legend/spin-doge.mp4",
-    tone: "neon" as const,
-    stats: [
-      ["Velocidade", "90"],
-      ["Força bruta", "84"],
-      ["Raridade", "Lendário"],
-    ],
-  },
+  { tag: "#001", name: "PEPE", img: "/game/legend/car-pepe.png", spin: "/game/legend/spin-pepe.mp4", tone: "ember" as const, speed: "88", force: "96" },
+  { tag: "#002", name: "DOGE", img: "/game/legend/car-doge.png", spin: "/game/legend/spin-doge.mp4", tone: "neon" as const, speed: "90", force: "84" },
+  { tag: "#003", name: "BINANCE", img: "/game/legend/car-binance.png", spin: "/game/legend/spin-binance.mp4", tone: "ember" as const, speed: "94", force: "91" },
+  { tag: "#004", name: "MEXC", img: "/game/legend/car-mexc.png", spin: "/game/legend/spin-mexc.mp4", tone: "neon" as const, speed: "86", force: "88" },
+  { tag: "#005", name: "BTC", img: "/game/legend/car-btc.png", spin: "/game/legend/spin-btc.mp4", tone: "ember" as const, speed: "97", force: "93" },
+  { tag: "#006", name: "NEURO", img: "/game/legend/car-neuro.png", spin: "/game/legend/spin-neuro.mp4", tone: "neon" as const, speed: "85", force: "98" },
+  { tag: "#007", name: "RONIN", img: "/game/legend/car-ronin.png", spin: "/game/legend/spin-ronin.mp4", tone: "ember" as const, speed: "93", force: "90" },
+  { tag: "#008", name: "T-REX", img: "/game/legend/car-trex.png", spin: "/game/legend/spin-trex.mp4", tone: "neon" as const, speed: "92", force: "99" },
 ];
 
 function ClientOnly({ children }: { children: ReactNode }) {
@@ -333,10 +305,10 @@ function Garagem() {
         <Reveal>
         <h2 className="text-center font-pixel text-5xl text-ember md:text-6xl">Plataforma de extração</h2>
         <p className="mx-auto mt-2 max-w-xl text-center text-pretty text-muted">
-          Passe o mouse no cartão. Ele inclina. Estes três são lendários: não estão na prateleira.
+          Passe o mouse no cartão. Ele inclina. Os oito lendários não estão na prateleira.
         </p>
         </Reveal>
-        <ul className="mt-10 grid gap-8 md:grid-cols-3">
+        <ul className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {CARS.map((car, i) => (
             <li key={car.name}>
               <Reveal delay={i * 90}>
@@ -356,12 +328,18 @@ function Garagem() {
                   />
                   <h3 className={`mt-3 font-pixel text-4xl ${car.tone === "neon" ? "text-neon" : "text-ember"}`}>{car.name}</h3>
                   <dl className="mt-3 space-y-1 text-lg">
-                    {car.stats.map(([label, value]) => (
-                      <div key={label} className="flex justify-between border-b border-border">
-                        <dt className="text-muted">{label}</dt>
-                        <dd className={label === "Raridade" ? "text-neon" : "text-fg"}>{value}</dd>
-                      </div>
-                    ))}
+                    <div className="flex justify-between border-b border-border">
+                      <dt className="text-muted">Velocidade</dt>
+                      <dd>{car.speed}</dd>
+                    </div>
+                    <div className="flex justify-between border-b border-border">
+                      <dt className="text-muted">Força bruta</dt>
+                      <dd>{car.force}</dd>
+                    </div>
+                    <div className="flex justify-between border-b border-border">
+                      <dt className="text-muted">Raridade</dt>
+                      <dd className="text-neon">Lendário</dd>
+                    </div>
                   </dl>
                   <p className="mt-3 flex-1 text-sm text-pretty text-muted">Não está na prateleira. Só sai na roleta.</p>
                   <Link
