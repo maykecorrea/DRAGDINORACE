@@ -72,8 +72,9 @@ function Home() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2">
           <a href="#hero" className="flex items-center gap-2">
             <img src="/home/logo.png" alt="" className="size-11 border border-neon object-cover" />
-            <span className="font-pixel text-3xl leading-none text-neon">DINO</span>
-            <span className="font-pixel text-3xl leading-none text-ember">RACE</span>
+            <span className="font-pixel text-2xl leading-none text-neon sm:text-3xl">DINO</span>
+            <span className="font-pixel text-2xl leading-none text-[#c9a227] sm:text-3xl">DRAG</span>
+            <span className="font-pixel text-2xl leading-none text-ember sm:text-3xl">RACE</span>
           </a>
           <nav className="hidden items-center gap-6 font-pixel text-2xl text-muted md:flex">
             <a href="#sobre" className="hover:text-neon">Totens</a>
@@ -159,7 +160,9 @@ function Hero() {
       <div className="hero-fog pointer-events-none absolute inset-0" />
       <div className="hero-ring pointer-events-none absolute inset-0" />
       <div className="anim-in pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-2 bg-gradient-to-t from-bg via-bg/80 to-transparent px-4 pb-5 pt-14 text-center">
-        <p className="font-pixel text-2xl tracking-wide text-neon md:text-3xl">Deslize o cursor. A névoa abre o templo.</p>
+        <p className="max-w-3xl font-pixel text-xl tracking-wide text-neon md:text-2xl">
+          DA FLORESTA PROFUNDA, UMA NOVA <span className="utopia-bug" data-text="UTOPIA">UTOPIA</span> SURGE.
+        </p>
         <div className="pointer-events-auto flex flex-wrap justify-center gap-3">
           <ClientOnly>
             <SignedOut>

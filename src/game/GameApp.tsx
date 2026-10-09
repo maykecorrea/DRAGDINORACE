@@ -517,7 +517,7 @@ export function GameApp({ rivalId, story }: { rivalId?: string; story?: boolean 
         width={VIEW_W}
         height={VIEW_H}
         className={`absolute inset-0 h-full w-full bg-bg object-contain ${screen === "intro" ? "invisible" : ""}`}
-        aria-label="Pista SAURSHIFT"
+        aria-label="Pista Dino Drag Race"
       />
       {!ready && (
         <p className="absolute bottom-6 left-6 font-display text-4xl text-primary">Acendendo o giro…</p>
@@ -556,7 +556,7 @@ export function GameApp({ rivalId, story }: { rivalId?: string; story?: boolean 
         <section className="pointer-events-none absolute inset-0 flex flex-col justify-end p-4 md:justify-end md:p-8">
           <div className="pointer-events-auto max-w-lg bg-bg/80 p-4">
             <p className="text-xs font-semibold tracking-widest text-primary">RONIN STRIP · 1v1</p>
-            <h1 className="font-display text-7xl leading-none text-fg md:text-8xl">SAURSHIFT</h1>
+            <h1 className="font-display text-6xl leading-none text-fg md:text-7xl">DINO DRAG RACE</h1>
             <p className="mt-2 max-w-sm text-pretty text-muted">
               Drag de cockpit. Pixel denso, neon de ácido e mandíbula de rex. Acerta a marcha e solta o nitro
               antes do rival.

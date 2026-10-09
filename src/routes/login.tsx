@@ -54,7 +54,7 @@ function LoginPage() {
     <main className="grid min-h-dvh place-items-center bg-bg px-4 py-10 text-fg">
       <div className="w-full max-w-md border border-border bg-surface p-5">
         <Link to="/" className="font-display text-4xl leading-none text-primary">
-          SAURSHIFT
+          DINO DRAG RACE
         </Link>
         <h1 className="mt-3 font-display text-6xl leading-none">{criar ? "Criar conta" : "Entrar"}</h1>
         <p className="mt-2 text-sm text-muted">

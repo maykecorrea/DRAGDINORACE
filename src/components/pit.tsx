@@ -36,7 +36,7 @@ export function PitFrame({ title, kicker, children }: { title: string; kicker?: 
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <Link to="/" className="font-display text-4xl leading-none text-primary">
-            SAURSHIFT
+            DINO DRAG RACE
           </Link>
           <nav className="flex max-w-full gap-1 overflow-x-auto">
             {LINKS.map((item) => (

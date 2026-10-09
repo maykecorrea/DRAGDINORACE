@@ -10,7 +10,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "SAURSHIFT" },
+      { title: "Dino Drag Race" },
       { name: "description", content: "Drag de cockpit em pixel art. Marcha, nitro e fóssil na Ronin." },
       { name: "theme-color", content: "#090b08" },
     ],

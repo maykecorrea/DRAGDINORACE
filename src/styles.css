@@ -262,6 +262,77 @@
   }
 }
 
+.utopia-bug {
+  position: relative;
+  display: inline-block;
+  color: #b6ff00;
+  text-shadow: 0 0 10px #b6ff00;
+  animation: utopia-bug 2.2s steps(1, end) infinite;
+}
+
+.utopia-bug::before,
+.utopia-bug::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.utopia-bug::before {
+  color: #d400ff;
+  text-shadow: 0 0 12px #d400ff;
+  animation: utopia-slice 0.85s steps(2, end) infinite;
+}
+
+.utopia-bug::after {
+  color: #c9a227;
+  text-shadow: 0 0 10px #c9a227;
+  animation: utopia-slice-b 1.15s steps(3, end) infinite;
+}
+
+@keyframes utopia-bug {
+  0%, 8% { color: #b6ff00; opacity: 1; transform: none; }
+  12% { color: #d400ff; transform: translate(2px, -1px) skewX(-8deg); }
+  16% { opacity: 0; }
+  20% { color: #c9a227; opacity: 1; transform: translate(-3px, 1px); }
+  28% { color: #b6ff00; transform: none; }
+  36% { opacity: 0.15; color: #d400ff; }
+  40% { opacity: 1; color: #b6ff00; }
+  52% { color: #c9a227; transform: skewX(6deg); }
+  60% { opacity: 0; }
+  64% { opacity: 1; color: #d400ff; transform: translate(1px, 0); }
+  78% { color: #b6ff00; transform: none; }
+  86% { opacity: 0; }
+  90%, 100% { opacity: 1; color: #c9a227; }
+}
+
+@keyframes utopia-slice {
+  0%, 30% { opacity: 0; transform: translate(0); clip-path: inset(40% 0 40% 0); }
+  35% { opacity: 1; transform: translate(-4px, 0); clip-path: inset(10% 0 70% 0); }
+  50% { opacity: 0; }
+  62% { opacity: 1; transform: translate(3px, -1px); clip-path: inset(60% 0 15% 0); }
+  80%, 100% { opacity: 0; }
+}
+
+@keyframes utopia-slice-b {
+  0%, 45% { opacity: 0; }
+  50% { opacity: 1; transform: translate(3px, 1px); clip-path: inset(70% 0 8% 0); }
+  68% { opacity: 0; }
+  74% { opacity: 0.9; transform: translate(-2px, 0); clip-path: inset(20% 0 55% 0); }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .utopia-bug,
+  .utopia-bug::before,
+  .utopia-bug::after {
+    animation: none;
+  }
+  .utopia-bug { color: #b6ff00; opacity: 1; }
+  .utopia-bug::before,
+  .utopia-bug::after { content: none; }
+}
+
 @keyframes fossil-flow {
   from {
     background-position: 0% 50%;
