@@ -13,7 +13,7 @@ const CARS = [
   { tag: "#001", name: "PEPE", img: "/game/legend/car-pepe.png", spin: "/game/legend/spin-pepe.mp4", tone: "ember" as const, speed: "88", force: "96" },
   { tag: "#002", name: "DOGE", img: "/game/legend/car-doge.png", spin: "/game/legend/spin-doge.mp4", tone: "neon" as const, speed: "90", force: "84" },
   { tag: "#003", name: "BINANCE", img: "/game/legend/car-binance.png", spin: "/game/legend/spin-binance.mp4", tone: "ember" as const, speed: "94", force: "91" },
-  { tag: "#004", name: "MEXC", img: "/game/legend/car-mexc.png", spin: "/game/legend/spin-mexc.mp4", tone: "neon" as const, speed: "86", force: "88" },
+  { tag: "#004", name: "MEXC", img: "/game/legend/car-mexc.png", spin: "/game/legend/spin-mexc.mp4?v=2", tone: "neon" as const, speed: "86", force: "88" },
   { tag: "#005", name: "BTC", img: "/game/legend/car-btc.png", spin: "/game/legend/spin-btc.mp4", tone: "ember" as const, speed: "97", force: "93" },
   { tag: "#006", name: "NEURO", img: "/game/legend/car-neuro.png", spin: "/game/legend/spin-neuro.mp4", tone: "neon" as const, speed: "85", force: "98" },
   { tag: "#007", name: "RONIN", img: "/game/legend/car-ronin.png", spin: "/game/legend/spin-ronin.mp4", tone: "ember" as const, speed: "93", force: "90" },
