@@ -14,6 +14,7 @@ const CARS = [
     tag: "#008",
     name: "T-REX",
     img: "/game/legend/car-trex.png",
+    spin: "/game/legend/spin-trex.mp4",
     tone: "neon" as const,
     stats: [
       ["Velocidade", "92"],
@@ -25,6 +26,7 @@ const CARS = [
     tag: "#001",
     name: "PEPE",
     img: "/game/legend/car-pepe.png",
+    spin: "/game/legend/spin-pepe.mp4",
     tone: "ember" as const,
     stats: [
       ["Velocidade", "88"],
@@ -36,6 +38,7 @@ const CARS = [
     tag: "#002",
     name: "DOGE",
     img: "/game/legend/car-doge.png",
+    spin: "/game/legend/spin-doge.mp4",
     tone: "neon" as const,
     stats: [
       ["Velocidade", "90"],
@@ -342,7 +345,15 @@ function Garagem() {
                   <p className={`self-end border px-2 font-pixel text-xl ${car.tone === "neon" ? "border-neon text-neon" : "border-ember text-ember"}`}>
                     {car.tag}
                   </p>
-                  <img src={car.img} alt="" className="mt-3 h-40 w-full object-contain" />
+                  <video
+                    src={car.spin}
+                    poster={car.img}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="mt-3 h-40 w-full object-contain"
+                  />
                   <h3 className={`mt-3 font-pixel text-4xl ${car.tone === "neon" ? "text-neon" : "text-ember"}`}>{car.name}</h3>
                   <dl className="mt-3 space-y-1 text-lg">
                     {car.stats.map(([label, value]) => (
