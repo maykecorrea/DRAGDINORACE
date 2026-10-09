@@ -1,0 +1,304 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Teko", Impact, sans-serif;
+  --color-bg: #090b08;
+  --color-surface: #141812;
+  --color-surface-2: #1e2618;
+  --color-fg: #efe6d2;
+  --color-muted: #9aa18c;
+  --color-primary: #d6ff3f;
+  --color-ink: #141806;
+  --color-danger: #ff3b1f;
+  --color-border: #2c3424;
+  --color-neon: #39ff14;
+  --color-ember: #ff7300;
+  --font-pixel: "VT323", ui-monospace, monospace;
+  --radius-md: 0.5rem;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-font-smoothing: antialiased;
+    scrollbar-color: var(--color-neon) #050605;
+    scrollbar-width: auto;
+  }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    min-height: 100dvh;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  canvas {
+    image-rendering: auto;
+    touch-action: none;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+::-webkit-scrollbar-track {
+  background: #050605;
+  border-left: 1px solid #16320c;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#d8ff6a, var(--color-neon) 45%, #14610c);
+  border: 3px solid #050605;
+  border-radius: 999px;
+  box-shadow: 0 0 12px var(--color-neon);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d8ff6a;
+  box-shadow: 0 0 18px var(--color-neon);
+}
+
+.hero-spot {
+  --mx: 50%;
+  --my: 50%;
+  --pan-x: 0px;
+  --pan-y: 0px;
+  background: #020306;
+}
+
+.hero-fog {
+  background-color: #020306;
+  background-image: url("/home/fog.jpg");
+  background-position: center;
+  background-size: cover;
+}
+
+.hero-spot[data-open] .hero-fog {
+  -webkit-mask-image: radial-gradient(
+    circle clamp(150px, 18vw, 250px) at var(--mx) var(--my),
+    rgb(0 0 0 / 0) 0%,
+    rgb(0 0 0 / 0) 58%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    circle clamp(150px, 18vw, 250px) at var(--mx) var(--my),
+    rgb(0 0 0 / 0) 0%,
+    rgb(0 0 0 / 0) 58%,
+    #000 100%
+  );
+}
+
+.hero-ring {
+  opacity: 0;
+  background: radial-gradient(
+    circle clamp(150px, 18vw, 250px) at var(--mx) var(--my),
+    transparent 54%,
+    color-mix(in srgb, var(--color-neon) 55%, transparent) 68%,
+    transparent 78%
+  );
+  mix-blend-mode: screen;
+}
+
+.hero-spot[data-open] .hero-ring,
+.hero-spot[data-open] .hero-glow {
+  opacity: 1;
+}
+
+@media (max-width: 700px) {
+  .hero-spot[data-open] .hero-fog {
+    -webkit-mask-image: radial-gradient(circle 68vw at var(--mx) var(--my), rgb(0 0 0 / 0) 0%, #000 78%);
+    mask-image: radial-gradient(circle 68vw at var(--mx) var(--my), rgb(0 0 0 / 0) 0%, #000 78%);
+  }
+  .hero-spot[data-open] .hero-ring {
+    background: radial-gradient(
+      circle 68vw at var(--mx) var(--my),
+      transparent 60%,
+      color-mix(in srgb, var(--color-neon) 40%, transparent) 72%,
+      transparent 84%
+    );
+  }
+}
+
+.hero-glow {
+  opacity: 0;
+  background: radial-gradient(
+    circle clamp(140px, 20vw, 280px) at var(--mx) var(--my),
+    color-mix(in srgb, var(--color-neon) 32%, transparent),
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+}
+
+.hero-art {
+  transform: translate3d(var(--pan-x), var(--pan-y), 0) scale(1.08);
+}
+
+.art-drift {
+  transform: translate3d(calc(var(--px, 0) * -18px), calc(var(--py, 0) * -12px), 0) scale(1.04);
+}
+
+.home-grid {
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(rgb(57 255 20 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(57 255 20 / 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.hero-spot[data-still] .hero-fog {
+  -webkit-mask-image: none;
+  mask-image: none;
+  opacity: 0.28;
+}
+
+.hero-spot[data-still] .hero-glow,
+.hero-spot[data-still] .hero-ring {
+  display: none;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-in {
+  animation: rise-in 0.7s ease both;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+
+.reveal[data-in="1"] {
+  opacity: 1;
+  transform: none;
+}
+
+.home-grid a,
+.home-grid button {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.home-grid a:hover,
+.home-grid button:hover {
+  box-shadow: 0 0 16px color-mix(in srgb, currentColor 45%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-art,
+  .art-drift,
+  .reveal {
+    transform: none;
+    opacity: 1;
+  }
+  .anim-in {
+    animation: none;
+  }
+}
+
+.glitch-title {
+  position: relative;
+}
+
+.glitch-title::before,
+.glitch-title::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.glitch-title::before {
+  color: var(--color-ember);
+  transform: translateX(2px);
+  animation: glitch-a 3.2s infinite linear alternate-reverse;
+}
+
+.glitch-title::after {
+  color: #7af0ff;
+  transform: translateX(-2px);
+  animation: glitch-b 2.6s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-a {
+  0% { clip-path: inset(8% 0 78% 0); }
+  12% { clip-path: inset(42% 0 36% 0); }
+  20% { clip-path: inset(70% 0 8% 0); }
+  28%, 100% { clip-path: inset(100% 0 0 0); }
+}
+
+@keyframes glitch-b {
+  0% { clip-path: inset(62% 0 16% 0); }
+  10% { clip-path: inset(18% 0 60% 0); }
+  18% { clip-path: inset(80% 0 4% 0); }
+  26%, 100% { clip-path: inset(100% 0 0 0); }
+}
+
+.scanlines {
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgb(0 0 0 / 0.18) 3px,
+    transparent 4px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch-title::before,
+  .glitch-title::after {
+    animation: none;
+    content: none;
+  }
+}
+
+@keyframes fossil-flow {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+@utility fossil-token {
+  background-image: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #ffffff 38%,
+    #050605 50%,
+    #ffffff 62%,
+    #ffffff 100%
+  );
+  background-size: 320% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: fossil-flow 4.8s ease-in-out infinite;
+}
+
+@utility fossil-token-lime {
+  background-image: linear-gradient(
+    90deg,
+    #050605 0%,
+    #050605 38%,
+    #ffffff 50%,
+    #050605 62%,
+    #050605 100%
+  );
+  background-size: 320% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: fossil-flow 4.8s ease-in-out infinite;
+}
