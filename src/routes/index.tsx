@@ -72,9 +72,9 @@ function Home() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2">
           <a href="#hero" className="flex items-center gap-2">
             <img src="/home/logo.png" alt="" className="size-11 border border-neon object-cover" />
-            <span className="font-pixel text-2xl leading-none text-neon sm:text-3xl">DINO</span>
-            <span className="font-pixel text-2xl leading-none text-[#c9a227] sm:text-3xl">DRAG</span>
-            <span className="font-pixel text-2xl leading-none text-ember sm:text-3xl">RACE</span>
+            <span className="brand-neon font-pixel text-2xl leading-none sm:text-3xl" data-text="DINO DRAG RACE">
+              DINO DRAG RACE
+            </span>
           </a>
           <nav className="hidden items-center gap-6 font-pixel text-2xl text-muted md:flex">
             <a href="#sobre" className="hover:text-neon">Totens</a>
