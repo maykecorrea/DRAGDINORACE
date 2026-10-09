@@ -164,18 +164,17 @@ function Hero() {
           DA FLORESTA PROFUNDA, UMA NOVA <span className="utopia-bug" data-text="UTOPIA">UTOPIA</span> SURGE.
         </p>
         <div className="pointer-events-auto flex flex-wrap justify-center gap-3">
+          <a
+            href="https://discord.com/channels/1103133770984468550"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-11 items-center bg-neon px-4 font-pixel text-3xl text-ink"
+          >
+            Lista de espera
+          </a>
           <ClientOnly>
-            <SignedOut>
-              <Link
-                to="/login"
-                search={{ modo: "criar" }}
-                className="inline-flex min-h-11 items-center bg-neon px-4 font-pixel text-3xl text-ink"
-              >
-                Criar a ficha
-              </Link>
-            </SignedOut>
             <SignedIn>
-              <Link to="/pista" className="inline-flex min-h-11 items-center bg-neon px-4 font-pixel text-3xl text-ink">
+              <Link to="/pista" className="inline-flex min-h-11 items-center border border-neon px-4 font-pixel text-3xl text-neon">
                 Ir pra pista
               </Link>
             </SignedIn>
@@ -358,13 +357,14 @@ function Airdrop({ onNote }: { onNote: (message: string) => void }) {
           >
             [ + ] Seguir no Twitter
           </button>
-          <button
-            type="button"
-            onClick={() => onNote("O canal ainda está fora do ar. A ficha já entra.")}
-            className="min-h-11 border border-ember px-4 font-pixel text-2xl text-ember"
+          <a
+            href="https://discord.com/channels/1103133770984468550"
+            target="_blank"
+            rel="noreferrer"
+            className="min-h-11 border border-ember px-4 font-pixel text-2xl text-ember inline-flex items-center justify-center"
           >
             [ + ] Entrar no Discord
-          </button>
+          </a>
         </div>
         <ClientOnly>
           <SignedOut>
