@@ -359,6 +359,39 @@ function Garagem() {
   );
 }
 
+function HeartCore() {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  function play() {
+    const video = ref.current;
+    if (!video) return;
+    void video.play();
+  }
+
+  function stop() {
+    const video = ref.current;
+    if (!video) return;
+    video.pause();
+    video.currentTime = 0;
+  }
+
+  return (
+    <video
+      ref={ref}
+      src="/home/core.mp4"
+      poster="/home/core.jpg"
+      muted
+      loop
+      playsInline
+      preload="auto"
+      aria-label="Coração mecânico repartindo play-to-earn, liquidez, crescimento e marketing"
+      className="w-full object-cover"
+      onPointerEnter={play}
+      onPointerLeave={stop}
+    />
+  );
+}
+
 function Nucleo() {
   return (
     <section id="nucleo" className="scroll-mt-20 px-4 py-20">
@@ -366,17 +399,13 @@ function Nucleo() {
         <Reveal>
         <h2 className="text-center font-pixel text-5xl text-neon md:text-6xl">Núcleo de distribuição</h2>
         <p className="mx-auto mt-2 max-w-xl text-center text-pretty text-muted">
-          O coração reparte o que a faixa gera. Passe o mouse: o núcleo acompanha a mão.
+          O coração reparte o que a faixa gera. O pulso só liga com o mouse em cima.
         </p>
         </Reveal>
         <Reveal delay={80}>
         <Tilt>
           <div className="mt-8 overflow-hidden border border-neon">
-            <img
-              src="/home/core.jpg"
-              alt="Coração mecânico repartindo play-to-earn, liquidez, crescimento e marketing"
-              className="art-drift w-full object-cover"
-            />
+            <HeartCore />
           </div>
         </Tilt>
         </Reveal>
