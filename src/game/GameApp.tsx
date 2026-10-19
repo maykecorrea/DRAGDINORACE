@@ -96,6 +96,8 @@ type Result = {
   wrecked: boolean;
   gears: number;
   rivalGears: number;
+  rivalHp?: number;
+  rivalHpMax?: number;
   stars: [boolean, boolean, boolean];
   note?: string;
   mission?: string | null;
@@ -163,7 +165,18 @@ function rivalStats(phase: StoryPhase) {
   return storyRivalStats(phase);
 }
 
-function launchLabel(grade: LaunchGrade | null): string {
+function rivalUpgrades(sim: Match): Upgrades {
+  const phase = STORY.find((item) => `fase-${item.chapter}` === sim.rivalId);
+  if (phase) return storyLoadout(phase).upgrades;
+  const streetId = sim.rivalId?.startsWith("racha-") ? sim.rivalId.slice(6) : "";
+  const streetCar = streetId ? streetById(streetId) : undefined;
+  if (streetCar) return streetBuild(streetCar.rarity);
+  const old = streetId ? RIVALS.find((item) => item.id === streetId) : undefined;
+  if (old) return old.build;
+  return { engine: 0, gearbox: 0, nitro: 0, tires: 0, chassis: 0 };
+}
+
+function launchLabel(grade: LaunchGrade | null | undefined): string {
   if (grade === "perfeito") return "PERFEITO";
   if (grade === "ok") return "OK";
   if (grade === "patinou") return "PATINOU";
@@ -233,7 +246,7 @@ function ResultCard({
         </div>
       )}
       <p className="mt-1 text-sm text-muted">
-        reação {reaction == null || reaction < 0 || reaction > 6 ? (launch === "queimou" || (reaction != null && reaction < 0) ? "QUEIMOU" : "—") : `${Math.round(reaction * 1000)} ms`} · trap {trap == null ? "—" : `${Math.round(mph(trap))} mph`}
+        reação {reaction == null || reaction > 6 ? (launch === "queimou" ? "QUEIMOU" : "—") : `${Math.round(reaction * 1000)} ms`} · trap {trap == null ? "—" : `${Math.round(mph(trap))} mph`}
       </p>
       <div className="mt-3 grid gap-1" style={{ gridTemplateColumns: `repeat(${boxes + 1}, minmax(0, 1fr))` }}>
         <div className={`px-1 py-2 text-center ${cellTone(launch)}`}>
@@ -523,7 +536,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               const car = selectedCar(saveRef.current);
               const up = stacked(car);
               const phase = STORY.find((item) => `fase-${item.chapter}` === sim.rivalId);
-              const rivalUp = phase ? storyLoadout(phase).upgrades : null;
+              const rivalUp = sim.mode === "duel" ? rivalUpgrades(sim) : null;
               while (acc.v >= 1 / 60 && guard < 5) {
                 const stepIn = {
                   ...(first ? input : { ...input, shift: false, nitro: false, fireEdge: false, rearEdge: false, shield: false, ram: 0 }),
@@ -699,6 +712,8 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   wrecked: sim.player.wrecked,
                   gears: sim.player.gears,
                   rivalGears: sim.rival?.gears ?? 5,
+                  rivalHp: sim.rival?.hp,
+                  rivalHpMax: sim.rival?.hpMax,
                   stars,
                   note: shownNote || undefined,
                   mission: missionReady({ ...saveRef.current, daily }) ? "Missão do dia pronta. Recolhe o fóssil na preparação." : null,
@@ -925,6 +940,11 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         sim.callout = boss.before;
         sim.calloutT = 2.8;
       }
+    } else if (sim.rival && sim.mode === "duel") {
+      const front = armedDef(undefined, "missile");
+      const back = armedRear(undefined, "mine");
+      armWeapon(sim.rival, front.id, front);
+      armRear(sim.rival, back.id, back);
     }
     return sim;
   }
@@ -1517,7 +1537,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
             <p className="pointer-events-none absolute left-1/2 top-44 z-20 max-w-sm -translate-x-1/2 bg-bg/80 px-3 py-2 text-center text-sm text-primary">
               {again.kind === "free"
                 ? "Segura o gás. Shift sobe a marcha quando aparecer TROCA. F atira na frente. G atira atrás."
-                : "Segura Espaço e W. Solta o Espaço no VAI. Shift sobe a marcha. F atira. G solta mina."}
+                : "Segura Espaço e W. Solta o Espaço no VAI — ou aperta W no VAI. W antes do verde queima. Shift sobe na faixa verde. F atira pra frente. G solta mina. Depois do VAI o Espaço é o cuspe."}
             </p>
           )}
           <div className="pointer-events-auto flex items-center justify-between">
@@ -1597,7 +1617,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
           <p className="pointer-events-none hidden pb-3 text-right text-sm text-fg md:block">
             {again.kind === "free"
               ? "Segura o gás · Shift sobe a marcha · N nitro · F frente · G traseira · A e D na faixa"
-              : "Espaço larga, depois é o cuspe · W gira · Shift marcha · N nitro · F frente · G trás · E escudo · A/D faixa · duplo toque pancada · V câmera · F3 debug"}
+              : "Espaço freia até o VAI, depois é o cuspe · W gira e larga no VAI · Shift na faixa verde · N nitro · F frente · G trás · E escudo · A/D faixa · V câmera"}
           </p>
         </div>
       )}
@@ -1632,6 +1652,9 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 launch={result.rivalLaunch}
                 grades={result.rivalGrades}
                 gears={result.rivalGears}
+                hp={result.rivalHp}
+                hpMax={result.rivalHpMax}
+                wrecked={result.stars[1]}
               />
             </div>
             <p className="mt-3 font-display text-3xl text-primary">

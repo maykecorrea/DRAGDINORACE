@@ -8,6 +8,7 @@ import {
   botForLevel,
   createDuel,
   gearsFor,
+  performanceOf,
   purse,
   raceVerdict,
   rubberMul,
@@ -363,4 +364,119 @@ test("bônus de desempenho corta em 50%", () => {
   assert.ok(pay.raw > 0.5);
   assert.equal(pay.cap, 0.5);
   assert.equal(pay.total, 150);
+});
+
+test("W antes do verde queima e não dá bônus de 0 ms", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("cedo", bot, comum, comum, 6, 6, 5);
+  let wall = 10_000;
+  const gasDown = wall + 400;
+  const dt = 1 / 60;
+  let saw: string[] = [];
+  for (let i = 0; i < 60 * 8; i++) {
+    wall += 1000 * dt;
+    const input: Input = {
+      throttle: 1,
+      steer: 0,
+      shift: false,
+      nitro: false,
+      brake: false,
+      nowMs: wall,
+      gasDownMs: gasDown,
+    };
+    stepMatch(m, input, dt, up, up);
+    if (m.banner) saw.push(m.banner);
+    if (m.player.launched && m.raceTime > 0.7) break;
+  }
+  assert.equal(m.player.launchGrade, "queimou");
+  assert.equal(m.player.redlight, true);
+  assert.ok((m.player.reaction ?? 0) < -0.2, String(m.player.reaction));
+  assert.equal(performanceOf(m).lines.some((line) => line.label.includes("reação")), false);
+  assert.ok(saw.includes("3") && saw.includes("2") && saw.includes("1"), saw.join(","));
+  const wait = createDuel("vai", bot, comum, comum, 6, 6, 6);
+  let wall2 = 20_000;
+  let vai = false;
+  for (let i = 0; i < 60 * 6 && !vai; i++) {
+    wall2 += 1000 * dt;
+    stepMatch(wait, { throttle: 0, steer: 0, shift: false, nitro: false, brake: true, nowMs: wall2 }, dt, up, null);
+    if (wait.banner === "VAI") vai = true;
+  }
+  assert.equal(vai, true);
+});
+
+test("rival de rua com upgrades termina a prova", () => {
+  const ai = botForLevel("medio", mulberry(12));
+  ai.willFoul = false;
+  ai.rubber = 0;
+  ai.aim = 0;
+  ai.mines = 0;
+  const m = createDuel("racha-gaiola", ai, comum, comum, 6, 6, 12);
+  m.hazards = [];
+  let brake = true;
+  let wall = 40_000;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 50 && m.phase !== "finish"; i++) {
+    wall += 1000 * dt;
+    const rpm = m.player.rpm;
+    const row = rowFor(m.player.gear);
+    let shift = false;
+    if (m.player.launched && m.player.shiftLock <= 0 && m.player.gear < 6 && rpm >= row.pLo && rpm <= row.pHi + 40) shift = true;
+    if (m.phase === "race" && !m.player.launched && m.raceTime >= 0.22) brake = false;
+    stepMatch(
+      m,
+      {
+        throttle: !m.player.launched && rpm > 4900 ? 0 : 1,
+        steer: 0,
+        shift,
+        nitro: false,
+        brake: brake && !m.player.launched,
+        nowMs: wall,
+        brakeUpMs: brake ? null : wall,
+      },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.equal(m.phase, "finish");
+  assert.ok(m.rival?.launched, "rival não largou");
+  assert.ok(m.rival?.finishTime != null && m.rival.finishTime < 34, String(m.rival?.finishTime));
+  assert.ok(m.player.finishTime != null && m.player.finishTime < 32, `ET ${m.player.finishTime}`);
+});
+
+test("míssil sai mesmo com o rival atrás e o cuspe acerta na frente", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0.6, rubber: 0, mines: 2 };
+  const m = createDuel("tiro", bot, comum, comum, 6, 6, 3);
+  m.phase = "race";
+  m.green = true;
+  m.player.launched = true;
+  m.player.dist = 200;
+  m.player.speed = 30;
+  m.player.lane = 0;
+  m.raceTime = 4;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 80;
+    m.rival.speed = 20;
+    m.rival.lane = 0;
+  }
+  const missile = weaponById("missile");
+  const mine = weaponById("mine");
+  armWeapon(m.player, "missile", missile);
+  armRear(m.player, "mine", mine);
+  const ammo = m.player.ammo;
+  const rear = m.player.rearAmmo;
+  stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, fire: true, rear: true, rearEdge: true, brake: false }, 1 / 60, up, up);
+  assert.ok(m.player.ammo < ammo, "F não gastou");
+  assert.ok(m.shots.some((shot) => shot.live && shot.owner === "you" && shot.kind === "missil" && shot.dist > m.player.dist));
+  assert.ok(m.player.rearAmmo < rear, "G não gastou");
+  assert.ok(m.shots.some((shot) => shot.live && shot.owner === "you" && shot.kind === "mina" && shot.dist < m.player.dist));
+  if (m.rival) {
+    m.rival.dist = m.player.dist + 24;
+    m.rival.lane = m.player.lane;
+    const hp = m.rival.hp;
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, cuspe: true, brake: false }, 1 / 60, up, up);
+    assert.ok(m.rival.hp < hp, `${m.rival.hp} vs ${hp}`);
+    assert.ok(m.player.hits >= 1);
+  }
 });

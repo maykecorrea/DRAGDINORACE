@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { SignedIn, SignedOut } from "@/lib/auth/gates";
+import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { gfGate } from "@/game/gf.functions";
 import { useLocale } from "@/lib/locale-context";
 
 export const Route = createFileRoute("/")({
@@ -30,7 +32,24 @@ function ClientOnly({ children }: { children: ReactNode }) {
 function Home() {
   const [note, setNote] = useState<string | null>(null);
   const router = useRouter();
+  const navigate = useNavigate();
+  const { user, isPending } = useCurrentUserState();
   const { t, lang, choose } = useLocale();
+
+  useEffect(() => {
+    if (isPending || !user) return;
+    let stop = false;
+    void gfGate()
+      .then((gate) => {
+        if (!stop) void navigate({ to: gate.home });
+      })
+      .catch(() => {
+        if (!stop) void navigate({ to: "/modos" });
+      });
+    return () => {
+      stop = true;
+    };
+  }, [user, isPending, navigate]);
 
   useEffect(() => {
     void router.preloadRoute({ to: "/dashboard" });
@@ -83,7 +102,7 @@ function Home() {
             </SignedOut>
             <SignedIn>
               <Link
-                to="/dashboard"
+                to="/modos"
                 preload="render"
                 className="inline-flex min-h-11 items-center border border-neon px-3 font-pixel text-2xl text-neon hover:bg-neon hover:text-ink"
               >
@@ -166,7 +185,7 @@ function Hero() {
           </a>
           <ClientOnly>
             <SignedIn>
-              <Link to="/pista" className="inline-flex min-h-11 items-center border border-neon px-4 font-pixel text-3xl text-neon">
+              <Link to="/modos" className="inline-flex min-h-11 items-center border border-neon px-4 font-pixel text-3xl text-neon">
                 Ir pra pista
               </Link>
             </SignedIn>

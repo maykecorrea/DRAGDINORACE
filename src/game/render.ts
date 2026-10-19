@@ -769,7 +769,7 @@ function paintMirror(
   ctx.restore();
 }
 
-function paintChaseCar(ctx: CanvasRenderingContext2D, m: Match, neon: string, now: number) {
+function paintChaseCar(ctx: CanvasRenderingContext2D, m: Match, neon: string, now: number, sprite?: CanvasImageSource) {
   const hex = NEON_HEX[neon as keyof typeof NEON_HEX] ?? "#d6ff3f";
   const tilt = m.player.laneT > 0 ? (m.player.laneGoal >= m.player.laneFrom ? 1 : -1) * ((6 * Math.PI) / 180) : 0;
   const x = VIEW_W * 0.5;
@@ -777,15 +777,22 @@ function paintChaseCar(ctx: CanvasRenderingContext2D, m: Match, neon: string, no
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(tilt);
-  ctx.fillStyle = "#1a140f";
-  ctx.fillRect(-100, -28, 200, 78);
-  ctx.fillStyle = "#3a2a1c";
-  ctx.fillRect(-78, -46, 156, 28);
-  ctx.fillStyle = "#070806";
-  ctx.fillRect(-36, -40, 72, 16);
-  ctx.fillStyle = hex;
-  ctx.fillRect(-86, -6, 26, 12);
-  ctx.fillRect(60, -6, 26, 12);
+  const img = sprite as CanvasImageSource & { width?: number; height?: number };
+  if (img && (img.width ?? 0) > 8 && (img.height ?? 0) > 8) {
+    const w = 210;
+    const h = w * ((img.height ?? 1) / (img.width ?? 1));
+    ctx.drawImage(img, -w / 2, -h * 0.78, w, h);
+  } else {
+    ctx.fillStyle = "#1a140f";
+    ctx.fillRect(-100, -28, 200, 78);
+    ctx.fillStyle = "#3a2a1c";
+    ctx.fillRect(-78, -46, 156, 28);
+    ctx.fillStyle = "#070806";
+    ctx.fillRect(-36, -40, 72, 16);
+    ctx.fillStyle = hex;
+    ctx.fillRect(-86, -6, 26, 12);
+    ctx.fillRect(60, -6, 26, 12);
+  }
   ctx.fillStyle = "#8a8172";
   ctx.fillRect(-16, 36, 10, 16);
   ctx.fillRect(6, 36, 10, 16);
@@ -1189,7 +1196,7 @@ export function drawFrame(
   if (m.rival && (m.mode === "duel" || m.mode === "free")) {
     const ahead = m.rival.dist - dist;
     if (m.player.draft > 0.04 && ahead > 1.6 && ahead < 26) paintSlip(ctx, now, airAt, ahead, m.rival.lane, m.player.draft);
-    if (ahead < -12 || ahead > 140) {
+    if (ahead < (chase ? -28 : -12) || ahead > 140) {
       const pin = ahead > 0 ? 64 : 8;
       const p = airAt(pin, m.rival.lane);
       ctx.save();
@@ -1309,7 +1316,7 @@ export function drawFrame(
   if (!chase) {
     ctx.drawImage(plate, box.x, box.y, box.w, box.h);
   } else {
-    paintChaseCar(ctx, m, neon, now);
+    paintChaseCar(ctx, m, neon, now, youMark);
   }
   if (m.player.nitroOn > 0) {
     ctx.save();

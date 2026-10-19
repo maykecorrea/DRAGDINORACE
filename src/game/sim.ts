@@ -705,7 +705,7 @@ function armNitro(m: Match, r: Racer, _up: Upgrades, who: "you" | "ai") {
 
 function reactionSeconds(m: Match, input: Input | null, fallback: number): number {
   if (input?.brakeUpMs && m.greenWall > 0 && m.usedBrake) return (input.brakeUpMs - m.greenWall) / 1000;
-  if (input?.gasDownMs && m.greenWall > 0 && !m.usedBrake) return Math.max(0, (input.gasDownMs - m.greenWall) / 1000);
+  if (input?.gasDownMs && m.greenWall > 0 && !m.usedBrake) return (input.gasDownMs - m.greenWall) / 1000;
   return fallback;
 }
 
@@ -1018,6 +1018,7 @@ function spawnShot(m: Match, r: Racer, owner: "you" | "ai", sure: boolean, force
     r.fired += 1;
     markFeedback(m, back ? "G" : "F");
     m.events.push(kind === "mina" ? "mine" : "shot");
+    if (kind === "mina") note(m, "MINA");
   }
 }
 
@@ -1134,30 +1135,27 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
       } else if (r.rearCool <= 0 && r.rearAmmo > 0) spawnShot(m, r, "you", false, true);
     }
     const lockable = r.weapon === "missile" || r.weapon === "homing" || r.load.lock > 0;
-    const same = !!foe && Math.abs(foe.lane - r.lane) < 0.85 && ahead >= RACE_CONFIG.missile.band[0] && ahead <= RACE_CONFIG.missile.band[1];
+    const same = !!foe && Math.abs(foe.lane - r.lane) < 0.85 && ahead >= COMBAT.missil.armaM && ahead <= COMBAT.missil.alcanceM;
     if (lockable) {
-      if (fire && ahead < -1.5) {
-        m.blockFront = 0.3;
-        m.aim = 0;
-        m.aimLock = false;
-      } else if (fire && r.ammo > 0) {
-        if (same) {
-          const was = m.aimLock;
-          m.aim = Math.min(1, m.aim + dt / COMBAT.missil.travaS);
-          m.aimLock = m.aim >= 0.995;
-          if (m.aimLock && !was) m.events.push("lock");
-        } else {
-          m.aim = Math.max(m.aim, 0.05);
-          m.aimLock = false;
-        }
+      if (fire && r.ammo > 0 && same) {
+        const was = m.aimLock;
+        m.aim = Math.min(1, m.aim + dt / COMBAT.missil.travaS);
+        m.aimLock = m.aim >= 0.995;
+        if (m.aimLock && !was) m.events.push("lock");
       } else {
-        const want = (m.aimLock || m.aim > 0.001 || m.bufFire > 0) && ahead > -1.5;
+        const want = m.aimLock || m.aim > 0.001 || m.bufFire > 0 || (fire && !same);
         if (want && r.ammo > 0 && r.cool <= 0) {
-          spawnShot(m, r, "you", m.aimLock, false);
+          if (ahead > -1.5 && ahead < COMBAT.missil.armaM) {
+            m.blockFront = 0.3;
+            note(m, "MUITO PERTO");
+            m.events.push("blocked");
+          } else {
+            spawnShot(m, r, "you", !fire && m.aimLock && same, false);
+          }
           m.bufFire = 0;
           m.aim = 0;
           m.aimLock = false;
-        } else if (!want) {
+        } else if (!fire) {
           m.aim = 0;
           m.aimLock = false;
         }
@@ -1165,10 +1163,7 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
       return;
     }
     if (fire || m.bufFire > 0) {
-      if (foe && ahead < -1.5 && fire) {
-        m.blockFront = 0.3;
-        m.events.push("blocked");
-      } else if (r.cool <= 0 && r.ammo > 0) {
+      if (r.cool <= 0 && r.ammo > 0) {
         spawnShot(m, r, "you", false, false);
         m.bufFire = 0;
       }
@@ -1464,27 +1459,36 @@ function stepRacer(m: Match, r: Racer, up: Upgrades, input: Input | null, dt: nu
       }
       const greenNow = (m.green || m.phase === "race") && m.phase !== "staging";
       const released = m.brakeHeld && !brake && m.usedBrake;
-      const casual = !m.usedBrake && !r.jail && gas && greenNow;
-      const stuck = greenNow && m.raceTime > 1.4 && !r.jail;
+      const gasDown = input?.gasDownMs ?? 0;
+      const earlyMs = m.greenWall > 0 && gasDown > 0 ? gasDown - m.greenWall : 0;
+      const jumped = !m.usedBrake && !r.jail && gas && greenNow && gasDown > 0 && earlyMs < -40;
+      const gasGo = !m.usedBrake && !r.jail && gas && !m.heldGas && greenNow && !jumped;
+      const holdAcross = !m.usedBrake && !r.jail && gas && m.heldGas && greenNow && !jumped && gasDown > 0 && earlyMs >= -40;
+      const stuck = greenNow && m.raceTime > 1.4 && !r.jail && !gas;
       if (released && input?.brakeUpMs) m.brakeUpWall = input.brakeUpMs;
       if (r.jail && greenNow && m.raceTime >= RACE_CONFIG.launch.redHold) {
         r.jail = false;
         r.launched = true;
         r.launchGrade = "queimou";
         if (m.greenWall > 0 && m.brakeUpWall > 0) r.reaction = (m.brakeUpWall - m.greenWall) / 1000;
+        else if (r.reaction == null && gasDown > 0 && m.greenWall > 0) r.reaction = (gasDown - m.greenWall) / 1000;
         justLaunched = true;
       } else if (!r.jail && released && !greenNow) {
         r.jail = true;
         r.redlight = true;
         r.launchGrade = "queimou";
-        r.reaction = m.greenWall > 0 && m.brakeUpWall > 0 ? (m.brakeUpWall - m.greenWall) / 1000 : null;
+        r.reaction = m.greenWall > 0 && m.brakeUpWall > 0 ? (m.brakeUpWall - m.greenWall) / 1000 : since;
+        r.burns += 1;
+        if (m.ranked && r.burns >= COMBAT.queimadasDq) r.dq = true;
         m.events.push("redlight");
         note(m, "QUEIMOU", 0.8);
         pulse(m, true, 0.3);
-      } else if (!r.jail && (released || casual || stuck)) {
-        if ((casual || stuck) && !released) r.rpm = 4200;
-        const timed = reactionSeconds(m, input, Math.max(0, m.raceTime));
-        doLaunch(m, r, up, greenNow, m.usedBrake ? timed : Math.max(0, timed), "you");
+      } else if (!r.jail && jumped) {
+        doLaunch(m, r, up, true, earlyMs / 1000, "you");
+        justLaunched = true;
+      } else if (!r.jail && (released || gasGo || holdAcross || stuck)) {
+        const timed = holdAcross ? Math.max(0, earlyMs / 1000) : reactionSeconds(m, input, Math.max(0, m.raceTime));
+        doLaunch(m, r, up, greenNow, timed, "you");
         justLaunched = true;
       }
       m.brakeHeld = brake;
@@ -1909,9 +1913,11 @@ export function stepMatch(m: Match, input: Input, dt: number, playerUp: Upgrades
   m.camPull += ((behind ? 1 : 0) - m.camPull) * Math.min(1, h / Math.max(0.05, ease));
   if (m.player.dq) m.banner = "DESCLASSIFICADO";
   else if (m.player.jail) m.banner = "QUEIMOU";
-  else if (m.phase === "race" && !m.player.launched) m.banner = "SOLTA";
-  else if (m.phase === "tree" || m.phase === "staging") m.banner = "ESPAÇO FREIA · W GIRA";
+  else if (m.phase === "staging") m.banner = "ESPAÇO FREIA · W GIRA";
+  else if (m.phase === "tree") m.banner = m.t < 1 ? "3" : m.t < 2 ? "2" : "1";
+  else if (m.phase === "race" && !m.player.launched) m.banner = "VAI";
   else if (m.noteT > 0 && m.note) m.banner = m.note;
+  else if (m.player.band && m.player.launched) m.banner = "TROCA";
   else m.banner = "";
   m.alertMissile = 0;
   m.alertMine = 0;

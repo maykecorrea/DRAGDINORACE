@@ -104,8 +104,8 @@ export function paintRaceWorld(
     if (!shot.live) continue;
     if (shot.weapon === "mine") {
       const gap = shot.dist - dist;
-      if (gap < -20 || gap > RACE_CONFIG.mine.see) continue;
-      const p = airAt(Math.max(1.2, gap), shot.lane);
+      if (gap < -40 || gap > RACE_CONFIG.mine.see) continue;
+      const p = airAt(gap, shot.lane);
       const h = Math.max(16, p.sp * 64);
       blit(ctx, race.minaOsso, p.x, p.y, h);
       const near = gap < RACE_CONFIG.mine.warn && gap > -2;
@@ -237,8 +237,8 @@ export function paintRaceHud(ctx: CanvasRenderingContext2D, m: Match, race: Race
 
   const box = HUD.tacho!;
   const cx = box.x + box.w / 2;
-  const cy = box.y + box.h / 2 - 6;
-  const dia = 220;
+  const cy = box.y + box.h / 2;
+  const dia = Math.min(box.w, box.h);
   if (race.taco.width) {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(race.taco, cx - dia / 2, cy - dia / 2, dia, dia);
@@ -277,13 +277,13 @@ export function paintRaceHud(ctx: CanvasRenderingContext2D, m: Match, race: Race
 
   ctx.textAlign = "center";
   ctx.fillStyle = "#efe6d2";
-  ctx.font = "700 64px ui-monospace, monospace";
-  ctx.fillText(String(m.player.gear), cx, cy + 10);
-  ctx.font = "700 28px ui-monospace, monospace";
-  ctx.fillText(String(Math.round(mph(m.player.speed))), cx, cy + 58);
-  ctx.font = "600 14px ui-monospace, monospace";
+  ctx.font = "700 42px ui-monospace, monospace";
+  ctx.fillText(String(m.player.gear), cx, cy + 8);
+  ctx.font = "700 18px ui-monospace, monospace";
+  ctx.fillText(String(Math.round(mph(m.player.speed))), cx, cy + 32);
+  ctx.font = "600 11px ui-monospace, monospace";
   ctx.fillStyle = "#9aa18c";
-  ctx.fillText("MPH", cx, cy + 76);
+  ctx.fillText("MPH", cx, cy + 46);
 
   const lights = 5;
   const span = n < lo ? 0 : n > hi ? 5 : ((n - lo) / Math.max(0.001, hi - lo)) * 5;
@@ -459,9 +459,10 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   ctx.globalAlpha = 1;
   if (m.banner) {
     const slot = HUD_CHASE.banner!;
+    const big = m.banner === "3" || m.banner === "2" || m.banner === "1" || m.banner === "VAI" || m.banner === "QUEIMOU" || m.banner === "TROCA";
     ctx.fillStyle = m.banner === "QUEIMOU" ? "#ff3b1f" : "#d6ff3f";
-    ctx.font = "900 22px ui-monospace, monospace";
-    ctx.fillText(m.banner, slot.x + slot.w / 2, slot.y + 24);
+    ctx.font = big ? "900 96px ui-monospace, monospace" : "900 22px ui-monospace, monospace";
+    ctx.fillText(m.banner, big ? 640 : slot.x + slot.w / 2, big ? 250 : slot.y + 24);
   }
   const w = HUD_CHASE.weapons!;
   ctx.textAlign = "left";
@@ -489,10 +490,30 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   const box = HUD_CHASE.tacho!;
   const cx = box.x + box.w / 2;
   const cy = box.y + 78;
-  ctx.beginPath();
-  ctx.strokeStyle = "#efe6d2";
+  const n = Math.max(0, Math.min(1, m.player.rpm / REDLINE));
+  const pre = !m.player.launched && m.mode === "duel";
+  const gear = Math.max(1, m.player.gear);
+  const row = RACE_CONFIG.shift[Math.min(RACE_CONFIG.shift.length - 1, gear - 1)] ?? RACE_CONFIG.shift[0];
+  const lo = pre ? RACE_CONFIG.launch.green[0] / REDLINE : row.lo / REDLINE;
+  const hi = pre ? RACE_CONFIG.launch.green[1] / REDLINE : row.hi / REDLINE;
+  const pLo = pre ? RACE_CONFIG.launch.perfect[0] / REDLINE : row.pLo / REDLINE;
+  const pHi = pre ? RACE_CONFIG.launch.perfect[1] / REDLINE : row.pHi / REDLINE;
+  const a0 = Math.PI * 0.75;
+  const sweep = Math.PI * 1.5;
   ctx.lineWidth = 8;
-  ctx.arc(cx, cy, 70, Math.PI * 0.75, Math.PI * 0.75 + Math.PI * 1.5 * Math.max(0, Math.min(1, m.player.rpm / REDLINE)));
+  ctx.beginPath();
+  ctx.strokeStyle = "#3f8f3a";
+  ctx.arc(cx, cy, 78, a0 + sweep * lo, a0 + sweep * hi);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.strokeStyle = "#e6c15a";
+  ctx.lineWidth = 5;
+  ctx.arc(cx, cy, 70, a0 + sweep * pLo, a0 + sweep * pHi);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.strokeStyle = n >= pLo && n <= pHi ? "#d6ff3f" : "#efe6d2";
+  ctx.lineWidth = 8;
+  ctx.arc(cx, cy, 70, a0, a0 + sweep * n);
   ctx.stroke();
   ctx.fillStyle = "#efe6d2";
   ctx.textAlign = "center";
