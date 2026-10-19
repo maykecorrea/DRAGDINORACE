@@ -31,7 +31,7 @@ import { reportQuestRace } from "@/game/quests.functions";
 import { Prep } from "./Prep";
 import { P2PRoom } from "@/lib/multiplayer";
 import { applyCar, applyShot, asPvpMsg, type PvpMsg } from "./pvp";
-import { ownedLoot, rollLoot, streetBuild, streetById, streetNear, bandStats, STREET_PRIZE } from "./street";
+import { rollLoot, streetBuild, streetById, streetNear, bandStats, STREET_PRIZE } from "./street";
 
 type Screen = "menu" | "drive" | "rivals" | "result" | "intro" | "pvp";
 
@@ -248,7 +248,7 @@ function ResultCard({
         </div>
       )}
       <p className="mt-1 text-sm text-muted">
-        reação {reaction == null || reaction > 6 ? (launch === "queimou" ? "QUEIMOU" : "—") : `${Math.round(reaction * 1000)} ms`} · trap {trap == null ? "—" : `${Math.round(mph(trap))} mph`}
+        reação {launch === "queimou" || (reaction != null && reaction < 0) ? "QUEIMOU" : reaction == null || reaction > 6 ? "—" : `${Math.round(reaction * 1000)} ms`} · trap {trap == null ? "—" : `${Math.round(mph(trap))} mph`}
       </p>
       <div className="mt-3 grid gap-1" style={{ gridTemplateColumns: `repeat(${boxes + 1}, minmax(0, 1fr))` }}>
         <div className={`px-1 py-2 text-center ${cellTone(launch)}`}>
@@ -662,13 +662,10 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 const boss = phase ? BOSSES[phase.chapter] : undefined;
                 const streetKey = sim.rivalId?.startsWith("racha-") ? sim.rivalId.slice(6) : "";
                 const streetCar = streetKey ? streetById(streetKey) : undefined;
-                const youNow = selectedCar(saveRef.current);
                 let gainedId: string | null = null;
-                let stolen: ReturnType<typeof ownedLoot> = null;
-                if (streetCar && !bet) {
-                  const drop = rollLoot(win ? streetCar.rarity : youNow.rarity);
-                  if (drop && win) gainedId = drop;
-                  else if (drop && !win) stolen = ownedLoot(saveRef.current);
+                if (streetCar && !bet && win) {
+                  const drop = rollLoot(streetCar.rarity);
+                  if (drop) gainedId = drop;
                 }
                 const baseWin = bet ? 0 : phase ? phase.fossil : streetCar ? STREET_PRIZE[streetCar.rarity] : 100;
                 const pay = bet ? null : purse(baseWin, draw ? "draw" : win ? "win" : "loss", sim);
@@ -677,7 +674,6 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   const stats = raceStatsOf(sim, paid, win, pay.base, pay.cap);
                   window.dispatchEvent(new CustomEvent("raceStats", { detail: stats }));
                 }
-                const lootNote = stolen ? `Ele levou ${stolen.name}.` : undefined;
                 const burnedNote = sim.player.redlight
                   ? "Queimou a largada: 0,6 s parado depois do VAI. O lugar é pelo tempo, não pela queima."
                   : "";
@@ -687,9 +683,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   ? win
                     ? `Pote ${table.pot}. A casa ficou com ${table.fee}.`
                     : `A aposta de ${stake} ficou na mesa.`
-                  : lootNote
-                    ? lootNote
-                    : sim.pvp
+                  : sim.pvp
                       ? win
                         ? "Sem aposta. O fóssil é o da corrida."
                         : "Sem aposta. A derrota paga menos."
@@ -779,25 +773,10 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   }
                   if (firstClear && phase) next.storyClear = chapter;
                   if (gainedId) next.bin = { ...(next.bin ?? {}), [gainedId]: (next.bin?.[gainedId] ?? 0) + 1 };
-                  if (stolen && !stolen.slot) {
-                    const have = next.bin?.[stolen.id] ?? 0;
-                    if (have > 0) {
-                      const bin = { ...(next.bin ?? {}) };
-                      if (have <= 1) delete bin[stolen.id];
-                      else bin[stolen.id] = have - 1;
-                      next.bin = bin;
-                    }
-                  }
                   next.cars = next.cars.map((car) => {
                     if (car.tokenId !== next.selected) return car;
-                    let gear = car.gear;
-                    if (stolen?.slot && gear?.[stolen.slot] === stolen.id) {
-                      gear = { ...gear };
-                      delete gear[stolen.slot];
-                    }
                     return {
                       ...car,
-                      gear,
                       xp: (car.xp ?? 0) + raceXp(win),
                       upgrades: firstClear && phase ? grantStoryPart(car.upgrades, phase.part) : car.upgrades,
                       hull: { hp: sim.player.hp, max: sim.player.hpMax, wrecked: sim.player.wrecked, at: Date.now() },

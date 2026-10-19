@@ -584,8 +584,10 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     ctx.fillText(coach.say, meterX + meterW / 2, meterY - 12);
   } else if (zone) {
     const near = zone === "CEDO" && lo - live < 0.1;
-    const say =
-      zone === "QUEBRADO"
+    const shiftNote = m.noteT > 0.12 && ["PERFEITO", "BOM", "CEDO", "TARDE", "CORTE"].includes(m.note);
+    const say = shiftNote
+      ? m.note
+      : zone === "QUEBRADO"
         ? "QUEBRADO"
         : zone === "PERFEITO"
           ? "AGORA — PERFEITO"

@@ -1216,7 +1216,12 @@ export function drawFrame(
   };
 
   if (m.rival && (m.mode === "duel" || m.mode === "free")) {
-    const ahead = m.rival.dist - dist;
+    let ahead = m.rival.dist - dist;
+    let showLane = m.rival.lane;
+    if (Math.abs(ahead) < 28 && Math.abs(showLane - lane) < 1.05) {
+      showLane = lane >= 0 ? -2.2 : 2.2;
+      ahead = Math.max(6, ahead);
+    }
     if (ahead < -28 || ahead > 90) {
       const pin = ahead > 0 ? 64 : 8;
       const p = airAt(pin, m.rival.lane);
@@ -1238,7 +1243,7 @@ export function drawFrame(
       const far = `${Math.abs(Math.round(ahead))}M`;
       text(ctx, far, p.x - far.length * 4, p.y + (ahead > 0 ? 12 : -22), 2, "#d6ff3f");
     } else {
-      drawCar(ahead, m.rival.lane, rivalSprite, m.rival.nitroOn > 0);
+      drawCar(ahead, showLane, rivalSprite, m.rival.nitroOn > 0);
     }
     const coat = m.rival.poison > 0 ? art.booms?.poison : m.rival.freeze > 0 ? art.booms?.ice : m.rival.slow < 1 && m.rival.slowT > 0 ? art.weapons?.ray : null;
     if (coat && coat.width && coat.height) {
@@ -1453,7 +1458,7 @@ export function drawFrame(
     ctx.fillRect(0, 0, W, H);
   }
 
-  if (art.race) paintChaseHud(ctx, m, now);
+  if (art.race && m.mode === "duel") paintChaseHud(ctx, m, now);
   else drawCluster(ctx, m, up, now, gaugeKey, digital);
   if (strip !== "off" && m.mode === "duel" && m.rival && !art.race) drawStrip(ctx, m, art, rivalSprite, youMark, strip);
   if (!art.race) drawHull(ctx, m, strip !== "off" && m.mode === "duel" && !!m.rival);

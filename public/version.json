@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.7",
-  "name": "tiro-certo",
+  "version": "2026-10-19.8",
+  "name": "lado-a-lado",
   "built": "2026-10-19",
-  "notes": "F e G disparam de novo, também pelos botões na tela. A IA fácil atira depois da largada e aguenta o cuspe. A mina não cai no VAI. A vida do resultado não muda depois e a próxima corrida começa cheia. Shift na faixa verde não vira CORTE. O preparo espera o save carregar. O cuspe mostra 2, não um pacote de 10. O resultado diz se o nitro saiu."
+  "notes": "Largada no giro certo não morre mais. O rival fica ao lado e atira. Shift na faixa verde não vira CORTE. A queima mostra QUEIMOU, sem milissegundo negativo. A derrota não tira peça. O HUD da preparação não mostra F 125 G 90, e a caixa não enche o pente que ainda tem tiro. A mina da IA não cai a 40 mph."
 }

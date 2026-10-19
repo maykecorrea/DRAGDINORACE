@@ -901,6 +901,95 @@ test("mina da IA fácil não cai na largada", () => {
   assert.equal(m.player.hp, m.player.hpMax);
 });
 
+test("giro certo no VAI não morre mesmo soltando o W", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("giro-segura", bot, comum, comum, 6, 6, 4);
+  let wall = 80_000;
+  let brake = true;
+  let gas = true;
+  let releaseAt = 0;
+  const dt = 1 / 60;
+  const [pLo, pHi] = RACE_CONFIG.launch.perfect;
+  for (let i = 0; i < 60 * 8 && !m.player.launched; i++) {
+    wall += 1000 * dt;
+    if (m.phase === "tree" && m.t > 2.65 && m.player.rpm >= pLo && m.player.rpm <= pHi) gas = false;
+    if (m.banner === "VAI" && m.raceTime >= 0.03 && brake) {
+      brake = false;
+      releaseAt = wall;
+    }
+    stepMatch(
+      m,
+      { throttle: gas ? 1 : 0, steer: 0, shift: false, nitro: false, brake, nowMs: wall, brakeUpMs: brake ? null : releaseAt },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.notEqual(m.player.launchGrade, "morreu", `rpm ${m.player.launchRpm}`);
+  assert.ok(m.player.launchGrade === "perfeito" || m.player.launchGrade === "ok", String(m.player.launchGrade));
+  assert.ok((m.player.reaction ?? -1) >= 0 && (m.player.reaction ?? 9) < 0.25, String(m.player.reaction));
+});
+
+test("63 mph na segunda com a faixa verde não é corte", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("verde-2", bot, comum, comum, 6, 6, 2);
+  m.phase = "race";
+  m.green = true;
+  m.player.launched = true;
+  m.player.gear = 2;
+  const vMax = driveMph(comum.vmax) / 2.236936;
+  const speed = 63 / 2.236936;
+  m.player.speed = speed;
+  m.player.rpm = (speed / (vMax * 0.52)) * 8000;
+  m.player.redlineT = 0.7;
+  stepMatch(m, { throttle: 1, steer: 0, shift: true, nitro: false, brake: false }, 1 / 60, up, up);
+  assert.equal(m.player.shifts[0], "ok", `${m.player.shifts.join(",")} rpm ${m.player.rpm.toFixed(0)}`);
+});
+
+test("limitador sozinho continua corte", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("tarde-corte", bot, comum, comum, 6, 6, 2);
+  m.phase = "race";
+  m.green = true;
+  m.player.launched = true;
+  m.player.gear = 1;
+  const vMax = driveMph(comum.vmax) / 2.236936;
+  m.player.speed = vMax * 0.38;
+  m.player.rpm = 8000;
+  m.player.redlineT = 0.5;
+  stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
+  assert.equal(m.player.shifts[0], "corte", m.player.shifts.join(","));
+});
+
+test("mina da IA fácil não cai a 40 mph", () => {
+  const easy = botForLevel("facil", mulberry(8));
+  easy.willFoul = false;
+  const m = createDuel("mina-40", easy, comum, comum, 6, 6, 8);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.dist = 40;
+  m.player.speed = 18;
+  m.player.gear = 1;
+  m.player.lane = 0;
+  m.raceTime = 2.4;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 52;
+    m.rival.speed = 22;
+    m.rival.gear = 2;
+    m.rival.lane = 0;
+    armWeapon(m.rival, "missile", weaponById("missile"));
+    armRear(m.rival, "mine", weaponById("mine"));
+  }
+  const dt = 1 / 60;
+  for (let i = 0; i < 40; i++) stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+  assert.ok(m.raceTime < 4, String(m.raceTime));
+  assert.equal(m.shots.some((shot) => shot.kind === "mina" && shot.owner === "ai"), false);
+});
+
 test("carro quebrado para antes da linha e não leva tempo", () => {
   const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
   const m = createDuel("quebra-para", bot, comum, comum, 6, 6, 2);
