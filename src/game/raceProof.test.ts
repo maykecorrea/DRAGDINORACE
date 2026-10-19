@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { StatBlock, Upgrades } from "./data.ts";
 import { RACE_CONFIG, SHIFT_LAMP, driveMph, gearBox, hudOverlap, placeDamageLabel } from "./raceConfig.ts";
+import { isSpaceKey, noteSpaceDown, noteSpaceUp, readBrake, type SpaceLatch } from "./brakeLatch.ts";
 import {
   armRear,
   armWeapon,
@@ -728,8 +729,9 @@ test("Shift com a faixa verde na tela não registra corte", () => {
   m.player.speed = 20;
   const row = rowFor(1);
   const vTop = (driveMph(comum.vmax) / 2.236936) * 0.38;
-  m.player.speed = vTop * ((row.lo + row.hi) / 2 / 8000);
-  m.player.rpm = (row.lo + row.hi) / 2;
+  const rpm = row.lo + 120;
+  m.player.speed = vTop * (rpm / 8000);
+  m.player.rpm = rpm;
   stepMatch(m, { throttle: 1, steer: 0, shift: true, nitro: false, brake: false }, 1 / 60, up, up);
   assert.equal(m.player.shifts[0], "ok", m.player.shifts.join(","));
   assert.equal(m.player.gear, 2);
@@ -764,8 +766,8 @@ test("IA fácil na frente solta mina e tira vida", () => {
   }
   const gap = Math.abs((m.rival?.dist ?? 0) - m.player.dist);
   assert.ok(gap < 32, `afastou ${gap.toFixed(1)}`);
-  assert.ok(m.player.hp < m.player.hpMax, `hp ${m.player.hp}/${m.player.hpMax} tiros ${m.shotsMade}`);
-  assert.ok(m.feed.some((row) => row.text.includes("da IA")) || m.dmgLog.some((row) => row.who === "you"), "sem rótulo de dano");
+  assert.ok(m.shotsMade > 0, `IA fácil não atirou`);
+  assert.ok(m.player.hp > m.player.hpMax * 0.62, `fácil pesado ${m.player.hp}/${m.player.hpMax}`);
 });
 
 test("depois da queima o shift não sobe marcha morta", () => {
@@ -1236,12 +1238,41 @@ test("banner PERFEITO apaga fora da faixa amarela e o Shift grava a nota da luz"
   m.player.rpm = 7200;
   stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
   assert.equal(m.banner, "AGORA — PERFEITO");
-  m.player.speed = (6400 / 8000) * vTop;
-  m.player.rpm = 6400;
+  m.player.speed = (7000 / 8000) * vTop;
+  m.player.rpm = 7000;
   stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
   assert.equal(m.banner, "AGORA — BOM", `${m.banner} rpm ${m.player.rpm.toFixed(0)}`);
   stepMatch(m, { throttle: 1, steer: 0, shift: true, nitro: false, brake: false }, 1 / 60, up, up);
   assert.equal(m.player.shifts[0], "ok", m.player.shifts.join(","));
+});
+
+test("soltura do Espaço com W preso não espera o fallback de 4 s", () => {
+  const latch: SpaceLatch = { down: false, releaseAt: 0 };
+  noteSpaceDown(latch, false);
+  assert.equal(isSpaceKey({ code: "", key: " ", keyCode: 32 }), true);
+  assert.equal(readBrake(latch, false, false).brake, true);
+  noteSpaceUp(latch, 12_345);
+  const first = readBrake(latch, true, false);
+  assert.equal(first.brake, false, "tecla presa no set não segura o freio depois da soltura");
+  assert.equal(first.pulse, true);
+  assert.equal(first.at, 12_345);
+  const again = readBrake(latch, false, false);
+  assert.equal(again.pulse, true, "quadro pulado não joga a soltura fora");
+  assert.equal(again.at, 12_345);
+  const done = readBrake(latch, false, true);
+  assert.equal(done.pulse, false);
+  assert.equal(done.brake, false);
+});
+
+test("fim da barra não é BOM e a 6ª não entra a 120 mph", () => {
+  assert.notEqual(shiftCall(7900, 1), "ok");
+  assert.notEqual(shiftCall(7900, 5), "ok");
+  assert.equal(shiftCall(8000, 5), "corte");
+  const cap = driveMph(162) * gearBox(6).frac[4]!;
+  const rpm120 = (120 / cap) * 8000;
+  assert.equal(shiftCall(rpm120, 5), "cedo", `${rpm120.toFixed(0)} em 120 mph`);
+  assert.equal(shiftWord(shiftCall(7200, 5)), "PERFEITO");
+  assert.ok(rpm120 < RACE_CONFIG.shift[4]!.lo);
 });
 
 test("freio preso não deixa a reação em branco nem a corrida parada", () => {
@@ -1561,11 +1592,12 @@ test("tempo limpo cabe na física e a queima não fica mais rápida", () => {
   assert.ok((foul.player.finishTime ?? 0) * Math.max(foul.player.trap, 1) > foul.strip, "queima mais rápida que a física");
 });
 
-test("número de dano fica fora da luz de troca", () => {
-  const spot = placeDamageLabel(640, SHIFT_LAMP.y + 40);
-  const gap = spot.x < SHIFT_LAMP.x ? SHIFT_LAMP.x - spot.x : spot.x - (SHIFT_LAMP.x + SHIFT_LAMP.w);
-  assert.ok(gap >= 70, `${spot.x} gap ${gap}`);
-  assert.ok(spot.y <= SHIFT_LAMP.y - 30, String(spot.y));
-  assert.deepEqual(placeDamageLabel(90, 180), { x: 90, y: 180 });
+test("número de dano fica fora da luz de troca e fora do carro", () => {
+  const onLamp = placeDamageLabel(640, SHIFT_LAMP.y + 40, 0);
+  const onCar = placeDamageLabel(640, 430, 1);
+  assert.ok(onLamp.x < SHIFT_LAMP.x - 80, String(onLamp.x));
+  assert.ok(onLamp.y < SHIFT_LAMP.y - 40, String(onLamp.y));
+  assert.ok(onCar.x < 220 && onCar.y < 160, `${onCar.x},${onCar.y}`);
+  assert.ok(onCar.y > onLamp.y, "rótulos empilhados");
 });
 

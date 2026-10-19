@@ -23,6 +23,7 @@ import { freshSave, loadSave, selectedCar, subscribeGarageReady, subscribeSave, 
 import versionInfo from "../../public/version.json";
 import { carLabel, cockpitKey, cockpitPlate, sideMark } from "./forge";
 import { keyLabel, readKeys } from "./hotkeys";
+import { isSpaceKey, noteSpaceDown, noteSpaceUp, readBrake, type SpaceLatch } from "./brakeLatch";
 import { raceXp, partById } from "./parts";
 import { BOSSES, STORY, grantStoryPart, storyLoadout, storyOpen, storyRivalStats, type StoryPhase } from "./story";
 import { createDuel, createFree, createPvp, raceVerdict, raceReason, stepMatch, stripFor, LANE_GAP, armWeapon, armRear, gearsFor, mph, botForLevel, levelForChapter, purse, raceStatsOf, type Grade, type LaunchGrade, type Match } from "./sim";
@@ -116,7 +117,8 @@ type Result = {
 };
 
 const keys = new Set<string>();
-const keyClock = { brakeUp: 0, gasDown: 0, spaceUp: false };
+const keyClock = { brakeUp: 0, gasDown: 0 };
+const spaceLatch: SpaceLatch = { down: false, releaseAt: 0 };
 const pending = { fire: false, rear: false, nitro: false, shield: false };
 let injected: string[] | null = null;
 let steerOverride: number | null = null;
@@ -365,20 +367,34 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       if ((e.code === "KeyD" || e.code === "ArrowRight") && e.timeStamp - edges.current.tapR <= 250) edges.current.ram = 1;
       if (e.code === "KeyD" || e.code === "ArrowRight") edges.current.tapR = e.timeStamp;
       const bind = readKeys(saveRef.current);
-      if (!keys.has(e.code) && (e.code === bind.gas || e.code === "KeyW" || e.code === "ArrowUp")) keyClock.gasDown = performance.now();
-      if (screenRef.current === "drive" && (e.code === "KeyF" || e.code === "KeyG" || e.code === "KeyN" || e.code === "KeyE" || e.code === "Space" || e.code === "ShiftLeft" || e.code === "ShiftRight")) e.preventDefault();
-      if (bind && Object.values(bind).includes(e.code)) e.preventDefault();
-      keys.add(e.code);
+      if (!isSpaceKey(e) && !keys.has(e.code) && (e.code === bind.gas || e.code === "KeyW" || e.code === "ArrowUp")) keyClock.gasDown = performance.now();
+      if (isSpaceKey(e)) {
+        if (screenRef.current === "drive") {
+          e.preventDefault();
+          const active = document.activeElement;
+          if (active instanceof HTMLElement && active.tagName === "BUTTON") active.blur();
+        }
+        noteSpaceDown(spaceLatch, e.repeat);
+        keys.add("Space");
+      } else {
+        if (screenRef.current === "drive" && (e.code === "KeyF" || e.code === "KeyG" || e.code === "KeyN" || e.code === "KeyE" || e.code === "ShiftLeft" || e.code === "ShiftRight")) e.preventDefault();
+        if (bind && Object.values(bind).includes(e.code)) e.preventDefault();
+        keys.add(e.code);
+      }
       if (letter === "f") keys.add("KeyF");
       if (letter === "g") keys.add("KeyG");
       if (letter === "n") keys.add("KeyN");
       if (letter === "e") keys.add("KeyE");
     };
     const onUp = (e: KeyboardEvent) => {
-      if (e.code === "Space") {
-        keyClock.brakeUp = performance.now();
-        keyClock.spaceUp = true;
+      if (isSpaceKey(e)) {
+        e.preventDefault();
+        keys.delete("Space");
+        if (e.code) keys.delete(e.code);
         hold.current.brake = false;
+        noteSpaceUp(spaceLatch, performance.now());
+        keyClock.brakeUp = spaceLatch.releaseAt;
+        return;
       }
       keys.delete(e.code);
       const letter = e.key.length === 1 ? e.key.toLowerCase() : "";
@@ -388,7 +404,9 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       if (e.code === "KeyE" || letter === "e") keys.delete("KeyE");
     };
     const onBlur = () => {
+      if (spaceLatch.down) noteSpaceUp(spaceLatch, performance.now());
       keys.clear();
+      hold.current.brake = false;
       pending.fire = false;
       pending.rear = false;
       pending.nitro = false;
@@ -455,18 +473,13 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       hold.current.shift = false;
       hold.current.nitro = false;
       const launched = !!simRef.current && simRef.current.player.launched && (simRef.current.phase === "race" || simRef.current.phase === "free");
-      const space = down("Space") || (injected?.includes("Space") ?? false) || hold.current.brake;
-      const wasHeld = edges.current.spaceHeld;
-      if (!launched && space) edges.current.spaceHeld = true;
-      if (!space) edges.current.spaceHeld = false;
-      const justUp = wasHeld && !space && !launched;
-      if (justUp && !keyClock.spaceUp) {
-        keyClock.brakeUp = performance.now();
-        keyClock.spaceUp = true;
-      }
-      const freshUp = keyClock.spaceUp && performance.now() - keyClock.brakeUp < 80;
-      const brakePulse = !launched && !space && (justUp || freshUp);
-      keyClock.spaceUp = false;
+      const focus = document.activeElement;
+      if (screenRef.current === "drive" && focus instanceof HTMLElement && focus.tagName === "BUTTON") focus.blur();
+      const rawSpace = spaceLatch.down || keys.has("Space") || (injected?.includes("Space") ?? false) || hold.current.brake;
+      if (!launched && spaceLatch.down && spaceLatch.releaseAt === 0) edges.current.spaceHeld = true;
+      if (!rawSpace) edges.current.spaceHeld = false;
+      const held = (keys.has("Space") || (injected?.includes("Space") ?? false) || hold.current.brake) && spaceLatch.releaseAt === 0;
+      const reading = readBrake(spaceLatch, held, launched);
       const ram = edges.current.ram;
       edges.current.ram = 0;
       return {
@@ -476,15 +489,15 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         nitro,
         fire: fireDown,
         rear: rearDown,
-        brake: !launched && space,
-        cuspe: launched && space && !edges.current.spaceHeld,
+        brake: reading.brake,
+        cuspe: launched && rawSpace && !edges.current.spaceHeld,
         fireEdge,
         rearEdge,
         shield,
         ram,
-        brakeUpMs: brakePulse ? keyClock.brakeUp || performance.now() : null,
+        brakeUpMs: reading.pulse ? reading.at || keyClock.brakeUp || performance.now() : null,
         gasDownMs: keyClock.gasDown || null,
-        brakePulse,
+        brakePulse: reading.pulse,
       };
     };
 
@@ -550,6 +563,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
           armRear(match.player, armedRear(saveRef.current.rearArm, saveRef.current.rear).id, armedRear(saveRef.current.rearArm, saveRef.current.rear));
           simRef.current = match;
           resultLock.current = false;
+          parkFocus();
           setAgain({ kind: "pvp", stake });
           screenRef.current = "drive";
           setScreen("drive");
@@ -990,9 +1004,20 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     return sim;
   }
 
+  function parkFocus() {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active !== document.body) active.blur();
+    spaceLatch.down = false;
+    spaceLatch.releaseAt = 0;
+    keys.delete("Space");
+    hold.current.brake = false;
+    edges.current.spaceHeld = false;
+  }
+
   function goFree() {
     if (!ready || !artRef.current) return;
     unlock();
+    parkFocus();
     const c = selectedCar(saveRef.current);
     simRef.current = arm(createFree(statsOf(c, saveRef.current.pilot, saveRef.current.kit), gearsFor(c.rarity)));
     resultLock.current = false;
@@ -1005,6 +1030,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     if (!ready || !artRef.current) return;
     if (!storyOpen(saveRef.current.storyClear ?? 0, phase.chapter)) return;
     unlock();
+    parkFocus();
     const c = selectedCar(saveRef.current);
     const load = storyLoadout(phase);
     const bot = botForLevel(levelForChapter(phase.chapter));
@@ -1028,6 +1054,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
   function goStreet(car: NonNullable<ReturnType<typeof streetById>>) {
     if (!ready || !artRef.current) return;
     unlock();
+    parkFocus();
     const c = selectedCar(saveRef.current);
     const you = statsOf(c, saveRef.current.pilot, saveRef.current.kit);
     const picked = saveRef.current.ai === "medio" || saveRef.current.ai === "dificil" ? saveRef.current.ai : "facil";
@@ -1053,6 +1080,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
   function goRacha(rival: (typeof RIVALS)[number]) {
     if (!ready || !artRef.current) return;
     unlock();
+    parkFocus();
     const c = selectedCar(saveRef.current);
     const you = statsOf(c, saveRef.current.pilot, saveRef.current.kit);
     const them = resolveStats(rival.driver, "Normal", rival.build);
@@ -1374,8 +1402,12 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     },
     onPointerUp: () => {
       if (key === "brake") {
-        keyClock.brakeUp = performance.now();
-        keyClock.spaceUp = true;
+        hold.current.brake = false;
+        if (!spaceLatch.down) {
+          noteSpaceUp(spaceLatch, performance.now());
+          keyClock.brakeUp = spaceLatch.releaseAt;
+        }
+        return;
       }
       hold.current[key] = false;
     },
@@ -1393,7 +1425,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         ref={canvasRef}
         width={VIEW_W}
         height={VIEW_H}
-        className={`absolute inset-0 h-full w-full bg-bg object-contain ${screen === "intro" ? "invisible" : ""}`}
+        className={`absolute inset-x-0 top-0 w-full bg-bg object-contain ${screen === "intro" ? "invisible" : ""} ${screen === "drive" ? "bottom-[9rem]" : "bottom-0 h-full"}`}
         aria-label="Pista Dino Drag Race"
       />
       <div
@@ -1619,31 +1651,31 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
             </button>
           </div>
           <div
-            className="pointer-events-auto absolute inset-x-3 bottom-0 pb-[max(0.35rem,env(safe-area-inset-bottom))]"
+            className="pointer-events-auto absolute inset-x-0 bottom-0 z-30 bg-bg px-3 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))]"
             onKeyDown={(e) => {
               if (e.code === "Space" || e.key === " ") e.preventDefault();
             }}
           >
           <div className="grid grid-cols-5 gap-1">
-            <button type="button" className="min-h-11 bg-surface text-fg" {...press("left")} aria-label="Faixa esquerda">
+            <div role="presentation" className="min-h-11 select-none bg-surface text-center text-fg" {...press("left")} aria-label="Faixa esquerda">
               <span className="block text-xs">Esq</span>
               <span className="font-display text-sm leading-none">{keyLabel(readKeys(save).left)}</span>
-            </button>
-            <button type="button" className="min-h-11 bg-surface text-fg" {...press("gas")}>
+            </div>
+            <div role="presentation" className="min-h-11 select-none bg-surface text-center text-fg" {...press("gas")}>
               <span className="block font-display text-sm leading-none">Gás</span>
               <span className="text-xs">{keyLabel(readKeys(save).gas)}</span>
-            </button>
-            <button type="button" className="min-h-11 bg-surface text-fg" {...press("brake")}>
+            </div>
+            <div role="presentation" className="min-h-11 select-none bg-surface text-center text-fg" {...press("brake")}>
               <span className="block font-display text-sm leading-none">Freio</span>
               <span className="text-xs">Espaço</span>
-            </button>
-            <button type="button" className="min-h-11 bg-surface text-fg" {...press("fire")}>
+            </div>
+            <div role="presentation" className="min-h-11 select-none bg-surface text-center text-fg" {...press("fire")}>
               <span className="block font-display text-sm leading-none">Frente</span>
               <span className="text-xs">{keyLabel(readKeys(save).fire)}</span>
-            </button>
-            <button
-              type="button"
-              className="min-h-11 bg-danger text-fg"
+            </div>
+            <div
+              role="presentation"
+              className="min-h-11 select-none bg-danger text-center text-fg"
               onPointerDown={(e) => {
                 (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
                 hold.current.nitro = true;
@@ -1658,14 +1690,14 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
             >
               <span className="block font-display text-sm leading-none">Nitro</span>
               <span className="text-xs">{keyLabel(readKeys(save).nitro)}</span>
-            </button>
-            <button type="button" className="min-h-11 bg-surface text-fg" {...press("right")} aria-label="Faixa direita">
+            </div>
+            <div role="presentation" className="min-h-11 select-none bg-surface text-center text-fg" {...press("right")} aria-label="Faixa direita">
               <span className="block text-xs">Dir</span>
               <span className="font-display text-sm leading-none">{keyLabel(readKeys(save).right)}</span>
-            </button>
-            <button
-              type="button"
-              className="min-h-11 bg-primary text-ink"
+            </div>
+            <div
+              role="presentation"
+              className="min-h-11 select-none bg-primary text-center text-ink"
               onPointerDown={(e) => {
                 (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
                 hold.current.shift = true;
@@ -1679,14 +1711,14 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
             >
               <span className="block font-display text-sm leading-none">Marcha</span>
               <span className="text-xs">{keyLabel(readKeys(save).shift)}</span>
-            </button>
-            <button type="button" className="min-h-11 bg-surface text-fg" {...press("rear")}>
+            </div>
+            <div role="presentation" className="min-h-11 select-none bg-surface text-center text-fg" {...press("rear")}>
               <span className="block font-display text-sm leading-none">Trás</span>
               <span className="text-xs">{keyLabel(readKeys(save).rear)}</span>
-            </button>
-            <button
-              type="button"
-              className="min-h-11 bg-surface text-fg"
+            </div>
+            <div
+              role="presentation"
+              className="min-h-11 select-none bg-surface text-center text-fg"
               onPointerDown={(e) => {
                 (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
                 edges.current.shield = true;
@@ -1695,7 +1727,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
             >
               <span className="block font-display text-sm leading-none">Escudo</span>
               <span className="text-xs">E</span>
-            </button>
+            </div>
           </div>
           <p className="pointer-events-none pb-1 text-right text-xs text-muted">
             {again.kind === "free"

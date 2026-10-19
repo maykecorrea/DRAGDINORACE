@@ -1109,7 +1109,8 @@ function spawnShot(m: Match, r: Racer, owner: "you" | "ai", sure: boolean, force
   m.shots.push(shot);
   const span = 4.8;
   if (foe && Math.abs(foe.lane - r.lane) > 0.55 && Math.abs(foe.lane - r.lane) <= span && (kind === "missil" || kind === "emp" || kind === "rajada")) {
-    const allow = owner === "you" || (r.bot && m.rng() < Math.max(0.45, r.bot.aim ?? 0.4));
+    const aimP = r.bot?.level === "facil" ? 0.12 : Math.max(0.45, r.bot?.aim ?? 0.4);
+    const allow = owner === "you" || (!!r.bot && m.rng() < aimP);
     if (allow) {
       const gap = foe.dist - r.dist;
       const beside = gap > -12 && gap < 30;
@@ -1292,39 +1293,49 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
   const locked = (r.bot?.lock ?? 0) >= 1 || ((r.bot?.lock ?? 0) > 0 && m.rng() < (r.bot?.lock ?? 0));
   const street = (r.bot.rubber ?? 0) > 0 && r.bot.level !== "dificil";
   if (street) {
-    r.bot.fireArm = (r.bot.fireArm ?? 0.4) - dt;
+    const easy = r.bot.level === "facil";
+    r.bot.fireArm = (r.bot.fireArm ?? (easy ? 1.6 : 0.4)) - dt;
     const gap = ahead;
-    const aimN = r.bot.aim ?? 0.3;
     const side = () => (m.rng() < 0.5 ? 2.2 : -2.2);
-    if (r.rear === "mine" && m.raceTime >= 4 && foe.speed > 22 && gap < 18 && gap > -80 && r.rearCool <= 0 && r.rearAmmo > 0 && (r.bot.mineGap ?? 0) <= 0) {
+    const mineCap = easy ? Math.min(1, r.bot.mines ?? 1) : (r.bot.mines ?? 2);
+    const laid = r.bot.minesLaid ?? 0;
+    if (r.rear === "mine" && laid < mineCap && m.raceTime >= 4 && foe.speed > 22 && gap < 18 && gap > -80 && r.rearCool <= 0 && r.rearAmmo > 0 && (r.bot.mineGap ?? 0) <= 0) {
       spawnShot(m, r, "ai", false, true);
-      const laid = m.shots[m.shots.length - 1];
-      if (laid && laid.live && laid.kind === "mina") {
-        const opening = (r.bot.minesLaid ?? 0) === 0;
-        const aimed = opening || m.rng() < 0.7;
-        laid.lane = aimed ? foe.lane : foe.lane + side();
-        const lead = Math.max(22, foe.speed * 0.9);
+      const mine = m.shots[m.shots.length - 1];
+      if (mine && mine.live && mine.kind === "mina") {
+        const aimed = easy ? m.rng() < 0.16 : laid === 0 || m.rng() < 0.7;
+        mine.lane = aimed ? foe.lane : foe.lane + side();
+        const lead = Math.max(22, foe.speed * (easy ? 0.45 : 0.9));
         const aheadOfYou = foe.dist + lead;
-        laid.dist = r.dist > foe.dist + 8 ? Math.min(r.dist - 3, aheadOfYou) : aheadOfYou;
-        laid.born = laid.dist;
+        mine.dist = r.dist > foe.dist + 8 ? Math.min(r.dist - 3, aheadOfYou) : aheadOfYou;
+        mine.born = mine.dist;
       }
-      r.bot.minesLaid = (r.bot.minesLaid ?? 0) + 1;
-      r.bot.mineGap = 3.2;
+      r.bot.minesLaid = laid + 1;
+      r.bot.mineGap = easy ? 5.5 : 3.2;
     }
     const near = gap > -50 && gap < 60;
     if (near && (r.bot.fireArm ?? 0) <= 0 && r.cool <= 0 && r.ammo > 0) {
       spawnShot(m, r, "ai", false, false);
       const shot = m.shots[m.shots.length - 1];
       if (shot && shot.live && (shot.kind === "missil" || shot.kind === "emp" || shot.kind === "rajada")) {
-        shot.lane = r.lane;
-        if (m.rng() < 0.7) shot.guide = Math.max(shot.guide, 0.55);
-        if (gap < -3 && shot.kind === "missil") {
-          shot.dist = r.dist - 2.2;
-          shot.born = shot.dist;
-          shot.speed = Math.max(0, foe.speed - 24);
+        if (easy) {
+          shot.guide = 0;
+          shot.lane = foe.lane + side();
+          if (m.rng() < 0.1) {
+            shot.lane = foe.lane;
+            shot.guide = 0.28;
+          }
+        } else {
+          shot.lane = r.lane;
+          if (m.rng() < 0.7) shot.guide = Math.max(shot.guide, 0.55);
+          if (gap < -3 && shot.kind === "missil") {
+            shot.dist = r.dist - 2.2;
+            shot.born = shot.dist;
+            shot.speed = Math.max(0, foe.speed - 24);
+          }
         }
       }
-      r.bot.fireArm = 2.2;
+      r.bot.fireArm = easy ? 4.2 : 2.2;
     }
     return;
   }

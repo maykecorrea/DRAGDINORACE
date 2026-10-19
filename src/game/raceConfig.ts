@@ -35,13 +35,13 @@ export const RACE_CONFIG = {
     redHold: 1.75,
   },
   shift: [
-    { lo: 5400, hi: 7850, pLo: 6800, pHi: 7500 },
-    { lo: 5500, hi: 7880, pLo: 6850, pHi: 7550 },
-    { lo: 5600, hi: 7900, pLo: 6900, pHi: 7600 },
-    { lo: 5700, hi: 7920, pLo: 6950, pHi: 7650 },
-    { lo: 5800, hi: 7940, pLo: 7000, pHi: 7700 },
-    { lo: 5900, hi: 7960, pLo: 7050, pHi: 7740 },
-    { lo: 6000, hi: 7980, pLo: 7100, pHi: 7780 },
+    { lo: 5400, hi: 7400, pLo: 6400, pHi: 7100 },
+    { lo: 5500, hi: 7420, pLo: 6500, pHi: 7150 },
+    { lo: 5600, hi: 7440, pLo: 6600, pHi: 7200 },
+    { lo: 5700, hi: 7460, pLo: 6700, pHi: 7250 },
+    { lo: 6900, hi: 7520, pLo: 7150, pHi: 7420 },
+    { lo: 7000, hi: 7540, pLo: 7200, pHi: 7440 },
+    { lo: 7100, hi: 7560, pLo: 7250, pHi: 7460 },
   ] as const,
   shiftTime: { perfeito: 0.06, ok: 0.1, cedo: 0.4, tarde: 0.4, corte: 0.5 },
   perfectBonus: 0.04,
@@ -112,9 +112,9 @@ export const AI_TABLE = {
     reaction: [0.38, 0.06],
     foul: 0,
     mix: [0.15, 0.45, 0.25, 0.12, 0.03],
-    aim: 0.3,
+    aim: 0.12,
     lock: 0,
-    mines: 2,
+    mines: 1,
     dodge: 0.2,
     dodgeDelay: 0.4,
     laneDelay: 1.6,
@@ -157,16 +157,9 @@ export type HudBox = { x: number; y: number; w: number; h: number };
 /** Luz de troca em 1280×720, com o letreiro. O dano não encosta nessa caixa. */
 export const SHIFT_LAMP: HudBox = { x: 360, y: 468, w: 560, h: 108 };
 
-export function placeDamageLabel(x: number, y: number): { x: number; y: number } {
-  const box = SHIFT_LAMP;
-  const pad = 28;
-  const hits = x > box.x - pad && x < box.x + box.w + pad && y > box.y - pad && y < box.y + box.h + pad;
-  if (!hits) return { x, y };
-  const left = x < box.x + box.w / 2;
-  return {
-    x: left ? box.x - 96 : box.x + box.w + 96,
-    y: box.y - 44,
-  };
+/** Dano empilhado na coluna esquerda, debaixo da vida. Nunca em cima do carro nem da luz. */
+export function placeDamageLabel(_x: number, _y: number, index = 0): { x: number; y: number } {
+  return { x: 168, y: 96 + index * 26 };
 }
 
 /** Caixas do HUD em 1280×720. O canvas faz letterbox, então 1920×1080 usa as mesmas. */

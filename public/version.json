@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.13",
-  "name": "quinta-no-teto",
+  "version": "2026-10-19.14",
+  "name": "solta-no-vai",
   "built": "2026-10-19",
-  "notes": "A 5ª leva o carro até cerca de 161 mph. Queimar a largada desclassifica. A reação conta do VAI até soltar o Espaço. O dano não encosta na luz e os botões ficam embaixo."
+  "notes": "A soltura do Espaço com o W preso conta na hora, sem o atraso de 4 s. No fácil a IA erra mais. A luz de BOM apaga antes do fim da barra e a 6ª não entra a 120 mph. O dano fica na coluna da vida e os botões saem de cima da pista."
 }

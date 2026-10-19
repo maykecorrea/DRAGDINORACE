@@ -579,34 +579,24 @@ function paintRange(
 function paintHits(
   ctx: CanvasRenderingContext2D,
   m: Match,
-  dist: number,
-  airAt: (ahead: number, worldLane: number) => { x: number; y: number; sp: number },
+  _dist: number,
+  _airAt: (ahead: number, worldLane: number) => { x: number; y: number; sp: number },
 ) {
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+  let stack = 0;
   for (const num of m.floats ?? []) {
-    const p = num.hud ? { x: 180, y: 70, sp: 1 } : roadPoint(airAt(num.dist - dist, num.lane), 24);
     const a = Math.max(0, num.life / num.max);
-    const rise = (1 - a) * 46;
     const size = 22;
     ctx.globalAlpha = Math.min(1, a + 0.15);
     ctx.font = `900 ${size}px Impact, Arial Black, sans-serif`;
     const label = `-${num.dmg}`;
     const text = num.label || label;
-    let x = p.x + num.drift * (1 - a);
-    let y = p.y - rise - 18;
-    const parked = placeDamageLabel(x, y);
-    x = parked.x;
-    y = parked.y;
-    const foe = HUD_CHASE.hpRival!;
-    const mineBox = HUD_CHASE.hp!;
-    const hitsBox = (box: { x: number; y: number; w: number; h: number }) =>
-      x > box.x - 36 && x < box.x + box.w + 36 && y > box.y - 28 && y < box.y + box.h + 24;
-    if (y < 78 || hitsBox(foe) || hitsBox(mineBox)) {
-      y = foe.y + foe.h + 36;
-      x = Math.min(Math.max(80, x), foe.x - 88);
-    }
+    const parked = placeDamageLabel(0, 0, stack);
+    stack += 1;
+    const x = parked.x;
+    const y = parked.y;
     ctx.lineWidth = 5;
     ctx.strokeStyle = "#070806";
     ctx.strokeText(text, x, y);
