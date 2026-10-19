@@ -773,8 +773,11 @@ function armNitro(m: Match, r: Racer, _up: Upgrades, who: "you" | "ai") {
 }
 
 function reactionSeconds(m: Match, input: Input | null, fallback: number): number {
-  if (input?.brakeUpMs && m.greenWall > 0 && m.usedBrake) return (input.brakeUpMs - m.greenWall) / 1000;
-  if (input?.gasDownMs && m.greenWall > 0 && !m.usedBrake) return (input.gasDownMs - m.greenWall) / 1000;
+  const up = input?.brakeUpMs ?? 0;
+  // Selo anterior ao VAI não é a soltura desta largada.
+  if (up > 0 && m.greenWall > 0 && m.usedBrake && up + 40 >= m.greenWall) return (up - m.greenWall) / 1000;
+  const gas = input?.gasDownMs ?? 0;
+  if (gas > 0 && m.greenWall > 0 && !m.usedBrake && gas + 40 >= m.greenWall) return (gas - m.greenWall) / 1000;
   return fallback;
 }
 
@@ -811,7 +814,6 @@ function doLaunch(m: Match, r: Racer, _up: Upgrades, green: boolean, since: numb
     return;
   }
   r.reaction = Math.max(0, since);
-  if (who === "you" && r.reaction < 0.0005) r.reaction = 0.02;
   markSuspect(r);
   const quick = who !== "you" || r.reaction <= 0.2;
   const decent = who !== "you" || r.reaction <= 0.4;
@@ -1465,6 +1467,8 @@ function integrate(m: Match, r: Racer, throttle: number, dt: number) {
     if (m.phase === "race" && m.raceTime >= RACE_CONFIG.launch.redHold) {
       r.jail = false;
       r.launched = true;
+      r.choke = Math.min(r.choke, 0.7);
+      r.chokeT = Math.max(r.chokeT, 1.2);
     }
     return;
   }
@@ -1636,11 +1640,13 @@ function stepRacer(m: Match, r: Racer, up: Upgrades, input: Input | null, dt: nu
         } else r.stageMem = Math.max(0, r.stageMem - dt);
       }
       const greenNow = (m.green || m.phase === "race") && m.phase !== "staging";
-      if (input?.brakePulse) {
+      const pedalUp = !brake;
+      const pulseUp = !!input?.brakePulse && pedalUp;
+      if (pulseUp) {
         m.usedBrake = true;
-        if (input.brakeUpMs) m.brakeUpWall = input.brakeUpMs;
+        if (input?.brakeUpMs) m.brakeUpWall = input.brakeUpMs;
       }
-      const released = (m.brakeHeld && !brake && m.usedBrake) || (!!input?.brakePulse && m.usedBrake);
+      const released = (m.brakeHeld && pedalUp && m.usedBrake) || (pulseUp && m.usedBrake);
       const gasDown = input?.gasDownMs ?? 0;
       const earlyMs = m.greenWall > 0 && gasDown > 0 ? gasDown - m.greenWall : 0;
       const jumped = !m.usedBrake && !r.jail && gas && greenNow && gasDown > 0 && earlyMs < -40;
@@ -1655,36 +1661,29 @@ function stepRacer(m: Match, r: Racer, up: Upgrades, input: Input | null, dt: nu
         r.shiftLock = 0;
         r.shiftBuf = 0;
         r.shiftMark = null;
-        r.choke = 1;
-        r.chokeT = 0;
+        r.choke = 0.7;
+        r.chokeT = 1.2;
         r.redlineT = 0;
         r.launchGrade = "queimou";
-        if (m.greenWall > 0 && m.brakeUpWall > 0) r.reaction = (m.brakeUpWall - m.greenWall) / 1000;
-        else if (r.reaction == null && gasDown > 0 && m.greenWall > 0) r.reaction = (gasDown - m.greenWall) / 1000;
+        if (r.reaction == null) r.reaction = m.greenWall > 0 && m.brakeUpWall > 0 ? (m.brakeUpWall - m.greenWall) / 1000 : -0.25;
         justLaunched = true;
       } else if (!r.jail && released && !greenNow) {
-        if (since >= -0.12) {
-          const measured = m.greenWall > 0 && input?.brakeUpMs ? (input.brakeUpMs - m.greenWall) / 1000 : since;
-          doLaunch(m, r, up, true, measured > 0.0005 ? measured : 0.02, "you");
-          justLaunched = true;
-        } else {
-          r.jail = true;
-          r.redlight = true;
-          r.launchGrade = "queimou";
-          r.reaction = m.greenWall > 0 && m.brakeUpWall > 0 ? (m.brakeUpWall - m.greenWall) / 1000 : since;
-          r.burns += 1;
-          if (m.ranked && r.burns >= COMBAT.queimadasDq) r.dq = true;
-          m.events.push("redlight");
-          note(m, "QUEIMOU", 0.8);
-          pulse(m, true, 0.3);
-        }
+        r.jail = true;
+        r.redlight = true;
+        r.launchGrade = "queimou";
+        r.reaction = m.greenWall > 0 && m.brakeUpWall > 0 ? (m.brakeUpWall - m.greenWall) / 1000 : since;
+        r.burns += 1;
+        if (m.ranked && r.burns >= COMBAT.queimadasDq) r.dq = true;
+        m.events.push("redlight");
+        note(m, "QUEIMOU", 0.8);
+        pulse(m, true, 0.3);
       } else if (!r.jail && jumped) {
-        doLaunch(m, r, up, true, earlyMs / 1000, "you");
+        doLaunch(m, r, up, false, earlyMs / 1000, "you");
         justLaunched = true;
       } else if (!r.jail && (released || gasGo || holdAcross || abandoned)) {
-        const raw = holdAcross ? earlyMs / 1000 : reactionSeconds(m, input, Math.max(0, m.raceTime));
-        const timed = raw > 0.0005 ? raw : 0.02;
-        doLaunch(m, r, up, greenNow, timed, "you");
+        const raw = released || gasGo ? reactionSeconds(m, input, Math.max(0, m.raceTime)) : holdAcross ? earlyMs / 1000 : Math.max(0, m.raceTime);
+        const legal = greenNow && raw >= -0.001;
+        doLaunch(m, r, up, legal, legal ? Math.max(0, raw) : raw, "you");
         justLaunched = true;
       }
       m.brakeHeld = brake;
@@ -1704,6 +1703,8 @@ function stepRacer(m: Match, r: Racer, up: Upgrades, input: Input | null, dt: nu
   if (who === "ai" && r.jail && m.phase === "race" && m.raceTime >= RACE_CONFIG.launch.redHold) {
     r.jail = false;
     r.launched = true;
+    r.choke = Math.min(r.choke, 0.7);
+    r.chokeT = Math.max(r.chokeT, 1.2);
     justLaunched = true;
   }
 
@@ -2256,6 +2257,7 @@ export function stepMatch(m: Match, input: Input, dt: number, playerUp: Upgrades
 export function raceVerdict(m: Match): "win" | "loss" | "draw" {
   if (m.player.dq) return "loss";
   const rival = m.rival;
+  if (m.player.redlight && !rival?.redlight) return "loss";
   if (!rival) return m.player.finished && !m.player.wrecked ? "win" : "loss";
   const you = m.player.finished && !m.player.wrecked;
   const them = rival.finished && !rival.wrecked;
@@ -2267,6 +2269,7 @@ export function raceVerdict(m: Match): "win" | "loss" | "draw" {
 
 export function raceReason(m: Match): string {
   if (m.player.dq) return "Desclassificado: 2 queimadas";
+  if (m.player.redlight && !m.rival?.redlight) return "Queimou a largada";
   const you = m.player.finished && !m.player.wrecked;
   const them = !!m.rival && m.rival.finished && !m.rival.wrecked;
   if (m.player.wrecked && m.rival?.wrecked) return "DNF duplo";

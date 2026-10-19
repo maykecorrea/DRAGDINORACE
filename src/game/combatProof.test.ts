@@ -205,8 +205,9 @@ test("vencedor é quem cruza e a tela diz o motivo", () => {
     m.rival.finished = true;
     m.rival.finishTime = 23.183;
   }
-  assert.equal(raceVerdict(m), "win");
-  assert.match(raceReason(m), /Você cruzou/);
+  assert.equal(raceVerdict(m), "loss");
+  assert.match(raceReason(m), /Queimou/);
+  m.player.redlight = false;
   m.player.finished = false;
   m.player.wrecked = true;
   if (m.rival) m.rival.finished = false;

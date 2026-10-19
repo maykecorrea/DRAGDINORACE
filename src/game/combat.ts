@@ -74,8 +74,8 @@ export const HUD_CHASE: Record<string, HudBox> = {
   alerts: { x: 24, y: 48, w: 220, h: 22 },
   aim: { x: 560, y: 200, w: 160, h: 36 },
   note: { x: 1010, y: 456, w: 180, h: 28 },
-  tacho: { x: 1010, y: 492, w: 200, h: 200 },
-  weapons: { x: 24, y: 600, w: 300, h: 96 },
+  tacho: { x: 1010, y: 492, w: 200, h: 168 },
+  weapons: { x: 24, y: 500, w: 300, h: 96 },
 };
 
 export function hudChaseOverlap(): string[] {

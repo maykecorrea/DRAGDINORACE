@@ -378,6 +378,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       if (e.code === "Space") {
         keyClock.brakeUp = performance.now();
         keyClock.spaceUp = true;
+        hold.current.brake = false;
       }
       keys.delete(e.code);
       const letter = e.key.length === 1 ? e.key.toLowerCase() : "";
@@ -455,10 +456,17 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       hold.current.nitro = false;
       const launched = !!simRef.current && simRef.current.player.launched && (simRef.current.phase === "race" || simRef.current.phase === "free");
       const space = down("Space") || (injected?.includes("Space") ?? false) || hold.current.brake;
-      const brakePulse = !launched && keyClock.spaceUp && performance.now() - keyClock.brakeUp < 400;
-      keyClock.spaceUp = false;
+      const wasHeld = edges.current.spaceHeld;
       if (!launched && space) edges.current.spaceHeld = true;
       if (!space) edges.current.spaceHeld = false;
+      const justUp = wasHeld && !space && !launched;
+      if (justUp && !keyClock.spaceUp) {
+        keyClock.brakeUp = performance.now();
+        keyClock.spaceUp = true;
+      }
+      const freshUp = keyClock.spaceUp && performance.now() - keyClock.brakeUp < 80;
+      const brakePulse = !launched && !space && (justUp || freshUp);
+      keyClock.spaceUp = false;
       const ram = edges.current.ram;
       edges.current.ram = 0;
       return {
@@ -474,7 +482,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         rearEdge,
         shield,
         ram,
-        brakeUpMs: keyClock.brakeUp || null,
+        brakeUpMs: brakePulse ? keyClock.brakeUp || performance.now() : null,
         gasDownMs: keyClock.gasDown || null,
         brakePulse,
       };
@@ -572,7 +580,6 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               const input = sample();
               let first = true;
               let guard = 0;
-              let stepI = 0;
               const car = selectedCar(saveRef.current);
               const up = stacked(car);
               const phase = STORY.find((item) => `fase-${item.chapter}` === sim.rivalId);
@@ -587,9 +594,8 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   shield: first ? input.shield : false,
                   ram: first ? input.ram : 0,
                   brakePulse: first ? input.brakePulse : false,
-                  nowMs: now + stepI * (1000 / 60),
+                  nowMs: now,
                 };
-                stepI += 1;
                 const worn = armedDef(saveRef.current.arm, saveRef.current.frontal);
                 const tail = armedRear(saveRef.current.rearArm, saveRef.current.rear);
                 armWeapon(sim.player, worn.id, worn);
@@ -691,7 +697,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   window.dispatchEvent(new CustomEvent("raceStats", { detail: stats }));
                 }
                 const burnedNote = sim.player.redlight
-                  ? "Queimou a largada: 0,6 s parado depois do VAI. O lugar é pelo tempo, não pela queima."
+                  ? "Queimou a largada: desclassificado. Sair antes do VAI perde a corrida."
                   : "";
                 const note = draw
                   ? "EMPATE / DNF DUPLO"
@@ -1376,6 +1382,9 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     onPointerCancel: () => {
       hold.current[key] = false;
     },
+    onLostPointerCapture: () => {
+      hold.current[key] = false;
+    },
   });
 
   return (
@@ -1575,7 +1584,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       )}
 
       {screen === "drive" && (
-        <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-3">
+        <div className="pointer-events-none absolute inset-0 p-3">
           {save.races === 0 && (
             <p className="pointer-events-none absolute left-1/2 top-44 z-20 max-w-sm -translate-x-1/2 bg-bg/80 px-3 py-2 text-center text-sm text-primary">
               {again.kind === "free"
@@ -1583,7 +1592,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 : "Segura ESPAÇO e W até o giro ficar verde (GIRO CERTO). Solta o ESPAÇO no VAI. W sozinho passa de 5500 e patina. Shift só quando aparecer AGORA. F míssil. G mina."}
             </p>
           )}
-          <div className="pointer-events-auto flex items-center justify-between">
+          <div className="pointer-events-auto absolute inset-x-3 top-3 flex items-center justify-between">
             <button type="button" className="inline-flex min-h-11 items-center gap-1 bg-bg/80 px-3 text-fg" onClick={backMenu}>
               <ChevronLeft className="size-5" />
               Pits
@@ -1609,57 +1618,75 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               {save.muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
             </button>
           </div>
-          <div className="pointer-events-auto grid grid-cols-5 gap-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
-            <button type="button" className="min-h-14 bg-surface text-fg" {...press("left")} aria-label="Faixa esquerda">
+          <div
+            className="pointer-events-auto absolute inset-x-3 bottom-0 pb-[max(0.35rem,env(safe-area-inset-bottom))]"
+            onKeyDown={(e) => {
+              if (e.code === "Space" || e.key === " ") e.preventDefault();
+            }}
+          >
+          <div className="grid grid-cols-5 gap-1">
+            <button type="button" className="min-h-11 bg-surface text-fg" {...press("left")} aria-label="Faixa esquerda">
               <span className="block text-xs">Esq</span>
               <span className="font-display text-sm leading-none">{keyLabel(readKeys(save).left)}</span>
             </button>
-            <button type="button" className="min-h-14 bg-surface text-fg" {...press("gas")}>
+            <button type="button" className="min-h-11 bg-surface text-fg" {...press("gas")}>
               <span className="block font-display text-sm leading-none">Gás</span>
               <span className="text-xs">{keyLabel(readKeys(save).gas)}</span>
             </button>
-            <button type="button" className="min-h-14 bg-surface text-fg" {...press("brake")}>
+            <button type="button" className="min-h-11 bg-surface text-fg" {...press("brake")}>
               <span className="block font-display text-sm leading-none">Freio</span>
               <span className="text-xs">Espaço</span>
             </button>
-            <button type="button" className="min-h-14 bg-surface text-fg" {...press("fire")}>
+            <button type="button" className="min-h-11 bg-surface text-fg" {...press("fire")}>
               <span className="block font-display text-sm leading-none">Frente</span>
               <span className="text-xs">{keyLabel(readKeys(save).fire)}</span>
             </button>
             <button
               type="button"
-              className="min-h-14 bg-danger text-fg"
+              className="min-h-11 bg-danger text-fg"
               onPointerDown={(e) => {
                 (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
                 hold.current.nitro = true;
                 pending.nitro = true;
               }}
+              onPointerUp={() => {
+                hold.current.nitro = false;
+              }}
+              onPointerCancel={() => {
+                hold.current.nitro = false;
+              }}
             >
               <span className="block font-display text-sm leading-none">Nitro</span>
               <span className="text-xs">{keyLabel(readKeys(save).nitro)}</span>
             </button>
-            <button type="button" className="min-h-14 bg-surface text-fg" {...press("right")} aria-label="Faixa direita">
+            <button type="button" className="min-h-11 bg-surface text-fg" {...press("right")} aria-label="Faixa direita">
               <span className="block text-xs">Dir</span>
               <span className="font-display text-sm leading-none">{keyLabel(readKeys(save).right)}</span>
             </button>
             <button
               type="button"
-              className="min-h-14 bg-primary text-ink"
+              className="min-h-11 bg-primary text-ink"
               onPointerDown={(e) => {
                 (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
                 hold.current.shift = true;
+              }}
+              onPointerUp={() => {
+                hold.current.shift = false;
+              }}
+              onPointerCancel={() => {
+                hold.current.shift = false;
               }}
             >
               <span className="block font-display text-sm leading-none">Marcha</span>
               <span className="text-xs">{keyLabel(readKeys(save).shift)}</span>
             </button>
-            <button type="button" className="min-h-14 bg-surface text-fg" {...press("rear")}>
+            <button type="button" className="min-h-11 bg-surface text-fg" {...press("rear")}>
               <span className="block font-display text-sm leading-none">Trás</span>
               <span className="text-xs">{keyLabel(readKeys(save).rear)}</span>
             </button>
             <button
               type="button"
-              className="min-h-14 bg-surface text-fg"
+              className="min-h-11 bg-surface text-fg"
               onPointerDown={(e) => {
                 (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
                 edges.current.shield = true;
@@ -1675,6 +1702,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               ? "Segura o gás · Shift sobe a marcha · N nitro · F frente · G traseira · A e D na faixa"
               : "ESPAÇO + W até GIRO CERTO · solta o ESPAÇO no VAI · W sozinho patina · Shift quando disser AGORA · N nitro · F míssil · G mina · E escudo · A/D faixa · V câmera"}
           </p>
+          </div>
         </div>
       )}
 

@@ -32,7 +32,7 @@ export const RACE_CONFIG = {
     perfectTime: 1,
     rise: 5200,
     fall: 2600,
-    redHold: 0.45,
+    redHold: 1.75,
   },
   shift: [
     { lo: 5400, hi: 7850, pLo: 6800, pHi: 7500 },
@@ -96,10 +96,10 @@ export function gearBox(count: number): { frac: number[]; mult: number[] } {
   const n = count >= 8 ? 8 : count >= 7 ? 7 : 6;
   const frac =
     n === 8
-      ? [0.38, 0.5, 0.6, 0.69, 0.77, 0.85, 0.93, 1]
+      ? [0.38, 0.5, 0.6, 0.69, 0.77, 0.85, 0.995, 1]
       : n === 7
-        ? [0.38, 0.52, 0.64, 0.75, 0.85, 0.93, 1]
-        : [0.38, 0.52, 0.65, 0.77, 0.88, 1];
+        ? [0.38, 0.52, 0.64, 0.75, 0.85, 0.995, 1]
+        : [0.38, 0.52, 0.66, 0.8, 0.995, 1];
   const base = frac[0] ?? 0.38;
   return { frac, mult: frac.map((f) => base / f) };
 }
@@ -153,6 +153,21 @@ export const AI_TABLE = {
 } as const;
 
 export type HudBox = { x: number; y: number; w: number; h: number };
+
+/** Luz de troca em 1280×720, com o letreiro. O dano não encosta nessa caixa. */
+export const SHIFT_LAMP: HudBox = { x: 360, y: 468, w: 560, h: 108 };
+
+export function placeDamageLabel(x: number, y: number): { x: number; y: number } {
+  const box = SHIFT_LAMP;
+  const pad = 28;
+  const hits = x > box.x - pad && x < box.x + box.w + pad && y > box.y - pad && y < box.y + box.h + pad;
+  if (!hits) return { x, y };
+  const left = x < box.x + box.w / 2;
+  return {
+    x: left ? box.x - 96 : box.x + box.w + 96,
+    y: box.y - 44,
+  };
+}
 
 /** Caixas do HUD em 1280×720. O canvas faz letterbox, então 1920×1080 usa as mesmas. */
 export const HUD: Record<string, HudBox> = {

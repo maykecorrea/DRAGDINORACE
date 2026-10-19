@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { StatBlock, Upgrades } from "./data.ts";
-import { RACE_CONFIG, driveMph, gearBox, hudOverlap } from "./raceConfig.ts";
+import { RACE_CONFIG, SHIFT_LAMP, driveMph, gearBox, hudOverlap, placeDamageLabel } from "./raceConfig.ts";
 import {
   armRear,
   armWeapon,
@@ -131,24 +131,27 @@ test("reação usa o timestamp da tecla, não o frame solto", () => {
   assert.ok(Math.abs((m.player.reaction ?? 0) - expect) < 1 / 60, `${m.player.reaction} vs ${expect}`);
 });
 
-test("queimar a largada não troca o vencedor: vale o tempo", () => {
+test("queimar a largada perde mesmo com o melhor tempo", () => {
   const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
   const m = createDuel("lugar", bot, comum, comum, 6, 6, 4);
   m.player.redlight = true;
   m.player.launchGrade = "queimou";
   m.player.finished = true;
-  m.player.finishTime = 19.3;
-  m.player.reaction = -2.833;
+  m.player.finishTime = 12.1;
+  m.player.reaction = -0.4;
   if (m.rival) {
     m.rival.finished = true;
-    m.rival.finishTime = 23.183;
+    m.rival.finishTime = 12.53;
+    m.rival.redlight = false;
   }
+  assert.equal(raceVerdict(m), "loss");
+  if (m.rival) m.rival.redlight = true;
   assert.equal(raceVerdict(m), "win");
-  m.player.finishTime = 24;
+  m.player.finishTime = 13;
   assert.equal(raceVerdict(m), "loss");
 });
 
-test("queimar a largada segura o carro 0,6 s depois do VAI", () => {
+test("queimar a largada segura o carro até o castigo acabar", () => {
   const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
   const m = createDuel("queima", bot, comum, comum, 6, 6, 4);
   let wall = 80_000;
@@ -172,13 +175,15 @@ test("queimar a largada segura o carro 0,6 s depois do VAI", () => {
       brakeUpMs: burned ? wall - 400 : null,
     };
     stepMatch(m, input, dt, up, up);
-    if (m.phase === "race" && m.raceTime < 0.4) maxSpeedDuring = Math.max(maxSpeedDuring, m.player.speed);
-    if (m.phase === "race" && m.raceTime > 0.7) break;
+    if (m.phase === "race" && m.raceTime < RACE_CONFIG.launch.redHold - 0.05) maxSpeedDuring = Math.max(maxSpeedDuring, m.player.speed);
+    if (m.phase === "race" && m.raceTime > RACE_CONFIG.launch.redHold + 0.35) break;
   }
   assert.equal(m.player.launchGrade, "queimou");
+  assert.equal(m.player.redlight, true);
   assert.ok(maxSpeedDuring < 0.2, `andou cedo ${maxSpeedDuring}`);
   assert.ok(m.player.launched);
   assert.ok(m.player.speed > 0.2 || m.player.dist > 0.2);
+  assert.equal(raceVerdict(m), "loss");
 });
 
 test("cinco trocas perfeitas batem cinco BOM por cerca de 0,6 s", () => {
@@ -783,7 +788,7 @@ test("depois da queima o shift não sobe marcha morta", () => {
       up,
       up,
     );
-    if (m.phase === "race" && m.raceTime > 2.2) break;
+    if (m.phase === "race" && m.raceTime > 3.6) break;
   }
   assert.equal(m.player.launchGrade, "queimou");
   assert.ok(m.player.gear <= 4, `marcha ${m.player.gear}`);
@@ -854,7 +859,7 @@ test("shift no verde não vira corte se a marcha ainda está engatando", () => {
   m.player.gears = 6;
   const row = rowFor(5);
   const vMax = driveMph(comum.vmax) / 2.236936;
-  const frac = 0.88;
+  const frac = gearBox(6).frac[4]!;
   m.player.speed = vMax * frac * (7200 / 8000);
   m.player.rpm = (row.pLo + row.pHi) / 2;
   m.player.shiftLock = 0.45;
@@ -1079,7 +1084,7 @@ test("Shift 0,25 s depois do PERFEITO ainda grava PERFEITO", () => {
   m.player.launched = true;
   m.player.gear = 5;
   const vMax = driveMph(comum.vmax) / 2.236936;
-  const vTop = vMax * 0.88;
+  const vTop = vMax * gearBox(6).frac[4]!;
   m.player.speed = (7200 / 8000) * vTop;
   m.player.rpm = 7200;
   const dt = 1 / 60;
@@ -1139,7 +1144,7 @@ test("troca limpa chega na frente da IA fácil", () => {
   }
   assert.ok(m.player.finishTime != null && m.rival?.finishTime != null, `${m.player.finishTime} / ${m.rival?.finishTime}`);
   assert.ok(m.player.finishTime! < m.rival!.finishTime!, `${m.player.finishTime} vs ${m.rival?.finishTime}`);
-  assert.ok(mph(m.player.trap) >= 155, String(mph(m.player.trap)));
+  assert.ok(mph(m.player.trap) >= 158, String(mph(m.player.trap)));
   assert.ok(!m.player.shifts.includes("corte"), m.player.shifts.join(","));
 });
 
@@ -1152,7 +1157,7 @@ test("Shift no verde grava a mesma palavra do HUD", () => {
   m.player.gear = 5;
   const vMax = driveMph(comum.vmax) / 2.236936;
   m.player.speed = 140 / 2.236936;
-  m.player.rpm = (m.player.speed / (vMax * 0.88)) * 8000;
+  m.player.rpm = (m.player.speed / (vMax * gearBox(6).frac[4]!)) * 8000;
   const call = shiftCall(m.player.rpm, m.player.gear);
   assert.equal(shiftWord(call), "BOM", `${call} rpm ${m.player.rpm}`);
   stepMatch(m, { throttle: 1, steer: 0, shift: true, nitro: false, brake: false }, 1 / 60, up, up);
@@ -1164,7 +1169,7 @@ test("Shift no verde grava a mesma palavra do HUD", () => {
   late.green = true;
   late.player.launched = true;
   late.player.gear = 5;
-  late.player.speed = vMax * 0.88;
+  late.player.speed = vMax * gearBox(6).frac[4]!;
   late.player.rpm = 8000;
   late.player.redlineT = 0.2;
   assert.equal(shiftWord(shiftCall(late.player.rpm, late.player.gear)), "CORTE");
@@ -1226,7 +1231,7 @@ test("banner PERFEITO apaga fora da faixa amarela e o Shift grava a nota da luz"
   m.player.launched = true;
   m.player.gear = 5;
   const vMax = driveMph(comum.vmax) / 2.236936;
-  const vTop = vMax * 0.88;
+  const vTop = vMax * gearBox(6).frac[4]!;
   m.player.speed = (7200 / 8000) * vTop;
   m.player.rpm = 7200;
   stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
@@ -1394,5 +1399,173 @@ test("IA fácil apanha o pente inteiro e ainda cruza", () => {
   assert.equal(m.rival?.finished, true);
   assert.ok((m.rival?.hp ?? 0) >= 1, String(m.rival?.hp));
   assert.ok(m.player.hits >= 3, String(m.player.hits));
+});
+
+test("a 5ª de um carro de 162 passa de 160 mph", () => {
+  const cap = driveMph(162) * gearBox(6).frac[4]!;
+  assert.ok(cap >= 160 && cap <= 162, String(cap));
+});
+
+test("toque velho no Espaço não vira reação de 20 ms", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("pulso-velho", bot, comum, comum, 6, 6, 5);
+  m.hazards = [];
+  m.crates = [];
+  let wall = 40_000;
+  let brake = true;
+  let releaseAt = 0;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 8 && !m.player.launched; i++) {
+    wall += 1000 * dt;
+    const late = m.phase === "race" && m.raceTime >= 0.42;
+    if (late && brake) {
+      brake = false;
+      releaseAt = wall;
+    }
+    const falsePulse = m.phase === "race" && m.raceTime > 0.02 && m.raceTime < 0.06 && brake;
+    stepMatch(
+      m,
+      {
+        throttle: 1,
+        steer: 0,
+        shift: false,
+        nitro: false,
+        brake,
+        nowMs: wall,
+        brakeUpMs: late ? releaseAt : 1000,
+        brakePulse: falsePulse || late,
+      },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.equal(m.player.launched, true);
+  assert.ok(Math.abs((m.player.reaction ?? 9) - 0.42) < 0.08, String(m.player.reaction));
+  assert.notEqual(Math.round((m.player.reaction ?? 0) * 1000), 20);
+  assert.equal(m.player.launchGrade === "perfeito", false);
+  assert.equal(performanceOf(m).lines.some((line) => line.label === "reação < 200 ms"), false);
+});
+
+test("queima fica mais lenta que a largada limpa e perde", () => {
+  const clean = driveGrade("perfeito", 6, 6);
+  const bot: Bot = { reaction: 0.28, shiftAt: 0.9, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("queima-tempo", bot, comum, comum, 6, 6, 6);
+  m.hazards = [];
+  m.crates = [];
+  let wall = 20_000;
+  let brake = true;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 20 && m.phase !== "finish"; i++) {
+    wall += 1000 * dt;
+    if (m.phase === "tree" && m.t > 1.5) brake = false;
+    const row = rowFor(m.player.gear);
+    const shift = m.player.launched && m.player.shiftLock <= 0 && m.player.gear < 6 && m.player.rpm >= row.pLo && m.player.rpm <= row.pHi + 40;
+    stepMatch(
+      m,
+      { throttle: 1, steer: 0, shift, nitro: false, brake: brake && !m.player.launched, nowMs: wall, brakeUpMs: brake ? null : wall },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.equal(m.player.launchGrade, "queimou");
+  assert.equal(raceVerdict(m), "loss");
+  assert.ok(m.player.finishTime != null && clean != null && m.player.finishTime > clean + 1.2, `${m.player.finishTime} vs limpa ${clean}`);
+});
+
+test("soltar centenas de ms depois do VAI não vira 20 ms", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("tarde-de-verdade", bot, comum, comum, 6, 6, 8);
+  m.hazards = [];
+  m.crates = [];
+  let wall = 50_000;
+  let brake = true;
+  const dt = 1 / 60;
+  const want = 0.32;
+  for (let i = 0; i < 60 * 8 && !m.player.launched; i++) {
+    wall += 1000 * dt;
+    const go = m.phase === "race" && m.raceTime >= want;
+    if (go) brake = false;
+    stepMatch(
+      m,
+      {
+        throttle: 1,
+        steer: 0,
+        shift: false,
+        nitro: false,
+        brake,
+        nowMs: wall,
+        brakeUpMs: go ? wall : 1000,
+        brakePulse: false,
+      },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.equal(m.player.redlight, false);
+  assert.ok(Math.abs((m.player.reaction ?? 9) - want) < 0.05, String(m.player.reaction));
+  assert.notEqual(Math.round((m.player.reaction ?? 0) * 1000), 20);
+  assert.equal(m.player.launchGrade === "perfeito", false);
+  assert.equal(performanceOf(m).lines.some((line) => line.label === "reação < 200 ms"), false);
+});
+
+test("tempo limpo cabe na física e a queima não fica mais rápida", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const clean = createDuel("fisica", bot, comum, comum, 6, 6, 4);
+  clean.hazards = [];
+  clean.crates = [];
+  let brake = true;
+  let wall = 15_000;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 30 && !clean.player.finished; i++) {
+    wall += 1000 * dt;
+    if (clean.phase === "race" && !clean.player.launched && clean.raceTime >= 0.18) brake = false;
+    const row = rowFor(clean.player.gear);
+    const shift = clean.player.launched && clean.player.shiftLock <= 0 && clean.player.gear < 6 && clean.player.rpm >= row.pLo && clean.player.rpm <= row.pHi + 40;
+    stepMatch(
+      clean,
+      { throttle: 1, steer: 0, shift, nitro: false, brake: brake && !clean.player.launched, nowMs: wall, brakeUpMs: brake ? null : wall },
+      dt,
+      up,
+      up,
+    );
+  }
+  const et = clean.player.finishTime ?? 0;
+  const trap = clean.player.trap;
+  assert.ok(mph(trap) >= 158 && mph(trap) <= 164, `trap ${mph(trap).toFixed(1)}`);
+  assert.ok(et >= 10 && et <= 13, `ET ${et}`);
+  assert.ok(et * trap > clean.strip * 1.15, `ET ${et} trap ${trap} faixa ${clean.strip}`);
+  const foul = createDuel("fisica-queima", bot, comum, comum, 6, 6, 4);
+  foul.hazards = [];
+  foul.crates = [];
+  let held = true;
+  let clock = 15_000;
+  for (let i = 0; i < 60 * 30 && !foul.player.finished; i++) {
+    clock += 1000 * dt;
+    if (foul.phase === "tree" && foul.t > 1.6) held = false;
+    const row = rowFor(foul.player.gear);
+    const shift = foul.player.launched && foul.player.shiftLock <= 0 && foul.player.gear < 6 && foul.player.rpm >= row.pLo && foul.player.rpm <= row.pHi + 40;
+    stepMatch(
+      foul,
+      { throttle: 1, steer: 0, shift, nitro: false, brake: held && !foul.player.launched, nowMs: clock, brakeUpMs: held ? null : clock },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.equal(foul.player.redlight, true);
+  assert.equal(raceVerdict(foul), "loss");
+  assert.ok((foul.player.finishTime ?? 0) > et + 1.2, `queima ${foul.player.finishTime} limpa ${et}`);
+  assert.ok((foul.player.finishTime ?? 0) * Math.max(foul.player.trap, 1) > foul.strip, "queima mais rápida que a física");
+});
+
+test("número de dano fica fora da luz de troca", () => {
+  const spot = placeDamageLabel(640, SHIFT_LAMP.y + 40);
+  const gap = spot.x < SHIFT_LAMP.x ? SHIFT_LAMP.x - spot.x : spot.x - (SHIFT_LAMP.x + SHIFT_LAMP.w);
+  assert.ok(gap >= 70, `${spot.x} gap ${gap}`);
+  assert.ok(spot.y <= SHIFT_LAMP.y - 30, String(spot.y));
+  assert.deepEqual(placeDamageLabel(90, 180), { x: 90, y: 180 });
 });
 

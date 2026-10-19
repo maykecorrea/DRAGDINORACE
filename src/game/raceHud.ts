@@ -1,7 +1,7 @@
 import versionInfo from "../../public/version.json";
 import { COMBAT, HUD_CHASE } from "./combat";
 import { sheetFrame, type RaceArt } from "./raceArt";
-import { HUD, RACE_CONFIG, type RaceBadge } from "./raceConfig";
+import { HUD, RACE_CONFIG, SHIFT_LAMP, type RaceBadge } from "./raceConfig";
 import { mph, REDLINE, shiftCall, shiftWord, type Match } from "./sim";
 
 type Air = { x: number; y: number; sp: number };
@@ -571,9 +571,9 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   ctx.fillText(String(m.player.gear), cx, cy + 8);
   ctx.font = "700 16px ui-monospace, monospace";
   ctx.fillText(`${Math.round(mph(m.player.speed))} MPH`, cx, cy + 36);
-  const meterX = 360;
-  const meterY = 648;
-  const meterW = 560;
+  const meterX = SHIFT_LAMP.x;
+  const meterY = SHIFT_LAMP.y + 40;
+  const meterW = SHIFT_LAMP.w;
   const live = Math.max(0, Math.min(1, m.player.rpm / REDLINE));
   ctx.fillStyle = "rgba(7,10,8,0.88)";
   ctx.fillRect(meterX, meterY, meterW, 36);

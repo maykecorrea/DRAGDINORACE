@@ -4,6 +4,7 @@ import { loadRaceArt } from "./raceArt";
 import { paintBeira, paintChaseHud, paintDebug, paintParallax, paintRaceWorld } from "./raceHud";
 import { HUD_CHASE } from "./combat";
 import { weaponReach } from "./weapons";
+import { placeDamageLabel } from "./raceConfig";
 import {
   LANE_GAP,
   REDLINE,
@@ -595,13 +596,16 @@ function paintHits(
     const text = num.label || label;
     let x = p.x + num.drift * (1 - a);
     let y = p.y - rise - 18;
+    const parked = placeDamageLabel(x, y);
+    x = parked.x;
+    y = parked.y;
     const foe = HUD_CHASE.hpRival!;
     const mineBox = HUD_CHASE.hp!;
     const hitsBox = (box: { x: number; y: number; w: number; h: number }) =>
-      x > box.x - 40 && x < box.x + box.w + 28 && y > box.y - 18 && y < box.y + box.h + 30;
+      x > box.x - 36 && x < box.x + box.w + 36 && y > box.y - 28 && y < box.y + box.h + 24;
     if (y < 78 || hitsBox(foe) || hitsBox(mineBox)) {
       y = foe.y + foe.h + 36;
-      x = Math.min(x, foe.x - 78);
+      x = Math.min(Math.max(80, x), foe.x - 88);
     }
     ctx.lineWidth = 5;
     ctx.strokeStyle = "#070806";
