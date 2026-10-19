@@ -24,7 +24,7 @@ import { carLabel, cockpitKey, cockpitPlate, sideMark } from "./forge";
 import { keyLabel, readKeys } from "./hotkeys";
 import { raceXp, partById } from "./parts";
 import { BOSSES, STORY, grantStoryPart, storyLoadout, storyOpen, storyRivalStats, type StoryPhase } from "./story";
-import { createDuel, createFree, createPvp, raceVerdict, raceReason, stepMatch, stripFor, LANE_GAP, armWeapon, armRear, gearsFor, mph, botForLevel, levelForChapter, levelForRarity, purse, raceStatsOf, type Grade, type LaunchGrade, type Match } from "./sim";
+import { createDuel, createFree, createPvp, raceVerdict, raceReason, stepMatch, stripFor, LANE_GAP, armWeapon, armRear, gearsFor, mph, botForLevel, levelForChapter, purse, raceStatsOf, type Grade, type LaunchGrade, type Match } from "./sim";
 import { resolveHull } from "./garage.functions";
 import { armById, armedDef, armedRear } from "./armory";
 import { bumpDaily, missionReady } from "./missions";
@@ -236,7 +236,8 @@ function ResultCard({
       <p className={`font-display text-5xl leading-none ${place === 1 ? "text-primary" : "text-muted"}`}>{place}º</p>
       <h2 className="mt-1 font-display text-4xl leading-none">{name}</h2>
       <p className="text-sm text-muted">{car}</p>
-      <p className="mt-2 font-display text-4xl leading-none">{wrecked ? "QUEBRADO" : et != null ? `${et.toFixed(3)}s` : "DNF"}</p>
+      <p className="mt-2 font-display text-4xl leading-none">{et != null ? `${et.toFixed(3)}s` : wrecked ? "QUEBRADO" : "DNF"}</p>
+      {wrecked && et == null && <p className="mt-1 text-xs text-danger">Parou antes da linha. Sem tempo.</p>}
       {hpMax != null && hp != null && (
         <div className="mt-2">
           <div className="h-3 bg-black">
@@ -1021,7 +1022,8 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     unlock();
     const c = selectedCar(saveRef.current);
     const you = statsOf(c, saveRef.current.pilot, saveRef.current.kit);
-    const bot = botForLevel(levelForRarity(c.rarity));
+    const picked = saveRef.current.ai === "medio" || saveRef.current.ai === "dificil" ? saveRef.current.ai : "facil";
+    const bot = botForLevel(picked);
     const them = bandStats(you, resolveStats(car.driver, car.rarity, streetBuild(car.rarity), car.id));
     const gears = gearsFor(c.rarity);
     simRef.current = arm(
@@ -1049,7 +1051,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     simRef.current = arm(
       createDuel(
         `racha-${rival.id}`,
-        botForLevel(levelForRarity("Normal")),
+        botForLevel(saveRef.current.ai === "medio" || saveRef.current.ai === "dificil" ? saveRef.current.ai : "facil"),
         you,
         them,
         gearsFor(c.rarity),

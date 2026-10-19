@@ -19,7 +19,7 @@ export const COMBAT = {
   input: { bufferS: 0.12, duploToqueS: 0.25, gracaTravaS: 0.12, bloqueioCuspeS: 0.3 },
   /** Centro a centro. 0,75 m já saiu da faixa aos 0,15 s de uma troca de 0,30 s. */
   laneHit: 0.75,
-  cuspe: { cadencia: 10, danoPct: 0.006, alcanceM: 60, velMs: 400, calor: 7, travaS: 1.5, esfria: 40, tirosMina: 3 },
+  cuspe: { cadencia: 10, danoPct: 0.04, alcanceM: 60, velMs: 400, calor: 7, travaS: 1.5, esfria: 40, tirosMina: 3 },
   missil: { danoPct: 0.15, travadoPct: 0.12, lentidao: 0.12, lentoS: 0.85, travaS: 0.5, rastreioS: 0.4, velRel: 55, armaM: 6, alcanceM: 150, cd: 1.2 },
   rajada: { tiros: 5, duracaoS: 0.25, danoPct: 0.03, lentidao: 0.05, lentoS: 0.2, cd: 2, municao: 4 },
   emp: { danoPct: 0.05, velRel: 40, rastreioS: 0.3, efeitoS: 2, forca: 0.9, cd: 4 },

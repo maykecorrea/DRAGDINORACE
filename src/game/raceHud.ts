@@ -449,8 +449,8 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     ctx.fillRect(foe.x, foe.y, foe.w * Math.max(0, m.rival.hp / Math.max(1, m.rival.hpMax)), foe.h);
     ctx.textAlign = "right";
     ctx.fillStyle = "#efe6d2";
-    const tag = m.ghost ? "FANTASMA" : m.pvp ? "PvP" : "IA";
-    ctx.fillText(`${m.rival.wrecked ? "DNF" : Math.round(m.rival.hp)} ${tag}`, foe.x + foe.w - 4, foe.y + 14);
+    const lvl = m.ghost ? "FANTASMA" : m.pvp ? "PvP" : m.rival.bot?.level === "dificil" ? "DIFÍCIL" : m.rival.bot?.level === "medio" ? "MÉDIO" : "FÁCIL";
+    ctx.fillText(`${m.rival.wrecked ? "DNF" : Math.round(m.rival.hp)} ${lvl}`, foe.x + foe.w - 4, foe.y + 14);
   }
   const prog = HUD_CHASE.progress!;
   ctx.fillStyle = "rgba(7,10,8,0.75)";

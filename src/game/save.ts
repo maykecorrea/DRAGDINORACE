@@ -77,6 +77,8 @@ export type Save = {
   reduceFx?: boolean;
   /** Câmera da corrida. Padrão: perseguição. */
   camera?: "perseguicao" | "cockpit";
+  /** Dificuldade da IA no racha de rua. */
+  ai?: "facil" | "medio" | "dificil";
 };
 
 const KEY = "saurshift-save-v1";

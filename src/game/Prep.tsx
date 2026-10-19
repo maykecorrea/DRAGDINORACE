@@ -4,7 +4,7 @@ import { CarShow, spinForNft } from "@/components/car-show";
 import { FossilWord } from "@/components/fossil-word";
 import { PILOTS, liveStats, pilotById, resolveStats, type NftCar } from "./data";
 import { carArt, carLabel } from "./forge";
-import { driveMph } from "./raceConfig";
+import { driveMph, type AiLevel } from "./raceConfig";
 import { bandStats, streetBuild, streetNear, STREET_PRIZE } from "./street";
 import { armArt, ARMS, type ArmPiece } from "./armory";
 import { canWear, wearReason } from "./parts";
@@ -215,10 +215,30 @@ export function Prep({
         {!treino && (() => {
           const foe = streetNear(car.rarity, save.races ?? 0);
           const foeStats = bandStats(carStats, resolveStats(foe.driver, foe.rarity, streetBuild(foe.rarity), foe.id));
+          const level: AiLevel = save.ai === "medio" || save.ai === "dificil" ? save.ai : "facil";
+          const label = level === "dificil" ? "DIFÍCIL" : level === "medio" ? "MÉDIO" : "FÁCIL";
           return (
-            <p className="mt-1 text-sm text-fg">
-              Rival {foe.name} · {foe.rarity} · {Math.round(driveMph(foeStats.vmax))} mph · vida {Math.round(foeStats.durability)} · fóssil {STREET_PRIZE[foe.rarity]}
-            </p>
+            <div className="mt-1">
+              <p className="text-sm text-fg">
+                Rival {foe.name} · {foe.rarity} · {Math.round(driveMph(foeStats.vmax))} mph · vida {Math.round(foeStats.durability)} · fóssil {STREET_PRIZE[foe.rarity]} · IA {label}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(["facil", "medio", "dificil"] as const).map((id) => {
+                  const name = id === "facil" ? "FÁCIL" : id === "medio" ? "MÉDIO" : "DIFÍCIL";
+                  const on = level === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => onCommit({ ...save, ai: id })}
+                      className={`min-h-11 border px-3 font-display text-2xl leading-none ${on ? "border-primary bg-primary text-ink" : "border-border text-fg"}`}
+                    >
+                      {name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           );
         })()}
         <div className="mt-3 grid gap-2">

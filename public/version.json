@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.5",
-  "name": "giro-certo",
+  "version": "2026-10-19.6",
+  "name": "troca-justa",
   "built": "2026-10-19",
-  "notes": "Depois da queima o carro anda de novo: Shift cedo não sobe marcha morta. A IA fácil erra mais e dá para passar. Segura Espaço e W até GIRO CERTO e solta no VAI. Giro baixo não é CORTE. O vácuo saiu, a borda aliviou e o nitro aparece."
+  "notes": "A IA fácil acerta menos e a mina dá para desviar. O cuspe tira 2. Carro quebrado para antes da linha, sem tempo; se cruzou vivo, o tempo conta. Reação não mostra mais 0 ms. Shift cedo fica guardado até a faixa verde. O preparo mostra FÁCIL, MÉDIO e DIFÍCIL. O rótulo fantasma da mina saiu."
 }

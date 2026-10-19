@@ -815,4 +815,52 @@ test("espaço e W juntos seguram o giro certo", () => {
   }
   assert.equal(sawGreen, true, `rpm ${m.player.rpm}`);
   assert.ok(m.player.launchGrade === "perfeito" || m.player.launchGrade === "ok", String(m.player.launchGrade));
+  assert.ok((m.player.reaction ?? 0) > 0.005, `reação zerada ${m.player.reaction}`);
+});
+
+test("shift guardado entra na faixa e não vira corte", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("faixa-guarda", bot, comum, comum, 6, 6, 3);
+  m.phase = "race";
+  m.green = true;
+  m.player.launched = true;
+  m.player.gear = 1;
+  const row = rowFor(1);
+  const vMax = driveMph(comum.vmax) / 2.236936;
+  const vTop = vMax * 0.38;
+  m.player.speed = vTop * ((row.lo - 280) / 8000);
+  m.player.rpm = row.lo - 280;
+  const dt = 1 / 60;
+  for (let i = 0; i < 90 && m.player.gear < 2; i++) {
+    stepMatch(m, { throttle: 1, steer: 0, shift: i === 0, nitro: false, brake: false }, dt, up, up);
+  }
+  assert.equal(m.player.gear, 2);
+  assert.notEqual(m.player.shifts[0], "corte");
+});
+
+test("carro quebrado para antes da linha e não leva tempo", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("quebra-para", bot, comum, comum, 6, 6, 2);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.wrecked = true;
+  m.player.hp = 0;
+  m.player.dist = m.strip - 40;
+  m.player.speed = 70;
+  m.player.gear = 5;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 200;
+    m.rival.speed = 30;
+  }
+  const dt = 1 / 60;
+  for (let i = 0; i < 180 && m.phase === "race"; i++) {
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+  }
+  assert.equal(m.player.finished, false);
+  assert.ok(m.player.dist < m.strip, `cruzou ${m.player.dist}`);
+  assert.ok(m.player.speed < 2, `ainda anda ${m.player.speed}`);
 });
