@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.15",
-  "name": "na-mira",
+  "version": "2026-10-19.16",
+  "name": "peso",
   "built": "2026-10-19",
-  "notes": "No fácil a IA atira o tempo todo (míssil, mina e ossada) e erra mais: você perde cerca de 15 a 25 de vida. A retícula diz NA MIRA quando o F pega. A barra de troca saiu de cima do carro e o AGORA aparece uma vez só. Toque curto em Shift, F, G, N e E entra numa fila. O carro não troca sozinho no limitador. O resultado abre até 1,25 s depois que você cruza. A garagem rola, ficou verde e o mapa abre num modal."
+  "notes": "A retícula fica presa no rival: NA MIRA, FORA ou LONGE. NA MIRA é acerto. O míssil tira uns 10 e o número aparece no carro, com clarão, tremida e som. Um pente bem mirado derruba o rival fácil. A faixa de teclas some no desktop para não cobrir a barra. AGORA só no ouro (PERFEITO); o verde é BOM. ESCUDO fica só na bolha. O rival que troca mal fica para trás, com seta e distância quando sai da tela."
 }

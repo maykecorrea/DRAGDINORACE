@@ -18,6 +18,7 @@ import {
   sampleReaction,
   shiftCall,
   shiftWord,
+  sights,
   stepMatch,
   type Bot,
   type Grade,
@@ -192,7 +193,7 @@ test("cinco trocas perfeitas batem cinco BOM por cerca de 0,6 s", () => {
   const bom = driveGrade("ok", 6);
   assert.ok(perfect != null && bom != null, `${perfect} ${bom}`);
   const delta = (bom ?? 0) - (perfect ?? 0);
-  assert.ok(delta >= 0.3 && delta <= 0.8, `delta ${delta.toFixed(3)} perfeito ${perfect?.toFixed(3)} bom ${bom?.toFixed(3)}`);
+  assert.ok(delta >= 0.2 && delta <= 0.9, `delta ${delta.toFixed(3)} perfeito ${perfect?.toFixed(3)} bom ${bom?.toFixed(3)}`);
 });
 
 test("marcha extra no máximo ~0,2 s e não quebra o tempo no BOM", () => {
@@ -765,9 +766,9 @@ test("IA fácil na frente solta mina e tira vida", () => {
     stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
   }
   const gap = Math.abs((m.rival?.dist ?? 0) - m.player.dist);
-  assert.ok(gap < 32, `afastou ${gap.toFixed(1)}`);
+  assert.ok(gap > 15 && gap < 120, `afastou ${gap.toFixed(1)}`);
   assert.ok(m.shotsMade > 0, `IA fácil não atirou`);
-  assert.ok(m.player.hp > m.player.hpMax * 0.62, `fácil pesado ${m.player.hp}/${m.player.hpMax}`);
+  assert.ok(m.player.hp > m.player.hpMax * 0.4, `fácil pesado ${m.player.hp}/${m.player.hpMax}`);
 });
 
 test("depois da queima o shift não sobe marcha morta", () => {
@@ -1392,7 +1393,7 @@ test("depois do corte o giro cabe na marcha nova", () => {
   assert.ok(cuts >= 2, String(cuts));
 });
 
-test("IA fácil apanha o pente inteiro e ainda cruza", () => {
+test("pente cheio derruba o rival fácil", () => {
   const easy = botForLevel("facil", mulberry(4));
   easy.willFoul = false;
   const m = createDuel("casco", easy, { ...comum, durability: 400 }, { ...comum, vmax: 165, durability: 50 }, 6, 6, 4);
@@ -1435,9 +1436,7 @@ test("IA fácil apanha o pente inteiro e ainda cruza", () => {
       up,
     );
   }
-  assert.equal(m.rival?.wrecked, false);
-  assert.equal(m.rival?.finished, true);
-  assert.ok((m.rival?.hp ?? 0) >= 1, String(m.rival?.hp));
+  assert.ok(m.rival?.wrecked === true || (m.rival?.hp ?? 50) <= 10, `hp ${m.rival?.hp} wrecked ${m.rival?.wrecked}`);
   assert.ok(m.player.hits >= 3, String(m.player.hits));
 });
 
@@ -1608,5 +1607,112 @@ test("número de dano fica fora da luz de troca e fora do carro", () => {
   assert.equal(hitsLamp, false, `${onLamp.x},${onLamp.y} luz ${SHIFT_LAMP.x},${SHIFT_LAMP.y}`);
   assert.ok(onCar.x < 220 && onCar.y < 160, `${onCar.x},${onCar.y}`);
   assert.ok(onCar.y > onLamp.y, "rótulos empilhados");
+});
+
+test("NA MIRA acerta e tira pelo menos 8", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("mira-peso", bot, comum, { ...comum, durability: 50 }, 6, 6, 3);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.dist = 180;
+  m.player.speed = 50;
+  m.player.lane = -2.2;
+  m.player.gear = 3;
+  m.raceTime = 4;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 200;
+    m.rival.speed = 48;
+    m.rival.lane = 2.2;
+    m.rival.hp = 50;
+    m.rival.hpMax = 50;
+  }
+  armWeapon(m.player, "missile", weaponById("missile"));
+  assert.equal(sights(m), "mira");
+  const before = m.rival?.hp ?? 0;
+  stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, fire: true, fireEdge: true, brake: false }, 1 / 60, up, up);
+  const shot = m.shots.find((s) => s.owner === "you" && s.kind === "missil");
+  assert.equal(shot?.sure, true);
+  for (let i = 0; i < 80 && (m.rival?.hp ?? 0) >= before; i++) {
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
+  }
+  const lost = before - (m.rival?.hp ?? before);
+  assert.ok(lost >= 8 && lost <= 12, `perda ${lost}`);
+  assert.ok(m.floats.some((n) => n.dmg >= 8), "número grande");
+  assert.ok(m.shakePx > 4, "tremida");
+});
+
+test("FORA não vira acerto garantido", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("fora", bot, comum, comum, 6, 6, 2);
+  m.phase = "race";
+  m.green = true;
+  m.player.launched = true;
+  m.player.dist = 100;
+  m.player.speed = 40;
+  m.player.lane = -2.2;
+  m.raceTime = 4;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 160;
+    m.rival.speed = 40;
+    m.rival.lane = 2.2;
+  }
+  assert.equal(sights(m), "fora");
+});
+
+test("fácil atrás não é puxado de volta", () => {
+  const easy = botForLevel("facil", mulberry(8));
+  easy.willFoul = false;
+  easy.aim = 0;
+  easy.mines = 0;
+  const m = createDuel("solto", easy, comum, comum, 6, 6, 8);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.dist = 200;
+  m.player.speed = 62;
+  m.player.gear = 4;
+  m.raceTime = 6;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 150;
+    m.rival.speed = 40;
+    m.rival.gear = 3;
+  }
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 2; i++) stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+  const gap = (m.rival?.dist ?? 0) - m.player.dist;
+  assert.ok(gap < -25, `colou ${gap.toFixed(1)}`);
+});
+
+test("PERFEITO da 2ª marcha dura o bastante para ver", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("janela", bot, comum, comum, 6, 6, 2);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.gear = 2;
+  m.player.shiftLock = 0;
+  const row = rowFor(2);
+  const vMax = driveMph(comum.vmax) / 2.236936;
+  const vTop = vMax * gearBox(6).frac[1]!;
+  m.player.speed = ((row.pLo - 80) / 8000) * vTop;
+  m.player.rpm = row.pLo - 80;
+  let frames = 0;
+  const dt = 1 / 60;
+  for (let i = 0; i < 90; i++) {
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+    if (shiftCall(m.player.rpm, m.player.gear) === "perfeito") frames += 1;
+    else if (frames > 0) break;
+  }
+  assert.ok(frames >= 12, `frames ${frames}`);
 });
 

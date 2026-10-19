@@ -35,13 +35,13 @@ export const RACE_CONFIG = {
     redHold: 1.75,
   },
   shift: [
-    { lo: 5400, hi: 7400, pLo: 6400, pHi: 7100 },
-    { lo: 5500, hi: 7420, pLo: 6500, pHi: 7150 },
-    { lo: 5600, hi: 7440, pLo: 6600, pHi: 7200 },
-    { lo: 5700, hi: 7460, pLo: 6700, pHi: 7250 },
-    { lo: 6900, hi: 7520, pLo: 7150, pHi: 7420 },
-    { lo: 7000, hi: 7540, pLo: 7200, pHi: 7440 },
-    { lo: 7100, hi: 7560, pLo: 7250, pHi: 7460 },
+    { lo: 5400, hi: 7500, pLo: 6000, pHi: 7300 },
+    { lo: 5500, hi: 7520, pLo: 6100, pHi: 7320 },
+    { lo: 5600, hi: 7540, pLo: 6200, pHi: 7340 },
+    { lo: 5700, hi: 7560, pLo: 6300, pHi: 7360 },
+    { lo: 6900, hi: 7680, pLo: 7080, pHi: 7520 },
+    { lo: 7000, hi: 7700, pLo: 7160, pHi: 7540 },
+    { lo: 7100, hi: 7720, pLo: 7220, pHi: 7560 },
   ] as const,
   shiftTime: { perfeito: 0.06, ok: 0.1, cedo: 0.4, tarde: 0.4, corte: 0.5 },
   perfectBonus: 0.04,
@@ -154,8 +154,8 @@ export const AI_TABLE = {
 
 export type HudBox = { x: number; y: number; w: number; h: number };
 
-/** Luz de troca no canto, fora do carro da 3ª pessoa. */
-export const SHIFT_LAMP: HudBox = { x: 16, y: 632, w: 360, h: 76 };
+/** Barra de troca à esquerda, acima da faixa de botões. */
+export const SHIFT_LAMP: HudBox = { x: 16, y: 408, w: 340, h: 72 };
 
 /** Dano empilhado na coluna esquerda, debaixo da vida. Nunca em cima do carro nem da luz. */
 export function placeDamageLabel(_x: number, _y: number, index = 0): { x: number; y: number } {

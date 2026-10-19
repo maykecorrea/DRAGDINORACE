@@ -639,7 +639,8 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 else if (ev.startsWith("shift:") || ev.startsWith("launch:")) audio.blip("shift");
                 if (ev.startsWith("nitro")) audio.blip(ev.endsWith("limpo") ? "nitro" : "bad");
                 if (ev === "redlight" || ev === "wall" || ev === "hurt") audio.blip("bad");
-                if (ev === "hit" || ev === "ammo") audio.blip("good");
+                if (ev === "hit") audio.blip("hit");
+                if (ev === "ammo") audio.blip("good");
                 if (ev === "band" || ev === "lamp") audio.blip("tick");
                 if (ev === "green") audio.blip("nitro");
                 if (ev === "lock" || ev === "shot" || ev === "agora" || ev === "shield" || ev === "ram") audio.blip("good");
@@ -1441,7 +1442,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         ref={canvasRef}
         width={VIEW_W}
         height={VIEW_H}
-        className={`absolute inset-x-0 top-0 w-full bg-bg object-contain ${screen === "intro" ? "invisible" : ""} ${screen === "drive" ? "bottom-[9rem]" : "bottom-0 h-full"}`}
+        className={`absolute inset-x-0 top-0 w-full bg-bg object-contain ${screen === "intro" ? "invisible" : ""} ${screen === "drive" ? "bottom-[9rem] lg:bottom-0 lg:h-full" : "bottom-0 h-full"}`}
         aria-label="Pista Dino Drag Race"
       />
       <div
@@ -1667,7 +1668,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
             </button>
           </div>
           <div
-            className="pointer-events-auto absolute inset-x-0 bottom-0 z-30 bg-bg px-3 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))]"
+            className="pointer-events-auto absolute inset-x-0 bottom-0 z-30 bg-bg px-3 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] lg:hidden"
             onKeyDown={(e) => {
               if (e.code === "Space" || e.key === " ") e.preventDefault();
             }}

@@ -589,18 +589,18 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   const meterY = SHIFT_LAMP.y + 34;
   const meterW = SHIFT_LAMP.w;
   const live = Math.max(0, Math.min(1, m.player.rpm / REDLINE));
-  ctx.fillStyle = "rgba(7,10,8,0.88)";
-  ctx.fillRect(SHIFT_LAMP.x, SHIFT_LAMP.y, SHIFT_LAMP.w, SHIFT_LAMP.h);
-  ctx.fillStyle = "#3f8f3a";
-  ctx.fillRect(meterX + 8 + (meterW - 16) * lo, meterY, (meterW - 16) * Math.max(0, hi - lo), 22);
-  ctx.fillStyle = "#e6c15a";
-  ctx.fillRect(meterX + 8 + (meterW - 16) * pLo, meterY, (meterW - 16) * Math.max(0, pHi - pLo), 22);
-  ctx.fillStyle = "#efe6d2";
-  ctx.fillRect(meterX + 8 + (meterW - 16) * live - 2, meterY - 4, 4, 30);
   const coach = !m.player.launched && m.mode === "duel" ? launchCoach(m.player.rpm) : null;
   const liveCall = m.player.launched ? shiftCall(m.player.rpm, m.player.gear) : null;
   const call = m.player.gear < m.player.gears ? liveCall : null;
   const zone = m.player.wrecked ? "QUEBRADO" : call ? shiftWord(call) : "";
+  ctx.fillStyle = zone === "PERFEITO" ? "rgba(42,32,8,0.92)" : "rgba(7,10,8,0.88)";
+  ctx.fillRect(SHIFT_LAMP.x, SHIFT_LAMP.y, SHIFT_LAMP.w, SHIFT_LAMP.h);
+  ctx.fillStyle = "#3f8f3a";
+  ctx.fillRect(meterX + 8 + (meterW - 16) * lo, meterY, (meterW - 16) * Math.max(0, hi - lo), 22);
+  ctx.fillStyle = "#e6c15a";
+  ctx.fillRect(meterX + 8 + (meterW - 16) * pLo, meterY - 4, (meterW - 16) * Math.max(0, pHi - pLo), 30);
+  ctx.fillStyle = zone === "PERFEITO" ? "#e6c15a" : zone === "BOM" ? "#d6ff3f" : "#efe6d2";
+  ctx.fillRect(meterX + 8 + (meterW - 16) * live - 2, meterY - 4, 4, 30);
   if (coach) {
     ctx.font = "900 16px ui-monospace, monospace";
     ctx.fillStyle = coach.color;
@@ -617,7 +617,7 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
         : zone === "PERFEITO"
           ? "AGORA — PERFEITO"
           : zone === "BOM"
-            ? "AGORA — BOM"
+            ? "BOM"
             : zone === "TARDE"
               ? "TARDE"
               : zone === "CORTE"
@@ -625,7 +625,7 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
                 : near
                   ? "QUASE — SEGURA"
                   : "SOBE O GIRO";
-    ctx.font = "900 18px ui-monospace, monospace";
+    ctx.font = zone === "PERFEITO" ? "900 22px ui-monospace, monospace" : "900 18px ui-monospace, monospace";
     ctx.fillStyle =
       zone === "QUEBRADO" || zone === "CORTE" ? "#ff3b1f" : zone === "PERFEITO" ? "#e6c15a" : zone === "BOM" ? "#d6ff3f" : zone === "TARDE" ? "#ffb020" : near ? "#ffb020" : "#efe6d2";
     ctx.textAlign = "left";

@@ -63,12 +63,12 @@ export function createAudio() {
     const src = ctx.createBufferSource();
     src.buffer = noise;
     const g = ctx.createGain();
-    const peak = kind === "nitro" ? 0.35 : kind === "bad" ? 0.2 : kind === "tick" ? 0.08 : 0.16;
+    const peak = kind === "hit" ? 0.5 : kind === "nitro" ? 0.35 : kind === "bad" ? 0.2 : kind === "tick" ? 0.08 : 0.16;
     g.gain.setValueAtTime(peak, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (kind === "nitro" ? 0.28 : 0.12));
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (kind === "hit" ? 0.26 : kind === "nitro" ? 0.28 : 0.12));
     const f = ctx.createBiquadFilter();
-    f.type = kind === "bad" ? "lowpass" : "highpass";
-    f.frequency.value = kind === "tick" ? 1400 : kind === "good" ? 900 : 240;
+    f.type = kind === "hit" || kind === "bad" ? "lowpass" : "highpass";
+    f.frequency.value = kind === "hit" ? 220 : kind === "tick" ? 1400 : kind === "good" ? 900 : 240;
     src.connect(f);
     f.connect(g);
     g.connect(master);

@@ -4,7 +4,6 @@ import { loadRaceArt } from "./raceArt";
 import { paintBeira, paintChaseHud, paintDebug, paintParallax, paintRaceWorld } from "./raceHud";
 import { HUD_CHASE } from "./combat";
 import { weaponReach } from "./weapons";
-import { placeDamageLabel } from "./raceConfig";
 import {
   LANE_GAP,
   REDLINE,
@@ -561,66 +560,146 @@ function drawAim(
   }
 }
 
-function roadPoint(p: { x: number; y: number; sp: number }, pad = 0) {
-  return { x: p.x, y: Math.min(p.y, 500 - pad), sp: p.sp };
+function roadPoint(p: { x: number; y: number; sp: number }, _pad = 0) {
+  return p;
 }
 
-function paintRange(
+function paintRivalMark(
   ctx: CanvasRenderingContext2D,
   m: Match,
   airAt: (ahead: number, worldLane: number) => { x: number; y: number; sp: number },
 ) {
-  if (!m.rival || (m.mode !== "duel" && m.mode !== "free") || m.phase === "finish") return;
+  if (!m.rival || (m.mode !== "duel" && m.mode !== "free") || m.phase === "finish" || m.phase === "staging" || m.phase === "tree") return;
+  if (!m.player.launched || m.rival.wrecked) return;
   const ahead = m.rival.dist - m.player.dist;
-  if (ahead < -1.2) return;
-  const chasing = ahead > 1.2;
-  const reach = weaponReach(chasing ? m.player.load : m.player.rearLoad);
-  const inside = Math.abs(ahead) <= reach && Math.abs(m.player.lane - m.rival.lane) < 1.35;
-  const raw = airAt(Math.max(-6, Math.min(ahead, 78)), m.rival.lane);
-  const rad = Math.max(22, raw.sp * (inside ? 70 : 48));
-  const p = roadPoint(raw, rad + 20);
+  const look = sights(m) || "longe";
+  const raw = airAt(Math.max(-24, Math.min(ahead, 70)), m.rival.lane);
+  const visible = ahead > -14 && ahead < 72 && raw.x > 56 && raw.x < VIEW_W - 56 && raw.y > 78 && raw.y < VIEW_H - 96;
+  const dx = m.rival.lane - m.player.lane;
+  let dir = ahead >= 0 ? "FRENTE" : "ATRÁS";
+  if (Math.abs(ahead) < 16 && dx > 0.9) dir = "DIREITA";
+  else if (Math.abs(ahead) < 16 && dx < -0.9) dir = "ESQUERDA";
+  else if (ahead < -8) dir = "ATRÁS";
+  else dir = "FRENTE";
+  let x = raw.x;
+  let y = raw.y;
+  if (!visible) {
+    if (dir === "ESQUERDA") {
+      x = 78;
+      y = Math.max(120, Math.min(VIEW_H - 150, raw.y));
+    } else if (dir === "DIREITA") {
+      x = VIEW_W - 78;
+      y = Math.max(120, Math.min(VIEW_H - 150, raw.y));
+    } else if (dir === "ATRÁS") {
+      x = Math.max(96, Math.min(VIEW_W - 96, raw.x));
+      y = VIEW_H - 118;
+    } else {
+      x = Math.max(96, Math.min(VIEW_W - 96, raw.x));
+      y = 96;
+    }
+  }
+  const hot = look === "mira";
+  const far = look === "longe";
+  const color = hot ? "#d6ff3f" : far ? "#9aa4b2" : "#ffb020";
+  const say = hot ? "NA MIRA" : far ? "LONGE" : "FORA";
+  const meters = `${Math.abs(Math.round(ahead))} m`;
   ctx.save();
-  ctx.strokeStyle = inside ? "#d6ff3f" : "#efe6d2";
-  ctx.lineWidth = inside ? 5 : 3;
-  ctx.beginPath();
-  ctx.arc(p.x, p.y, rad, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.font = "900 18px Impact, Arial Black, sans-serif";
+  ctx.translate(x, y);
+  ctx.lineWidth = hot ? 6 : 3;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  if (hot) {
+    const s = 28 + Math.sin(m.raceTime * 14) * 3;
+    ctx.strokeRect(-s, -s, s * 2, s * 2);
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-8, 0);
+    ctx.lineTo(8, 0);
+    ctx.moveTo(0, -8);
+    ctx.lineTo(0, 8);
+    ctx.stroke();
+  } else if (far) {
+    ctx.setLineDash([7, 6]);
+    ctx.beginPath();
+    ctx.arc(0, 0, 22, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(0, -26);
+    ctx.lineTo(24, 0);
+    ctx.lineTo(0, 26);
+    ctx.lineTo(-24, 0);
+    ctx.closePath();
+    ctx.stroke();
+  }
+  if (!visible) {
+    ctx.beginPath();
+    if (dir === "FRENTE") {
+      ctx.moveTo(0, -40);
+      ctx.lineTo(-12, -22);
+      ctx.lineTo(12, -22);
+    } else if (dir === "ATRÁS") {
+      ctx.moveTo(0, 40);
+      ctx.lineTo(-12, 22);
+      ctx.lineTo(12, 22);
+    } else if (dir === "ESQUERDA") {
+      ctx.moveTo(-40, 0);
+      ctx.lineTo(-22, -12);
+      ctx.lineTo(-22, 12);
+    } else {
+      ctx.moveTo(40, 0);
+      ctx.lineTo(22, -12);
+      ctx.lineTo(22, 12);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.font = hot ? "900 22px Impact, Arial Black, sans-serif" : "900 18px Impact, Arial Black, sans-serif";
   ctx.textAlign = "center";
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 5;
   ctx.strokeStyle = "#070806";
-  ctx.fillStyle = inside ? "#d6ff3f" : "#efe6d2";
-  const label = inside ? "NO ALCANCE" : `${Math.max(0, Math.round(Math.abs(ahead) - reach))}M`;
-  ctx.strokeText(label, p.x, p.y - rad - 8);
-  ctx.fillText(label, p.x, p.y - rad - 8);
+  ctx.strokeText(say, 0, -38);
+  ctx.fillStyle = color;
+  ctx.fillText(say, 0, -38);
+  if (!visible) {
+    ctx.font = "900 16px ui-monospace, monospace";
+    ctx.strokeStyle = "#070806";
+    ctx.strokeText(`${dir} ${meters}`, 0, 48);
+    ctx.fillStyle = "#efe6d2";
+    ctx.fillText(`${dir} ${meters}`, 0, 48);
+  }
   ctx.restore();
 }
 
 function paintHits(
   ctx: CanvasRenderingContext2D,
   m: Match,
-  _dist: number,
-  _airAt: (ahead: number, worldLane: number) => { x: number; y: number; sp: number },
+  dist: number,
+  airAt: (ahead: number, worldLane: number) => { x: number; y: number; sp: number },
 ) {
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  let stack = 0;
   for (const num of m.floats ?? []) {
     const a = Math.max(0, num.life / num.max);
-    const size = 22;
-    ctx.globalAlpha = Math.min(1, a + 0.15);
+    const big = num.dmg >= 8;
+    const size = big ? 48 : 28;
+    const rise = (1 - a) * (big ? 36 : 18);
+    let x = 640 + num.drift * 0.4;
+    let y = 468 - rise;
+    if (!num.hud) {
+      const p = airAt(num.dist - dist, num.lane);
+      x = p.x + num.drift * 0.2;
+      y = p.y - 42 - rise;
+    }
+    ctx.globalAlpha = Math.min(1, a + 0.2);
     ctx.font = `900 ${size}px Impact, Arial Black, sans-serif`;
-    const label = `-${num.dmg}`;
-    const text = num.label || label;
-    const parked = placeDamageLabel(0, 0, stack);
-    stack += 1;
-    const x = parked.x;
-    const y = parked.y;
-    ctx.lineWidth = 5;
+    const text = num.label || `-${num.dmg}`;
+    ctx.lineWidth = big ? 7 : 5;
     ctx.strokeStyle = "#070806";
     ctx.strokeText(text, x, y);
-    ctx.fillStyle = "#ffe27a";
+    ctx.fillStyle = big ? "#ff5a2a" : "#ffe27a";
     ctx.fillText(text, x, y);
   }
   ctx.restore();
@@ -1222,7 +1301,7 @@ export function drawFrame(
   ctx.globalAlpha = 1;
 
   const drawCar = (ahead: number, worldLane: number, sprite: number, nitro: boolean, shielded = false) => {
-    if (ahead < -18 || ahead > 90) return;
+    if (ahead < -12 || ahead > 78) return;
     const z = Math.max(2.4, 3.1 + Math.max(0, ahead) * 0.14);
     const p = Math.min(0.48, CAM / z);
     const y = horizon + p * (H - horizon);
@@ -1268,26 +1347,33 @@ export function drawFrame(
   if (m.rival && (m.mode === "duel" || m.mode === "free")) {
     const ahead = m.rival.dist - dist;
     const showLane = m.rival.lane;
-    if (ahead < -28 || ahead > 90) {
-      const pin = ahead > 0 ? 64 : 8;
-      const p = airAt(pin, m.rival.lane);
+    if (ahead < -12 || ahead > 78) {
+      const pinAhead = ahead > 0 ? 8 : -6;
+      const p = airAt(pinAhead, m.rival.lane);
+      const word = ahead > 12 ? "FRENTE" : ahead < -8 ? "ATRÁS" : m.rival.lane > lane + 0.8 ? "DIREITA" : m.rival.lane < lane - 0.8 ? "ESQUERDA" : ahead >= 0 ? "FRENTE" : "ATRÁS";
       ctx.save();
       ctx.fillStyle = "#d6ff3f";
       ctx.beginPath();
-      if (ahead > 0) {
+      if (word === "ATRÁS") {
+        ctx.moveTo(p.x, Math.min(VIEW_H - 80, p.y + 18));
+        ctx.lineTo(p.x - 12, Math.min(VIEW_H - 80, p.y + 18) - 22);
+        ctx.lineTo(p.x + 12, Math.min(VIEW_H - 80, p.y + 18) - 22);
+      } else if (word === "ESQUERDA") {
+        ctx.moveTo(48, p.y);
+        ctx.lineTo(70, p.y - 12);
+        ctx.lineTo(70, p.y + 12);
+      } else if (word === "DIREITA") {
+        ctx.moveTo(VIEW_W - 48, p.y);
+        ctx.lineTo(VIEW_W - 70, p.y - 12);
+        ctx.lineTo(VIEW_W - 70, p.y + 12);
+      } else {
         ctx.moveTo(p.x, p.y - 16);
         ctx.lineTo(p.x - 12, p.y + 8);
         ctx.lineTo(p.x + 12, p.y + 8);
-      } else {
-        ctx.moveTo(p.x, p.y + 16);
-        ctx.lineTo(p.x - 12, p.y - 8);
-        ctx.lineTo(p.x + 12, p.y - 8);
       }
       ctx.closePath();
       ctx.fill();
       ctx.restore();
-      const far = `${Math.abs(Math.round(ahead))}M`;
-      text(ctx, far, p.x - far.length * 4, p.y + (ahead > 0 ? 12 : -22), 2, "#d6ff3f");
     } else {
       drawCar(ahead, showLane, rivalSprite, m.rival.nitroOn > 0, m.rival.shield > 0);
     }
@@ -1452,8 +1538,6 @@ export function drawFrame(
   ctx.restore();
   if (!chase) paintMirror(ctx, m, art, rivalSprite, now, strip !== "off" && m.mode === "duel" && !!m.rival);
   if (art.race) paintRaceWorld(ctx, m, art.race, now, dist, airAt);
-  paintRange(ctx, m, airAt);
-  paintHits(ctx, m, dist, airAt);
   ctx.restore();
 
   if (!reduce && m.player.speed * 2.236936 > 70) {
@@ -1506,6 +1590,8 @@ export function drawFrame(
 
   if (art.race && m.mode === "duel") paintChaseHud(ctx, m, now);
   else drawCluster(ctx, m, up, now, gaugeKey, digital);
+  paintHits(ctx, m, dist, airAt);
+  paintRivalMark(ctx, m, airAt);
   if (strip !== "off" && m.mode === "duel" && m.rival && !art.race) drawStrip(ctx, m, art, rivalSprite, youMark, strip);
   if (!art.race) drawHull(ctx, m, strip !== "off" && m.mode === "duel" && !!m.rival);
   if (m.debug) paintDebug(ctx, m, now);
