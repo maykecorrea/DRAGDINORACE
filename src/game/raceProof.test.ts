@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { StatBlock, Upgrades } from "./data.ts";
-import { RACE_CONFIG, driveMph, hudOverlap } from "./raceConfig.ts";
+import { RACE_CONFIG, driveMph, gearBox, hudOverlap } from "./raceConfig.ts";
 import {
   armRear,
   armWeapon,
@@ -1252,5 +1252,147 @@ test("freio preso não deixa a reação em branco nem a corrida parada", () => {
   assert.ok(m.raceTime < 5, String(m.raceTime));
   assert.ok(m.player.reaction != null && m.player.reaction > 0.4, String(m.player.reaction));
   assert.equal(m.player.launchGrade, "atrasou");
+});
+
+test("toque curto no VAI mede a reação e não grava 1417", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("toque", bot, comum, comum, 6, 6, 3);
+  m.hazards = [];
+  m.crates = [];
+  let wall = 60_000;
+  const dt = 1 / 60;
+  let greenAt = 0;
+  for (let i = 0; i < 60 * 8 && !m.player.launched; i++) {
+    wall += 1000 * dt;
+    if (m.phase === "race" && greenAt === 0) greenAt = m.greenWall || wall;
+    const tap = m.banner === "VAI" && m.raceTime >= 0.08 && m.raceTime < 0.12;
+    stepMatch(
+      m,
+      {
+        throttle: 0,
+        steer: 0,
+        shift: false,
+        nitro: false,
+        brake: false,
+        nowMs: wall,
+        brakeUpMs: tap ? greenAt + 90 : null,
+        brakePulse: tap,
+      },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.equal(m.player.launched, true);
+  assert.ok(Math.abs((m.player.reaction ?? 9) - 0.09) < 0.05, String(m.player.reaction));
+  assert.notEqual(Math.round((m.player.reaction ?? 0) * 1000), 1417);
+  assert.notEqual(m.player.launchGrade, "atrasou");
+});
+
+test("sem toque o carro não larga aos 1417 ms", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("parado", bot, comum, comum, 6, 6, 3);
+  m.hazards = [];
+  m.crates = [];
+  let wall = 60_000;
+  const dt = 1 / 60;
+  let sawVai = false;
+  for (let i = 0; i < 60 * 6; i++) {
+    wall += 1000 * dt;
+    stepMatch(m, { throttle: 0, steer: 0, shift: false, nitro: false, brake: false, nowMs: wall }, dt, up, up);
+    if (m.banner === "VAI") sawVai = true;
+    if (sawVai && m.raceTime > 2) break;
+  }
+  assert.equal(sawVai, true);
+  assert.equal(m.player.launched, false);
+  assert.ok(m.raceTime > 1.5, String(m.raceTime));
+});
+
+test("depois do corte o giro cabe na marcha nova", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("giro", bot, comum, comum, 6, 6, 2);
+  m.hazards = [];
+  m.crates = [];
+  let brake = true;
+  let wall = 40_000;
+  const dt = 1 / 60;
+  const box = gearBox(6);
+  const vMax = driveMph(comum.vmax) / 2.2369362920544;
+  let cuts = 0;
+  for (let i = 0; i < 60 * 14 && cuts < 3; i++) {
+    wall += 1000 * dt;
+    const before = m.player.gear;
+    if (m.phase === "race" && !m.player.launched && m.raceTime >= 0.16) brake = false;
+    stepMatch(
+      m,
+      { throttle: 1, steer: 0, shift: false, nitro: false, brake: brake && !m.player.launched, nowMs: wall, brakeUpMs: brake ? null : wall },
+      dt,
+      up,
+      up,
+    );
+    if (m.player.gear === before || !m.player.launched) continue;
+    cuts += 1;
+    const gi = Math.max(0, Math.min(box.frac.length - 1, m.player.gear - 1));
+    const vTop = vMax * box.frac[gi]!;
+    const expect = Math.min(8000, Math.max(m.player.gear === 1 ? 3800 : 1000, (m.player.speed / Math.max(0.4, vTop)) * 8000));
+    assert.ok(Math.abs(m.player.rpm - expect) < 40, `g${m.player.gear} rpm ${m.player.rpm} vs ${expect}`);
+    const call = shiftCall(m.player.rpm, m.player.gear);
+    if (m.banner === "AGORA — BOM") assert.equal(call, "ok");
+    if (m.banner === "AGORA — PERFEITO") assert.equal(call, "perfeito");
+    if (call === "ok" || call === "perfeito") {
+      const row = rowFor(m.player.gear);
+      assert.ok(m.player.rpm >= row.lo && m.player.rpm <= row.hi, `${m.player.rpm} fora de ${row.lo}-${row.hi}`);
+    }
+  }
+  assert.ok(cuts >= 2, String(cuts));
+});
+
+test("IA fácil apanha o pente inteiro e ainda cruza", () => {
+  const easy = botForLevel("facil", mulberry(4));
+  easy.willFoul = false;
+  const m = createDuel("casco", easy, { ...comum, durability: 400 }, { ...comum, vmax: 165, durability: 50 }, 6, 6, 4);
+  m.hazards = [];
+  m.crates = [];
+  const missile = weaponById("missile");
+  const mine = weaponById("mine");
+  let brake = true;
+  let wall = 70_000;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 20 && m.phase !== "finish"; i++) {
+    wall += 1000 * dt;
+    const row = rowFor(m.player.gear);
+    const shift = m.player.launched && m.player.shiftLock <= 0 && m.player.gear < 6 && m.player.rpm >= row.pLo && m.player.rpm <= row.pHi + 40;
+    if (m.phase === "race" && !m.player.launched && m.raceTime >= 0.12) brake = false;
+    if (m.player.ammo <= 0) m.player.ammo = missile.clip;
+    if (m.player.rearAmmo <= 0) m.player.rearAmmo = mine.clip;
+    armWeapon(m.player, "missile", missile);
+    armRear(m.player, "mine", mine);
+    const fire = m.player.launched && m.player.cool <= 0;
+    const rear = m.player.launched && m.player.rearCool <= 0;
+    stepMatch(
+      m,
+      {
+        throttle: 1,
+        steer: 0,
+        shift,
+        nitro: false,
+        brake: brake && !m.player.launched,
+        nowMs: wall,
+        brakeUpMs: brake ? null : wall,
+        fire,
+        fireEdge: fire,
+        rear,
+        rearEdge: rear,
+        cuspe: m.player.launched && i % 3 === 0,
+      },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.equal(m.rival?.wrecked, false);
+  assert.equal(m.rival?.finished, true);
+  assert.ok((m.rival?.hp ?? 0) >= 1, String(m.rival?.hp));
+  assert.ok(m.player.hits >= 3, String(m.player.hits));
 });
 

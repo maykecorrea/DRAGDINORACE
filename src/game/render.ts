@@ -2,6 +2,7 @@ import { NEON_HEX, type Upgrades } from "./data";
 import type { RaceArt } from "./raceArt";
 import { loadRaceArt } from "./raceArt";
 import { paintBeira, paintChaseHud, paintDebug, paintParallax, paintRaceWorld } from "./raceHud";
+import { HUD_CHASE } from "./combat";
 import { weaponReach } from "./weapons";
 import {
   LANE_GAP,
@@ -587,13 +588,21 @@ function paintHits(
     const p = num.hud ? { x: 180, y: 70, sp: 1 } : roadPoint(airAt(num.dist - dist, num.lane), 24);
     const a = Math.max(0, num.life / num.max);
     const rise = (1 - a) * 46;
-    const size = 28;
+    const size = 22;
     ctx.globalAlpha = Math.min(1, a + 0.15);
     ctx.font = `900 ${size}px Impact, Arial Black, sans-serif`;
     const label = `-${num.dmg}`;
     const text = num.label || label;
-    const x = p.x + num.drift * (1 - a);
-    const y = p.y - rise - 18;
+    let x = p.x + num.drift * (1 - a);
+    let y = p.y - rise - 18;
+    const foe = HUD_CHASE.hpRival!;
+    const mineBox = HUD_CHASE.hp!;
+    const hitsBox = (box: { x: number; y: number; w: number; h: number }) =>
+      x > box.x - 40 && x < box.x + box.w + 28 && y > box.y - 18 && y < box.y + box.h + 30;
+    if (y < 78 || hitsBox(foe) || hitsBox(mineBox)) {
+      y = foe.y + foe.h + 36;
+      x = Math.min(x, foe.x - 78);
+    }
     ctx.lineWidth = 5;
     ctx.strokeStyle = "#070806";
     ctx.strokeText(text, x, y);

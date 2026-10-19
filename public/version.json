@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.11",
-  "name": "tiro-na-faixa",
+  "version": "2026-10-19.12",
+  "name": "ponteiro-certo",
   "built": "2026-10-19",
-  "notes": "A luz AGORA só acende dentro da faixa. Shift nela grava BOM ou PERFEITO. Tiro, cuspe e mina acertam o carro da outra faixa. Reação lenta aparece em ms, e o carro não fica parado no VAI. A versão fica no canto da tela."
+  "notes": "A luz usa o giro da marcha que está na tela. Toque no Espaço no VAI mede a reação de verdade. A IA fácil aguenta o tiroteio e cruza. A versão aparece inteira. O dano não cobre a barra do rival."
 }

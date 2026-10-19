@@ -43,6 +43,8 @@ export type Input = {
   brakeUpMs?: number | null;
   /** timeStamp do keydown do gás, se houve. */
   gasDownMs?: number | null;
+  /** Soltou o Espaço neste quadro, mesmo se o toque durou menos que um tick. */
+  brakePulse?: boolean;
 };
 
 export type Bot = {
@@ -676,6 +678,19 @@ function pulse(m: Match, hot: boolean, amount = 0.28) {
   m.flashHot = hot;
 }
 
+function syncRpm(m: Match, r: Racer) {
+  const rawMph = (r.bot ? m.rivalPace : m.pace) * REF_MPH;
+  const vMax = driveMph(rawMph) / MPH_PER_MS;
+  const box = gearBox(r.gears);
+  const gi = Math.max(0, Math.min(box.frac.length - 1, r.gear - 1));
+  const vTop = vMax * box.frac[gi]!;
+  const floor = r.gear === 1 ? 3800 : 1000;
+  let rpm = Math.max((r.speed / Math.max(0.4, vTop)) * REDLINE, floor);
+  if (rpm >= REDLINE) rpm = REDLINE;
+  else r.redlineT = 0;
+  r.rpm = rpm;
+}
+
 function gradeShift(m: Match, r: Racer, _up: Upgrades, who: "you" | "ai") {
   if (r.gear >= r.gears || r.shiftLock > 0) return;
   const rpm = r.rpm;
@@ -722,6 +737,7 @@ function gradeShift(m: Match, r: Racer, _up: Upgrades, who: "you" | "ai") {
     m.shakePx = Math.max(m.shakePx, g === "perfeito" ? 1.5 : 1.5);
     if (g === "perfeito") m.fovKick = Math.max(m.fovKick, 4);
   }
+  syncRpm(m, r);
 }
 
 function armNitro(m: Match, r: Racer, _up: Upgrades, who: "you" | "ai") {
@@ -946,7 +962,9 @@ function applyHit(m: Match, target: Racer, weapon: WeaponId, dmg: number, splash
   const streetBot = (bot: Racer["bot"] | undefined) => !!bot && bot.level === "facil" && (bot.rubber ?? 0) > 0 && !m.ranked && !m.pvp && !m.ghost;
   if (streetBot(shooter?.bot) && target === m.player) dealt = Math.max(1, Math.round(dealt * 0.7));
   if (streetBot(target.bot) && shooter === m.player) {
-    dealt = Math.max(1, Math.round(dealt * 0.75));
+    dealt = Math.max(1, Math.round(dealt * 0.4));
+    const room = target.hp - 1;
+    dealt = room <= 0 ? 0 : Math.min(dealt, room);
   }
   if (!named && kind === "emp" && !splash) target.empT = Math.max(target.empT, COMBAT.emp.efeitoS);
   if (!named && kind === "missil" && !splash) addSlow(target, COMBAT.missil.lentidao, COMBAT.missil.lentoS);
@@ -955,6 +973,7 @@ function applyHit(m: Match, target: Racer, weapon: WeaponId, dmg: number, splash
   else if (!named && kind === "rajada" && !splash) addSlow(target, COMBAT.rajada.lentidao, COMBAT.rajada.lentoS);
   else if (!named && kind === "tiroTras" && !splash) addSlow(target, COMBAT.tiroTras.lentidao, COMBAT.tiroTras.lentoS);
   else if (!named && def.slow < 1 && !splash && def.slowTime > 0) addSlow(target, Math.max(0, 1 - def.slow), def.slowTime);
+  if (dealt <= 0) return;
   if (weapon === "leech" && shooter && !splash) {
     const steal = Math.min(target.nitroLeft, 0.9);
     target.nitroLeft = Math.max(0, target.nitroLeft - steal);
@@ -1572,6 +1591,7 @@ function stepRacer(m: Match, r: Racer, up: Upgrades, input: Input | null, dt: nu
   }
   if (r.poison > 0 && !r.wrecked) {
     r.hp = Math.max(0, r.hp - r.poison * dt);
+    if (r.bot?.level === "facil" && (r.bot.rubber ?? 0) > 0 && !m.ranked && !m.pvp && !m.ghost && r.hp < 1) r.hp = 1;
     r.poisonTime += dt;
     markDead(m, r, who);
   }
@@ -1616,13 +1636,16 @@ function stepRacer(m: Match, r: Racer, up: Upgrades, input: Input | null, dt: nu
         } else r.stageMem = Math.max(0, r.stageMem - dt);
       }
       const greenNow = (m.green || m.phase === "race") && m.phase !== "staging";
-      const released = m.brakeHeld && !brake && m.usedBrake;
+      if (input?.brakePulse) {
+        m.usedBrake = true;
+        if (input.brakeUpMs) m.brakeUpWall = input.brakeUpMs;
+      }
+      const released = (m.brakeHeld && !brake && m.usedBrake) || (!!input?.brakePulse && m.usedBrake);
       const gasDown = input?.gasDownMs ?? 0;
       const earlyMs = m.greenWall > 0 && gasDown > 0 ? gasDown - m.greenWall : 0;
       const jumped = !m.usedBrake && !r.jail && gas && greenNow && gasDown > 0 && earlyMs < -40;
       const gasGo = !m.usedBrake && !r.jail && gas && !m.heldGas && greenNow && !jumped;
       const holdAcross = !m.usedBrake && !r.jail && gas && m.heldGas && greenNow && !jumped && gasDown > 0 && earlyMs >= -40;
-      const stuck = greenNow && m.raceTime > 1.4 && !r.jail && !brake;
       const abandoned = greenNow && m.raceTime > 4 && !r.jail;
       if (released && input?.brakeUpMs) m.brakeUpWall = input.brakeUpMs;
       if (r.jail && greenNow && m.raceTime >= RACE_CONFIG.launch.redHold) {
@@ -1658,7 +1681,7 @@ function stepRacer(m: Match, r: Racer, up: Upgrades, input: Input | null, dt: nu
       } else if (!r.jail && jumped) {
         doLaunch(m, r, up, true, earlyMs / 1000, "you");
         justLaunched = true;
-      } else if (!r.jail && (released || gasGo || holdAcross || stuck || abandoned)) {
+      } else if (!r.jail && (released || gasGo || holdAcross || abandoned)) {
         const raw = holdAcross ? earlyMs / 1000 : reactionSeconds(m, input, Math.max(0, m.raceTime));
         const timed = raw > 0.0005 ? raw : 0.02;
         doLaunch(m, r, up, greenNow, timed, "you");

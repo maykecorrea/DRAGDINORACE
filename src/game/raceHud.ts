@@ -196,12 +196,7 @@ function ring(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, fr
 }
 
 export function paintRaceHud(ctx: CanvasRenderingContext2D, m: Match, race: RaceArt, now: number) {
-  ctx.save();
-  ctx.font = "600 12px ui-monospace, monospace";
-  ctx.textAlign = "right";
-  ctx.fillStyle = "rgba(239,230,210,0.72)";
-  ctx.fillText(versionInfo.version, 1264, 16);
-  ctx.restore();
+  paintVersion(ctx);
   const W = 1280;
   const hp = HUD.hp!;
   const rivalBox = HUD.hpRival!;
@@ -435,7 +430,22 @@ function launchCoach(rpm: number): { say: string; color: string } {
   return { say: "W — SOBE ATÉ O VERDE", color: "#efe6d2" };
 }
 
+function paintVersion(ctx: CanvasRenderingContext2D) {
+  const label = versionInfo.version;
+  ctx.save();
+  ctx.font = "600 14px ui-monospace, monospace";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  const w = ctx.measureText(label).width + 12;
+  ctx.fillStyle = "rgba(7,10,8,0.82)";
+  ctx.fillRect(12, 96, w, 20);
+  ctx.fillStyle = "#efe6d2";
+  ctx.fillText(label, 18, 99);
+  ctx.restore();
+}
+
 export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: number) {
+  paintVersion(ctx);
   const hp = HUD_CHASE.hp!;
   const foe = HUD_CHASE.hpRival!;
   ctx.save();
@@ -604,7 +614,10 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
       zone === "QUEBRADO" || zone === "CORTE" ? "#ff3b1f" : zone === "PERFEITO" ? "#e6c15a" : zone === "BOM" ? "#d6ff3f" : zone === "TARDE" ? "#ffb020" : near ? "#ffb020" : "#efe6d2";
     ctx.fillText(say, meterX + meterW / 2, meterY - 12);
   }
-  if (m.noteT > 0 && m.note && m.note !== m.banner) {
+  const liveWord =
+    call === "perfeito" ? "PERFEITO" : call === "ok" ? "BOM" : call === "cedo" ? "CEDO" : call === "tarde" ? "TARDE" : call === "corte" ? "CORTE" : "";
+  const shiftWordNote = ["PERFEITO", "BOM", "CEDO", "TARDE", "CORTE"].includes(m.note);
+  if (m.noteT > 0 && m.note && m.note !== m.banner && !(shiftWordNote && liveWord)) {
     const note = HUD_CHASE.note!;
     ctx.font = "700 18px ui-monospace, monospace";
     ctx.fillStyle = "#d6ff3f";
@@ -618,10 +631,6 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     const bits = [m.alertMissile > 0 ? "MÍSSIL" : "", m.alertMine > 0 ? "MINA" : ""].filter(Boolean);
     ctx.fillText(bits.join("  "), alerts.x, alerts.y + 16);
   }
-  ctx.font = "600 12px ui-monospace, monospace";
-  ctx.textAlign = "right";
-  ctx.fillStyle = "rgba(239,230,210,0.72)";
-  ctx.fillText(versionInfo.version, 1264, 18);
   paintRadar(ctx, m);
   for (const shot of m.shots) {
     if (!shot.live || shot.owner !== "ai" || (shot.kind !== "missil" && shot.kind !== "emp")) continue;

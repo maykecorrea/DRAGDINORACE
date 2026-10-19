@@ -116,7 +116,7 @@ type Result = {
 };
 
 const keys = new Set<string>();
-const keyClock = { brakeUp: 0, gasDown: 0 };
+const keyClock = { brakeUp: 0, gasDown: 0, spaceUp: false };
 const pending = { fire: false, rear: false, nitro: false, shield: false };
 let injected: string[] | null = null;
 let steerOverride: number | null = null;
@@ -375,7 +375,10 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       if (letter === "e") keys.add("KeyE");
     };
     const onUp = (e: KeyboardEvent) => {
-      if (e.code === "Space") keyClock.brakeUp = performance.now();
+      if (e.code === "Space") {
+        keyClock.brakeUp = performance.now();
+        keyClock.spaceUp = true;
+      }
       keys.delete(e.code);
       const letter = e.key.length === 1 ? e.key.toLowerCase() : "";
       if (e.code === "KeyF" || letter === "f") keys.delete("KeyF");
@@ -452,6 +455,8 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       hold.current.nitro = false;
       const launched = !!simRef.current && simRef.current.player.launched && (simRef.current.phase === "race" || simRef.current.phase === "free");
       const space = down("Space") || (injected?.includes("Space") ?? false) || hold.current.brake;
+      const brakePulse = !launched && keyClock.spaceUp && performance.now() - keyClock.brakeUp < 400;
+      keyClock.spaceUp = false;
       if (!launched && space) edges.current.spaceHeld = true;
       if (!space) edges.current.spaceHeld = false;
       const ram = edges.current.ram;
@@ -471,6 +476,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         ram,
         brakeUpMs: keyClock.brakeUp || null,
         gasDownMs: keyClock.gasDown || null,
+        brakePulse,
       };
     };
 
@@ -580,6 +586,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   rearEdge: first ? input.rearEdge : false,
                   shield: first ? input.shield : false,
                   ram: first ? input.ram : 0,
+                  brakePulse: first ? input.brakePulse : false,
                   nowMs: now + stepI * (1000 / 60),
                 };
                 stepI += 1;
@@ -1360,7 +1367,10 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       hold.current[key] = true;
     },
     onPointerUp: () => {
-      if (key === "brake") keyClock.brakeUp = performance.now();
+      if (key === "brake") {
+        keyClock.brakeUp = performance.now();
+        keyClock.spaceUp = true;
+      }
       hold.current[key] = false;
     },
     onPointerCancel: () => {
