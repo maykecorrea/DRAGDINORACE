@@ -468,7 +468,7 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   ctx.globalAlpha = 1;
   if (m.banner) {
     const slot = HUD_CHASE.banner!;
-    const big = ["3", "2", "1", "VAI", "QUEIMOU", "QUEBRADO", "TROCA"].includes(m.banner);
+    const big = ["3", "2", "1", "VAI", "QUEIMOU", "QUEBRADO"].includes(m.banner);
     ctx.fillStyle = m.banner === "QUEIMOU" || m.banner === "QUEBRADO" ? "#ff3b1f" : "#d6ff3f";
     ctx.font = big ? "900 84px ui-monospace, monospace" : "900 22px ui-monospace, monospace";
     ctx.fillText(m.banner, big ? 640 : slot.x + slot.w / 2, big ? 220 : slot.y + 24);
@@ -567,7 +567,9 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   ctx.fillStyle = "#efe6d2";
   ctx.fillRect(meterX + meterW * live - 3, meterY - 6, 6, 48);
   const coach = !m.player.launched && m.mode === "duel" ? launchCoach(m.player.rpm) : null;
-  const call = m.player.launched ? shiftCall(m.player.rpm, m.player.gear) : null;
+  const liveCall = m.player.launched ? shiftCall(m.player.rpm, m.player.gear) : null;
+  const promised = m.player.shownT > 0 && (m.player.shown === "perfeito" || m.player.shown === "ok") ? m.player.shown : null;
+  const call = promised ?? liveCall;
   const zone = m.player.wrecked ? "QUEBRADO" : call ? shiftWord(call) : "";
   if (coach) {
     ctx.font = "900 22px ui-monospace, monospace";

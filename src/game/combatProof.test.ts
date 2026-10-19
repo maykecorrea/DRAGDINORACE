@@ -223,3 +223,19 @@ test("contagem de projétil fecha: criado = acerto + erro + quebrado + no ar", (
   const live = m.shots.filter((shot) => shot.live).length;
   assert.equal(m.shotsMade, m.shotsHit + m.shotsMiss + m.shotsBroke + live);
 });
+
+test("tiro na faixa ao lado acerta quando o rival está do lado", () => {
+  const m = boot();
+  if (!m.rival) return;
+  m.rival.lane = 2.2;
+  m.player.lane = 0;
+  m.rival.dist = m.player.dist + 6;
+  m.rival.hp = 50;
+  m.rival.hpMax = 50;
+  armWeapon(m.player, "missile", weaponById("missile"));
+  const before = m.rival.hp;
+  stepMatch(m, { ...quiet, fireEdge: true, fire: true }, 1 / 60, up, up);
+  for (let i = 0; i < 40 && m.rival.hp >= before; i++) stepMatch(m, quiet, 1 / 60, up, up);
+  assert.ok(m.rival.hp < before, `vida ${m.rival.hp}`);
+  assert.ok(m.player.hits >= 1, String(m.player.hits));
+});

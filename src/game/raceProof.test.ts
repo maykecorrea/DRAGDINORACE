@@ -1046,6 +1046,103 @@ test("reação de 2 s não é largada perfeita", () => {
   assert.equal(m.player.launchGrade, "atrasou");
 });
 
+test("reação lenta com giro baixo é ATRASOU, não MORREU", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("reacao-afogou", bot, comum, comum, 6, 6, 3);
+  let wall = 80_000;
+  let brake = true;
+  let releaseAt = 0;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 12 && !m.player.launched; i++) {
+    wall += 1000 * dt;
+    if (m.banner === "VAI" && m.raceTime >= 1.4 && brake) {
+      brake = false;
+      releaseAt = wall;
+    }
+    stepMatch(
+      m,
+      { throttle: 0, steer: 0, shift: false, nitro: false, brake, nowMs: wall, brakeUpMs: brake ? null : releaseAt },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.ok((m.player.reaction ?? 0) > 1, String(m.player.reaction));
+  assert.equal(m.player.launchGrade, "atrasou");
+});
+
+test("Shift 0,25 s depois do PERFEITO ainda grava PERFEITO", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("graça", bot, comum, comum, 6, 6, 5);
+  m.phase = "race";
+  m.green = true;
+  m.player.launched = true;
+  m.player.gear = 5;
+  const vMax = driveMph(comum.vmax) / 2.236936;
+  const vTop = vMax * 0.88;
+  m.player.speed = (7200 / 8000) * vTop;
+  m.player.rpm = 7200;
+  const dt = 1 / 60;
+  stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+  assert.equal(m.player.shown, "perfeito");
+  m.player.speed = vTop;
+  m.player.rpm = 8000;
+  m.player.redlineT = 0.5;
+  for (let i = 0; i < 12; i++) stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+  assert.equal(m.player.shifts.length, 0, m.player.shifts.join(","));
+  assert.equal(shiftWord(m.player.shown ?? "corte"), "PERFEITO");
+  stepMatch(m, { throttle: 1, steer: 0, shift: true, nitro: false, brake: false }, dt, up, up);
+  assert.equal(m.player.shifts[0], "perfeito");
+  assert.equal(m.note, "PERFEITO");
+});
+
+test("nitro apertado antes de poder sair ainda queima", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("nitro-cedo", bot, comum, comum, 6, 6, 2);
+  m.phase = "staging";
+  m.green = false;
+  m.player.launched = false;
+  stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: true, brake: false }, 1 / 60, up, up);
+  assert.equal(m.player.nitroUsed, false);
+  m.phase = "race";
+  m.green = true;
+  m.player.launched = true;
+  m.player.rpm = 6400;
+  m.player.speed = 40;
+  for (let i = 0; i < 20; i++) stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
+  assert.equal(m.player.nitroUsed, true);
+});
+
+test("troca limpa chega na frente da IA fácil", () => {
+  const easy = botForLevel("facil", mulberry(9));
+  easy.willFoul = false;
+  const m = createDuel("vence-facil", easy, comum, { ...comum, vmax: 165, durability: 50 }, 6, 6, 9);
+  m.hazards = [];
+  m.crates = [];
+  let brake = true;
+  let wall = 30_000;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 20 && m.phase !== "finish"; i++) {
+    wall += 1000 * dt;
+    const rpm = m.player.rpm;
+    const row = rowFor(m.player.gear);
+    let shift = false;
+    if (m.player.launched && m.player.shiftLock <= 0 && m.player.gear < 6 && rpm >= row.pLo && rpm <= row.pHi + 80) shift = true;
+    if (m.phase === "race" && !m.player.launched && m.raceTime >= 0.16) brake = false;
+    stepMatch(
+      m,
+      { throttle: 1, steer: 0, shift, nitro: false, brake: brake && !m.player.launched, nowMs: wall, brakeUpMs: brake ? null : wall },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.ok(m.player.finishTime != null && m.rival?.finishTime != null, `${m.player.finishTime} / ${m.rival?.finishTime}`);
+  assert.ok(m.player.finishTime! < m.rival!.finishTime!, `${m.player.finishTime} vs ${m.rival?.finishTime}`);
+  assert.ok(mph(m.player.trap) >= 155, String(mph(m.player.trap)));
+  assert.ok(!m.player.shifts.includes("corte"), m.player.shifts.join(","));
+});
+
 test("Shift no verde grava a mesma palavra do HUD", () => {
   const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
   const m = createDuel("nome-igual", bot, comum, comum, 6, 6, 5);

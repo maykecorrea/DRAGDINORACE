@@ -349,7 +349,7 @@ export function Prep({
         )}
 
         {(save.races ?? 0) === 0 && (
-          <p className="mt-3 text-sm text-muted">Primeira corrida: segura o gás e troca a marcha quando aparecer TROCA. O rival fica marcado com seta, FRENTE ou ATRÁS.</p>
+          <p className="mt-3 text-sm text-muted">Primeira corrida: segura o gás e troca a marcha quando aparecer AGORA. O rival fica marcado com seta, FRENTE ou ATRÁS.</p>
         )}
 
         <div className="mt-4 border border-border p-3">

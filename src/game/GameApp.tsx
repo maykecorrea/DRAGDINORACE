@@ -103,6 +103,7 @@ type Result = {
   bonusPct?: number;
   bonusLines?: string[];
   baseFossil?: number;
+  winBase?: number;
   hits?: number;
   fired?: number;
   crates?: number;
@@ -258,7 +259,7 @@ function ResultCard({
         </div>
         {Array.from({ length: boxes }, (_, i) => (
           <div key={i} className={`px-1 py-2 text-center ${cellTone(grades[i])}`}>
-            <p className="font-display text-lg leading-none">{i + 2}ª</p>
+            <p className="font-display text-lg leading-none">{i + 1}ª</p>
             <p className="mt-1 text-[10px] font-semibold tracking-widest">{shiftLabel(grades[i])}</p>
           </div>
         ))}
@@ -752,6 +753,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   bonusPct: pay?.cap ?? 0,
                   bonusLines: pay?.lines.map((line) => line.label) ?? [],
                   baseFossil: pay?.base ?? paid,
+                  winBase: bet ? undefined : baseWin,
                   hits: sim.player.hits,
                   fired: sim.player.fired,
                   crates: sim.player.crates,
@@ -1566,7 +1568,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
           {save.races === 0 && (
             <p className="pointer-events-none absolute left-1/2 top-44 z-20 max-w-sm -translate-x-1/2 bg-bg/80 px-3 py-2 text-center text-sm text-primary">
               {again.kind === "free"
-                ? "Segura o gás. Shift sobe a marcha quando aparecer TROCA. F atira na frente. G atira atrás."
+                ? "Segura o gás. Shift sobe a marcha quando aparecer AGORA. F atira na frente. G atira atrás."
                 : "Segura ESPAÇO e W até o giro ficar verde (GIRO CERTO). Solta o ESPAÇO no VAI. W sozinho passa de 5500 e patina. Shift só quando aparecer AGORA. F míssil. G mina."}
             </p>
           )}
@@ -1707,7 +1709,10 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
             </p>
             {result.baseFossil != null && (
               <p className="mt-1 text-sm text-muted">
-                Base {result.baseFossil} + {Math.round((result.bonusPct ?? 0) * 100)}% desempenho (teto 50%)
+                {!result.win && !result.draw && result.winBase
+                  ? `Derrota paga 40% de ${result.winBase} = ${result.baseFossil}`
+                  : `Base ${result.baseFossil}`}
+                {` + ${Math.round((result.bonusPct ?? 0) * 100)}% desempenho (teto 50%)`}
                 {result.bonusLines && result.bonusLines.length > 0 ? ` · ${result.bonusLines.join(", ")}` : ""}
               </p>
             )}
