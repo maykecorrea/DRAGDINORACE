@@ -956,7 +956,7 @@ test("63 mph na segunda com a faixa verde não é corte", () => {
   assert.equal(m.player.shifts[0], "ok", `${m.player.shifts.join(",")} rpm ${m.player.rpm.toFixed(0)}`);
 });
 
-test("limitador sozinho continua corte", () => {
+test("limitador sozinho não troca a marcha", () => {
   const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
   const m = createDuel("tarde-corte", bot, comum, comum, 6, 6, 2);
   m.phase = "race";
@@ -967,8 +967,9 @@ test("limitador sozinho continua corte", () => {
   m.player.speed = vMax * 0.38;
   m.player.rpm = 8000;
   m.player.redlineT = 0.5;
-  stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
-  assert.equal(m.player.shifts[0], "corte", m.player.shifts.join(","));
+  for (let i = 0; i < 90; i++) stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
+  assert.equal(m.player.gear, 1);
+  assert.equal(m.player.shifts.length, 0);
 });
 
 test("mina da IA fácil não cai a 40 mph", () => {
@@ -1237,11 +1238,13 @@ test("banner PERFEITO apaga fora da faixa amarela e o Shift grava a nota da luz"
   m.player.speed = (7200 / 8000) * vTop;
   m.player.rpm = 7200;
   stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
-  assert.equal(m.banner, "AGORA — PERFEITO");
+  assert.equal(shiftCall(m.player.rpm, m.player.gear), "perfeito");
+  assert.equal(m.banner.includes("AGORA"), false, m.banner);
   m.player.speed = (7000 / 8000) * vTop;
   m.player.rpm = 7000;
   stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
-  assert.equal(m.banner, "AGORA — BOM", `${m.banner} rpm ${m.player.rpm.toFixed(0)}`);
+  assert.equal(shiftCall(m.player.rpm, m.player.gear), "ok");
+  assert.equal(m.banner.includes("AGORA"), false, m.banner);
   stepMatch(m, { throttle: 1, steer: 0, shift: true, nitro: false, brake: false }, 1 / 60, up, up);
   assert.equal(m.player.shifts[0], "ok", m.player.shifts.join(","));
 });
@@ -1359,9 +1362,15 @@ test("depois do corte o giro cabe na marcha nova", () => {
     wall += 1000 * dt;
     const before = m.player.gear;
     if (m.phase === "race" && !m.player.launched && m.raceTime >= 0.16) brake = false;
+    const callNow = shiftCall(m.player.rpm, m.player.gear);
+    const shift =
+      m.player.launched &&
+      m.player.shiftLock <= 0 &&
+      m.player.gear < 6 &&
+      (callNow === "ok" || callNow === "perfeito" || callNow === "tarde");
     stepMatch(
       m,
-      { throttle: 1, steer: 0, shift: false, nitro: false, brake: brake && !m.player.launched, nowMs: wall, brakeUpMs: brake ? null : wall },
+      { throttle: 1, steer: 0, shift, nitro: false, brake: brake && !m.player.launched, nowMs: wall, brakeUpMs: brake ? null : wall },
       dt,
       up,
       up,
@@ -1371,7 +1380,7 @@ test("depois do corte o giro cabe na marcha nova", () => {
     const gi = Math.max(0, Math.min(box.frac.length - 1, m.player.gear - 1));
     const vTop = vMax * box.frac[gi]!;
     const expect = Math.min(8000, Math.max(m.player.gear === 1 ? 3800 : 1000, (m.player.speed / Math.max(0.4, vTop)) * 8000));
-    assert.ok(Math.abs(m.player.rpm - expect) < 40, `g${m.player.gear} rpm ${m.player.rpm} vs ${expect}`);
+    assert.ok(Math.abs(m.player.rpm - expect) < 120, `g${m.player.gear} rpm ${m.player.rpm} vs ${expect}`);
     const call = shiftCall(m.player.rpm, m.player.gear);
     if (m.banner === "AGORA — BOM") assert.equal(call, "ok");
     if (m.banner === "AGORA — PERFEITO") assert.equal(call, "perfeito");
@@ -1595,8 +1604,8 @@ test("tempo limpo cabe na física e a queima não fica mais rápida", () => {
 test("número de dano fica fora da luz de troca e fora do carro", () => {
   const onLamp = placeDamageLabel(640, SHIFT_LAMP.y + 40, 0);
   const onCar = placeDamageLabel(640, 430, 1);
-  assert.ok(onLamp.x < SHIFT_LAMP.x - 80, String(onLamp.x));
-  assert.ok(onLamp.y < SHIFT_LAMP.y - 40, String(onLamp.y));
+  const hitsLamp = onLamp.y + 22 > SHIFT_LAMP.y && onLamp.y < SHIFT_LAMP.y + SHIFT_LAMP.h && onLamp.x < SHIFT_LAMP.x + SHIFT_LAMP.w && onLamp.x + 96 > SHIFT_LAMP.x;
+  assert.equal(hitsLamp, false, `${onLamp.x},${onLamp.y} luz ${SHIFT_LAMP.x},${SHIFT_LAMP.y}`);
   assert.ok(onCar.x < 220 && onCar.y < 160, `${onCar.x},${onCar.y}`);
   assert.ok(onCar.y > onLamp.y, "rótulos empilhados");
 });

@@ -154,8 +154,8 @@ export const AI_TABLE = {
 
 export type HudBox = { x: number; y: number; w: number; h: number };
 
-/** Luz de troca em 1280×720, com o letreiro. O dano não encosta nessa caixa. */
-export const SHIFT_LAMP: HudBox = { x: 360, y: 468, w: 560, h: 108 };
+/** Luz de troca no canto, fora do carro da 3ª pessoa. */
+export const SHIFT_LAMP: HudBox = { x: 16, y: 632, w: 360, h: 76 };
 
 /** Dano empilhado na coluna esquerda, debaixo da vida. Nunca em cima do carro nem da luz. */
 export function placeDamageLabel(_x: number, _y: number, index = 0): { x: number; y: number } {

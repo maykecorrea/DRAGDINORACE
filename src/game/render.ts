@@ -12,6 +12,7 @@ import {
   launchWindow,
   mph,
   shiftWindow,
+  sights,
   type Match,
 } from "./sim";
 
@@ -483,6 +484,25 @@ function drawAim(
   const W = VIEW_W;
   const H = VIEW_H;
   const lockingFront = m.player.weapon === "homing" && !!m.rival && m.rival.dist > m.player.dist + 1.2;
+  const look = sights(m);
+  if (look && m.rival && (m.phase === "race" || m.phase === "free")) {
+    const ahead = m.rival.dist - m.player.dist;
+    const raw = airAt(Math.min(Math.max(ahead, 1.5), 72), m.rival.lane);
+    const hot = look === "mira";
+    const p = roadPoint(raw, hot ? 36 : 28);
+    ctx.save();
+    ctx.strokeStyle = hot ? "#d6ff3f" : look === "longe" ? "#9aa18c" : "#ffb020";
+    ctx.lineWidth = hot ? 4 : 2;
+    ctx.strokeRect(p.x - 18, p.y - 18, 36, 36);
+    ctx.font = "900 18px ui-monospace, monospace";
+    ctx.textAlign = "center";
+    ctx.fillStyle = hot ? "#d6ff3f" : "#efe6d2";
+    ctx.strokeStyle = "#070806";
+    const say = hot ? "NA MIRA" : look === "longe" ? "LONGE" : "FORA";
+    ctx.strokeText(say, p.x, p.y - 26);
+    ctx.fillText(say, p.x, p.y - 26);
+    ctx.restore();
+  }
   if (lockingFront && (m.aim > 0.02 || m.aimLock) && (m.phase === "race" || m.phase === "free")) {
     const ahead = m.rival!.dist - m.player.dist;
     const raw = airAt(Math.min(Math.max(ahead, 1.2), 78), m.rival!.lane);

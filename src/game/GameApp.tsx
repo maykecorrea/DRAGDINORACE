@@ -119,7 +119,21 @@ type Result = {
 const keys = new Set<string>();
 const keyClock = { brakeUp: 0, gasDown: 0 };
 const spaceLatch: SpaceLatch = { down: false, releaseAt: 0 };
-const pending = { fire: false, rear: false, nitro: false, shield: false };
+const taps: Array<"shift" | "fire" | "rear" | "nitro" | "shield"> = [];
+function queueTap(kind: "shift" | "fire" | "rear" | "nitro" | "shield") {
+  if (taps.length < 24) taps.push(kind);
+}
+function takeTaps() {
+  const got = { shift: false, fire: false, rear: false, nitro: false, shield: false };
+  const keep: Array<"shift" | "fire" | "rear" | "nitro" | "shield"> = [];
+  for (const tap of taps) {
+    if (!got[tap]) got[tap] = true;
+    else keep.push(tap);
+  }
+  taps.length = 0;
+  for (const tap of keep) taps.push(tap);
+  return got;
+}
 let injected: string[] | null = null;
 let steerOverride: number | null = null;
 
@@ -354,19 +368,22 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         writeSave(next);
         setSave(next);
       }
-      if (e.code === "KeyE" || (e.key.length === 1 && e.key.toLowerCase() === "e")) {
+      if (screenRef.current === "drive" && (e.code === "KeyE" || (e.key.length === 1 && e.key.toLowerCase() === "e"))) {
         edges.current.shield = true;
-        pending.shield = true;
       }
       const letter = e.key.length === 1 ? e.key.toLowerCase() : "";
-      if (e.code === "KeyF" || letter === "f") pending.fire = true;
-      if (e.code === "KeyG" || letter === "g") pending.rear = true;
-      if (e.code === "KeyN" || letter === "n") pending.nitro = true;
+      const bind = readKeys(saveRef.current);
+      if (!e.repeat && screenRef.current === "drive") {
+        if (e.code === "KeyE" || letter === "e") queueTap("shield");
+        if (e.code === "KeyF" || letter === "f" || e.code === bind.fire) queueTap("fire");
+        if (e.code === "KeyG" || letter === "g" || e.code === bind.rear) queueTap("rear");
+        if (e.code === "KeyN" || letter === "n" || e.code === bind.nitro) queueTap("nitro");
+        if (e.code === "ShiftLeft" || e.code === "ShiftRight" || e.code === bind.shift) queueTap("shift");
+      }
       if ((e.code === "KeyA" || e.code === "ArrowLeft") && e.timeStamp - edges.current.tapL <= 250) edges.current.ram = -1;
       if (e.code === "KeyA" || e.code === "ArrowLeft") edges.current.tapL = e.timeStamp;
       if ((e.code === "KeyD" || e.code === "ArrowRight") && e.timeStamp - edges.current.tapR <= 250) edges.current.ram = 1;
       if (e.code === "KeyD" || e.code === "ArrowRight") edges.current.tapR = e.timeStamp;
-      const bind = readKeys(saveRef.current);
       if (!isSpaceKey(e) && !keys.has(e.code) && (e.code === bind.gas || e.code === "KeyW" || e.code === "ArrowUp")) keyClock.gasDown = performance.now();
       if (isSpaceKey(e)) {
         if (screenRef.current === "drive") {
@@ -407,10 +424,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       if (spaceLatch.down) noteSpaceUp(spaceLatch, performance.now());
       keys.clear();
       hold.current.brake = false;
-      pending.fire = false;
-      pending.rear = false;
-      pending.nitro = false;
-      pending.shield = false;
+      taps.length = 0;
     };
     window.addEventListener("keydown", onDown, true);
     window.addEventListener("keyup", onUp, true);
@@ -434,6 +448,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
 
     const sample = () => {
       const bind = readKeys(saveRef.current);
+      const queued = takeTaps();
       const down = (code: string) => keys.has(code) || Boolean(injected?.length && injected.includes(code));
       let steer = steerOverride ?? 0;
       if (steerOverride == null) {
@@ -452,19 +467,16 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         (injected?.includes("ShiftLeft") ?? false) ||
         (injected?.includes("ShiftRight") ?? false) ||
         (injected?.includes("ArrowUp") ?? false) ||
-        hold.current.shift;
-      const nitroDown = down(bind.nitro) || down("KeyN") || (injected?.includes("KeyN") ?? false) || hold.current.nitro || pending.nitro;
-      const fireDown = down(bind.fire) || down("KeyF") || hold.current.fire || pending.fire;
-      const rearDown = down(bind.rear) || down("KeyG") || hold.current.rear || pending.rear;
+        hold.current.shift ||
+        queued.shift;
+      const nitroDown = down(bind.nitro) || down("KeyN") || (injected?.includes("KeyN") ?? false) || hold.current.nitro || queued.nitro;
+      const fireDown = down(bind.fire) || down("KeyF") || hold.current.fire || queued.fire;
+      const rearDown = down(bind.rear) || down("KeyG") || hold.current.rear || queued.rear;
       const shift = shiftDown;
-      const nitro = (nitroDown && !prev.current.nitro) || pending.nitro;
-      const fireEdge = (fireDown && !prev.current.fire) || pending.fire;
-      const rearEdge = (rearDown && !prev.current.rear) || pending.rear;
-      pending.fire = false;
-      pending.rear = false;
-      pending.nitro = false;
-      const shield = edges.current.shield || pending.shield;
-      pending.shield = false;
+      const nitro = (nitroDown && !prev.current.nitro) || queued.nitro;
+      const fireEdge = (fireDown && !prev.current.fire) || queued.fire;
+      const rearEdge = (rearDown && !prev.current.rear) || queued.rear;
+      const shield = edges.current.shield || queued.shield;
       edges.current.shield = false;
       prev.current.shift = shiftDown;
       prev.current.nitro = nitroDown;
@@ -591,13 +603,14 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               acc.v += dt;
               sim.view = (saveRef.current.camera ?? "perseguicao") === "cockpit" ? "cockpit" : "perseguicao";
               sim.debug = debugOn.current;
-              const input = sample();
               let first = true;
               let guard = 0;
               const car = selectedCar(saveRef.current);
               const up = stacked(car);
               const phase = STORY.find((item) => `fase-${item.chapter}` === sim.rivalId);
               const rivalUp = sim.mode === "duel" ? rivalUpgrades(sim) : null;
+              if (acc.v >= 1 / 60) {
+              const input = sample();
               while (acc.v >= 1 / 60 && guard < 5) {
                 const stepIn = {
                   ...input,
@@ -619,6 +632,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 first = false;
                 acc.v -= 1 / 60;
                 guard += 1;
+              }
               }
               for (const ev of events) {
                 if (ev.startsWith("shift:perfeito") || ev === "launch:perfeito") audio.blip("good");
@@ -1399,6 +1413,8 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     onPointerDown: (e: PointerEvent) => {
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
       hold.current[key] = true;
+      if (key === "fire") queueTap("fire");
+      if (key === "rear") queueTap("rear");
     },
     onPointerUp: () => {
       if (key === "brake") {
@@ -1679,7 +1695,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               onPointerDown={(e) => {
                 (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
                 hold.current.nitro = true;
-                pending.nitro = true;
+                queueTap("nitro");
               }}
               onPointerUp={() => {
                 hold.current.nitro = false;
@@ -1701,6 +1717,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               onPointerDown={(e) => {
                 (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
                 hold.current.shift = true;
+                queueTap("shift");
               }}
               onPointerUp={() => {
                 hold.current.shift = false;
@@ -1722,7 +1739,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               onPointerDown={(e) => {
                 (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
                 edges.current.shield = true;
-                pending.shield = true;
+                queueTap("shield");
               }}
             >
               <span className="block font-display text-sm leading-none">Escudo</span>

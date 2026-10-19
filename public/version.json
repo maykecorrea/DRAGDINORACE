@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.14",
-  "name": "solta-no-vai",
+  "version": "2026-10-19.15",
+  "name": "na-mira",
   "built": "2026-10-19",
-  "notes": "A soltura do Espaço com o W preso conta na hora, sem o atraso de 4 s. No fácil a IA erra mais. A luz de BOM apaga antes do fim da barra e a 6ª não entra a 120 mph. O dano fica na coluna da vida e os botões saem de cima da pista."
+  "notes": "No fácil a IA atira o tempo todo (míssil, mina e ossada) e erra mais: você perde cerca de 15 a 25 de vida. A retícula diz NA MIRA quando o F pega. A barra de troca saiu de cima do carro e o AGORA aparece uma vez só. Toque curto em Shift, F, G, N e E entra numa fila. O carro não troca sozinho no limitador. O resultado abre até 1,25 s depois que você cruza. A garagem rola, ficou verde e o mapa abre num modal."
 }

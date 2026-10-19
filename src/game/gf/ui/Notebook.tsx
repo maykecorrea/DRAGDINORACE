@@ -73,7 +73,6 @@ export function Notebook({
         Voltar ao pátio
       </button>
       <h2 className="gf-kicker">Caderno</h2>
-      <p className="gf-file">notebook.jpg</p>
       {known.length === 0 ? (
         <p>Ainda não tem página. O domingo e os recados escrevem sozinhos.</p>
       ) : (

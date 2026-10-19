@@ -218,7 +218,7 @@ function MapArt({ spot, level, tint, hour, closed }: { spot: PlaceId; level: num
         <image key={`fechado-${id}`} href="/assets/gf/map/ui/ui_placa_fechado.png?v=1" x={PIN[id].x - 16} y={PIN[id].y - 28} width={32} height={32} />
       ))}
       <rect x={pin.x - 3} y={pin.y - 16} width="6" height="6" fill="#7cff4f" />
-      <rect x={pin.x - 1} y={pin.y - 10} width="2" height="6" fill="#f1e6c8" />
+      <rect x={pin.x - 1} y={pin.y - 10} width="2" height="6" fill="#d8f5c4" />
     </svg>
   );
 }

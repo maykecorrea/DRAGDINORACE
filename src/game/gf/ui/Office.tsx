@@ -28,12 +28,9 @@ type Screen = "hub" | "clients" | "bays" | "stock" | "crew" | "bank" | "reserve"
 type FeedLine = { icon: string; text: string };
 const DEPOSITS = [0, 30, 50, 100] as const;
 
-function layoutNow(): { phone: boolean; scale: number } {
-  if (typeof window === "undefined") return { phone: false, scale: 2 };
-  const phone = window.matchMedia("(max-width: 767px)").matches;
-  if (phone) return { phone: true, scale: 1 };
-  const scale = Math.max(1, Math.min(4, Math.floor(window.innerWidth / 480), Math.floor(window.innerHeight / 270)));
-  return { phone: false, scale };
+function layoutNow(): { phone: boolean } {
+  if (typeof window === "undefined") return { phone: false };
+  return { phone: window.matchMedia("(max-width: 767px)").matches };
 }
 
 function flagNum(flags: GameState["flags"], key: string): number {
@@ -136,6 +133,7 @@ function Yard({ level, bays }: { level: number; bays: number }) {
 export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Content; onRun: (run: GfRun) => void; onLeave: () => void }) {
   const state = run.state;
   const [screen, setScreen] = useState<Screen>("hub");
+  const [mapOpen, setMapOpen] = useState(false);
   const [layout, setLayout] = useState(layoutNow);
   const [toast, setToast] = useState<string | null>(null);
   const [feed, setFeed] = useState<FeedLine[]>([]);
@@ -207,7 +205,7 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
   }, [blockingId, state.calendar.week, state.calendar.day]);
 
   useEffect(() => {
-    if (screen !== "hub" && screen !== "map") return;
+    if (screen !== "hub" && screen !== "map" && !mapOpen) return;
     if (openCard || blockingId || state.clock?.paused || state.ending) return;
     let last = performance.now();
     const timer = window.setInterval(() => {
@@ -229,7 +227,7 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onVis);
     };
-  }, [screen, openCard, blockingId, state.clock?.paused, state.ending, run.rev]);
+  }, [screen, mapOpen, openCard, blockingId, state.clock?.paused, state.ending, run.rev]);
 
   useEffect(() => {
     if (!openCard) return;
@@ -304,7 +302,7 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
   const phone = layout.phone;
   const body = (
     <>
-      <Hud state={state} pack={pack} busy={busy} blocked={Boolean(blockingId)} tips={tips} onAct={(action) => void go(action)} stat={focusStat} />
+      <Hud state={state} pack={pack} busy={busy} blocked={Boolean(blockingId)} tips={tips} onAct={(action) => void go(action)} onMap={() => setMapOpen(true)} stat={focusStat} />
       <div className="gf-body">
         {screen === "hub" && (
           <Hub
@@ -313,6 +311,10 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
             busy={busy}
             onAct={(action) => void go(action)}
             onScreen={(next) => {
+              if (next === "map") {
+                setMapOpen(true);
+                return;
+              }
               if (next === "stock") setNeed(null);
               setScreen(next);
             }}
@@ -330,9 +332,9 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
             onAct={(action) => void go(action)}
             onBuy={(material, qty) => {
               setNeed({ material, qty });
-              setScreen("map");
+              setMapOpen(true);
             }}
-            onMap={() => setScreen("map")}
+            onMap={() => setMapOpen(true)}
             onBack={() => setScreen("hub")}
           />
         )}
@@ -346,19 +348,7 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
             onAct={(action) => void go(action)}
             onBack={() => setScreen("hub")}
             onClearFocus={() => setNeed(null)}
-            onMap={() => setScreen("map")}
-          />
-        )}
-        {screen === "map" && (
-          <DistrictMap
-            state={state}
-            pack={pack}
-            busy={busy}
-            focus={need}
-            onAct={(action) => void go(action)}
-            onBack={() => setScreen("hub")}
-            onCounter={() => setScreen("shop")}
-            onEnter={(next) => setScreen(next)}
+            onMap={() => setMapOpen(true)}
           />
         )}
         {screen === "shop" &&
@@ -372,12 +362,15 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
               lockSupplier={supplierAt(here(state)) ?? undefined}
               backLabel="Voltar ao mapa"
               onAct={(action) => void go(action)}
-              onBack={() => setScreen("map")}
+              onBack={() => {
+                setScreen("hub");
+                setMapOpen(true);
+              }}
               onClearFocus={() => setNeed(null)}
             />
           ) : (
             <section className="gf-screen">
-              <button type="button" onClick={() => setScreen("map")}>
+              <button type="button" onClick={() => setMapOpen(true)}>
                 Voltar ao mapa
               </button>
               <p>O balcão só abre se você estiver na loja.</p>
@@ -444,6 +437,29 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
     </>
   );
 
+  const mapModal = mapOpen ? (
+    <div className="gf-mapmodal" role="dialog" aria-modal="true" aria-label="Mapa mundial" onClick={() => setMapOpen(false)}>
+      <div className="gf-mapsheet" onClick={(event) => event.stopPropagation()}>
+        <DistrictMap
+          state={state}
+          pack={pack}
+          busy={busy}
+          focus={need}
+          onAct={(action) => void go(action)}
+          onBack={() => setMapOpen(false)}
+          onCounter={() => {
+            setMapOpen(false);
+            setScreen("shop");
+          }}
+          onEnter={(next) => {
+            setMapOpen(false);
+            setScreen(next);
+          }}
+        />
+      </div>
+    </div>
+  ) : null;
+
   if (phone) {
     return (
       <div className="gf-ui gf-phone">
@@ -451,21 +467,18 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
           Modos
         </a>
         {body}
+        {mapModal}
       </div>
     );
   }
 
-  const scale = layout.scale;
   return (
     <div className="gf-shell">
       <a href="/modos" className="gf-exit">
         Modos
       </a>
-      <div className="gf-scale" style={{ width: 480 * scale, height: 270 * scale }}>
-        <div className="gf-ui gf-pixel" style={{ width: 480, height: 270, transform: `scale(${scale})` }}>
-          {body}
-        </div>
-      </div>
+      <div className="gf-ui gf-pixel gf-flow">{body}</div>
+      {mapModal}
     </div>
   );
 }
@@ -477,6 +490,7 @@ function Hud({
   blocked,
   tips,
   onAct,
+  onMap,
   stat,
 }: {
   state: GameState;
@@ -485,6 +499,7 @@ function Hud({
   blocked: boolean;
   tips: boolean;
   onAct: (action: Record<string, unknown>) => void;
+  onMap: () => void;
   stat: (text: string) => {
     onMouseEnter: () => void;
     onMouseLeave: () => void;
@@ -554,6 +569,9 @@ function Hud({
             />
           ))}
         </span>
+        <button type="button" className="gf-mapbtn" title="Abrir o mapa mundial" onClick={onMap}>
+          Mapa
+        </button>
         <button
           type="button"
           className="gf-wait"
