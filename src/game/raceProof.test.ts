@@ -1716,3 +1716,106 @@ test("PERFEITO da 2ª marcha dura o bastante para ver", () => {
   assert.ok(frames >= 12, `frames ${frames}`);
 });
 
+test("colado do lado é NA MIRA e o F acerta", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("colado", bot, comum, { ...comum, durability: 50 }, 6, 6, 4);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.dist = 220;
+  m.player.speed = 55;
+  m.player.lane = -2.2;
+  m.raceTime = 5;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 218;
+    m.rival.speed = 54;
+    m.rival.lane = 2.2;
+    m.rival.hp = 50;
+    m.rival.hpMax = 50;
+  }
+  assert.equal(sights(m), "mira");
+  armWeapon(m.player, "missile", weaponById("missile"));
+  const before = m.rival?.hp ?? 0;
+  stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, fire: true, fireEdge: true, brake: false }, 1 / 60, up, up);
+  for (let i = 0; i < 40 && (m.rival?.hp ?? 0) >= before; i++) {
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
+  }
+  assert.ok(before - (m.rival?.hp ?? before) >= 8, `colado ${m.rival?.hp}`);
+});
+
+test("mesma faixa na frente é NA MIRA e a outra faixa longe é FORA", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const lined = createDuel("linha", bot, comum, comum, 6, 6, 2);
+  lined.phase = "race";
+  lined.green = true;
+  lined.player.launched = true;
+  lined.player.dist = 100;
+  lined.player.lane = 2.2;
+  if (lined.rival) {
+    lined.rival.launched = true;
+    lined.rival.dist = 180;
+    lined.rival.lane = 2.2;
+  }
+  assert.equal(sights(lined), "mira");
+  const wide = createDuel("larga", bot, comum, comum, 6, 6, 2);
+  wide.phase = "race";
+  wide.green = true;
+  wide.player.launched = true;
+  wide.player.dist = 100;
+  wide.player.lane = -2.2;
+  wide.raceTime = 4;
+  if (wide.rival) {
+    wide.rival.launched = true;
+    wide.rival.dist = 180;
+    wide.rival.lane = 2.2;
+  }
+  assert.equal(sights(wide), "fora");
+  armWeapon(wide.player, "missile", weaponById("missile"));
+  const hp = wide.rival?.hp ?? 0;
+  stepMatch(wide, { throttle: 1, steer: 0, shift: false, nitro: false, fire: true, fireEdge: true, brake: false }, 1 / 60, up, up);
+  assert.equal(wide.shotCall, "ERROU");
+  const shot = wide.shots.find((s) => s.owner === "you" && s.kind === "missil");
+  assert.equal(shot?.sure, false);
+  for (let i = 0; i < 30; i++) stepMatch(wide, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
+  assert.equal(wide.rival?.hp, hp);
+});
+
+test("IA com 315 ms não larga MORREU", () => {
+  const bot = botForLevel("facil", mulberry(2));
+  bot.reaction = 0.315;
+  bot.willFoul = false;
+  const m = createDuel("larg-real", bot, comum, comum, 6, 6, 2);
+  m.hazards = [];
+  m.crates = [];
+  let brake = true;
+  let wall = 30_000;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 8 && !m.rival?.launched; i++) {
+    wall += 1000 * dt;
+    if (m.phase === "race" && m.raceTime >= 0.12) brake = false;
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake, nowMs: wall, brakeUpMs: brake ? null : wall }, dt, up, up);
+  }
+  assert.equal(m.rival?.launched, true);
+  assert.notEqual(m.rival?.launchGrade, "morreu", String(m.rival?.launchGrade));
+  assert.equal(m.rival?.launchGrade, "ok", String(m.rival?.launchGrade));
+  assert.ok(Math.abs((m.rival?.reaction ?? 9) - 0.315) < 0.05, String(m.rival?.reaction));
+});
+
+test("freio preso até os 4 s marca largada AUTO", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("auto", bot, comum, comum, 6, 6, 3);
+  let wall = 20_000;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 8 && !m.player.launched; i++) {
+    wall += 1000 * dt;
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: true, nowMs: wall }, dt, up, up);
+  }
+  assert.equal(m.player.launched, true);
+  assert.equal(m.player.launchAuto, true);
+  assert.equal(m.player.launchGrade, "atrasou");
+  assert.equal(m.note, "LARGADA AUTO");
+});
+

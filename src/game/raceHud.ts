@@ -402,7 +402,15 @@ export function paintRadar(ctx: CanvasRenderingContext2D, m: Match) {
   ctx.fill();
   if (m.rival) {
     const dy = m.rival.dist - m.player.dist;
-    if (dy < front && dy > -back) {
+    ctx.textAlign = "center";
+    ctx.font = "700 11px ui-monospace, monospace";
+    if (dy >= front || dy <= -back) {
+      const down = dy < 0;
+      const y = down ? b.y + b.h - 18 : b.y + 14;
+      ctx.fillStyle = "#d6ff3f";
+      ctx.fillText(down ? "ATRÁS" : "FRENTE", b.x + b.w / 2, y);
+      ctx.fillText(`${Math.abs(Math.round(dy))}m`, b.x + b.w / 2, y + 12);
+    } else {
       ctx.fillStyle = "#ffb020";
       const x = xOf(m.rival.lane);
       const y = yOf(dy);

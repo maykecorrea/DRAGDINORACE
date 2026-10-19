@@ -564,38 +564,44 @@ function roadPoint(p: { x: number; y: number; sp: number }, _pad = 0) {
   return p;
 }
 
+function hudCovers(x: number, y: number) {
+  if (x > 990 && y > 430) return true;
+  if (x < 390 && y > 390 && y < 620) return true;
+  if (x < 72 || x > VIEW_W - 72 || y < 132 || y > 630) return true;
+  return false;
+}
+
 function paintRivalMark(
   ctx: CanvasRenderingContext2D,
   m: Match,
-  airAt: (ahead: number, worldLane: number) => { x: number; y: number; sp: number },
+  carAt: (ahead: number, worldLane: number) => { x: number; y: number; sp: number },
 ) {
   if (!m.rival || (m.mode !== "duel" && m.mode !== "free") || m.phase === "finish" || m.phase === "staging" || m.phase === "tree") return;
   if (!m.player.launched || m.rival.wrecked) return;
   const ahead = m.rival.dist - m.player.dist;
   const look = sights(m) || "longe";
-  const raw = airAt(Math.max(-24, Math.min(ahead, 70)), m.rival.lane);
-  const visible = ahead > -14 && ahead < 72 && raw.x > 56 && raw.x < VIEW_W - 56 && raw.y > 78 && raw.y < VIEW_H - 96;
   const dx = m.rival.lane - m.player.lane;
-  let dir = ahead >= 0 ? "FRENTE" : "ATRÁS";
-  if (Math.abs(ahead) < 16 && dx > 0.9) dir = "DIREITA";
-  else if (Math.abs(ahead) < 16 && dx < -0.9) dir = "ESQUERDA";
-  else if (ahead < -8) dir = "ATRÁS";
-  else dir = "FRENTE";
+  const raw = carAt(Math.max(-6, Math.min(ahead, 64)), m.rival.lane);
+  const offRoad = ahead < -10 || ahead > 64 || raw.x < 72 || raw.x > VIEW_W - 72 || raw.y < 132 || raw.y > 600;
+  const pinned = offRoad || hudCovers(raw.x, raw.y);
+  let dir = ahead >= 8 ? "FRENTE" : ahead <= -6 ? "ATRÁS" : dx > 0.6 ? "DIREITA" : dx < -0.6 ? "ESQUERDA" : ahead >= 0 ? "FRENTE" : "ATRÁS";
+  if (Math.abs(ahead) >= 18 && ahead > 0) dir = "FRENTE";
+  if (ahead < -8) dir = "ATRÁS";
   let x = raw.x;
-  let y = raw.y;
-  if (!visible) {
+  let y = raw.y - 8;
+  if (pinned) {
     if (dir === "ESQUERDA") {
-      x = 78;
-      y = Math.max(120, Math.min(VIEW_H - 150, raw.y));
+      x = 430;
+      y = 340;
     } else if (dir === "DIREITA") {
-      x = VIEW_W - 78;
-      y = Math.max(120, Math.min(VIEW_H - 150, raw.y));
+      x = 900;
+      y = 340;
     } else if (dir === "ATRÁS") {
-      x = Math.max(96, Math.min(VIEW_W - 96, raw.x));
-      y = VIEW_H - 118;
+      x = dx >= 0 ? 860 : 420;
+      y = 250;
     } else {
-      x = Math.max(96, Math.min(VIEW_W - 96, raw.x));
-      y = 96;
+      x = Math.max(180, Math.min(920, raw.x));
+      y = 156;
     }
   }
   const hot = look === "mira";
@@ -609,49 +615,53 @@ function paintRivalMark(
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
   if (hot) {
-    const s = 28 + Math.sin(m.raceTime * 14) * 3;
+    const s = 30 + Math.sin(m.raceTime * 14) * 3;
     ctx.strokeRect(-s, -s, s * 2, s * 2);
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(-8, 0);
-    ctx.lineTo(8, 0);
-    ctx.moveTo(0, -8);
-    ctx.lineTo(0, 8);
+    ctx.moveTo(-10, 0);
+    ctx.lineTo(10, 0);
+    ctx.moveTo(0, -10);
+    ctx.lineTo(0, 10);
     ctx.stroke();
   } else if (far) {
     ctx.setLineDash([7, 6]);
     ctx.beginPath();
-    ctx.arc(0, 0, 22, 0, Math.PI * 2);
+    ctx.arc(0, 0, 24, 0, Math.PI * 2);
     ctx.stroke();
     ctx.setLineDash([]);
   } else {
     ctx.beginPath();
-    ctx.moveTo(0, -26);
-    ctx.lineTo(24, 0);
-    ctx.lineTo(0, 26);
-    ctx.lineTo(-24, 0);
+    ctx.moveTo(0, -28);
+    ctx.lineTo(26, 0);
+    ctx.lineTo(0, 28);
+    ctx.lineTo(-26, 0);
     ctx.closePath();
     ctx.stroke();
   }
-  if (!visible) {
-    ctx.beginPath();
-    if (dir === "FRENTE") {
-      ctx.moveTo(0, -40);
-      ctx.lineTo(-12, -22);
-      ctx.lineTo(12, -22);
-    } else if (dir === "ATRÁS") {
-      ctx.moveTo(0, 40);
-      ctx.lineTo(-12, 22);
-      ctx.lineTo(12, 22);
-    } else if (dir === "ESQUERDA") {
-      ctx.moveTo(-40, 0);
-      ctx.lineTo(-22, -12);
-      ctx.lineTo(-22, 12);
-    } else {
-      ctx.moveTo(40, 0);
-      ctx.lineTo(22, -12);
-      ctx.lineTo(22, 12);
-    }
+  ctx.beginPath();
+  if (dir === "FRENTE" && (pinned || ahead > 16)) {
+    ctx.moveTo(0, -46);
+    ctx.lineTo(-14, -28);
+    ctx.lineTo(14, -28);
+    ctx.closePath();
+    ctx.fill();
+  } else if (dir === "ATRÁS" && (pinned || ahead < -6)) {
+    ctx.moveTo(0, 46);
+    ctx.lineTo(-14, 28);
+    ctx.lineTo(14, 28);
+    ctx.closePath();
+    ctx.fill();
+  } else if (pinned && dir === "ESQUERDA") {
+    ctx.moveTo(-46, 0);
+    ctx.lineTo(-28, -14);
+    ctx.lineTo(-28, 14);
+    ctx.closePath();
+    ctx.fill();
+  } else if (pinned && dir === "DIREITA") {
+    ctx.moveTo(46, 0);
+    ctx.lineTo(28, -14);
+    ctx.lineTo(28, 14);
     ctx.closePath();
     ctx.fill();
   }
@@ -659,15 +669,22 @@ function paintRivalMark(
   ctx.textAlign = "center";
   ctx.lineWidth = 5;
   ctx.strokeStyle = "#070806";
-  ctx.strokeText(say, 0, -38);
+  ctx.strokeText(say, 0, -40);
   ctx.fillStyle = color;
-  ctx.fillText(say, 0, -38);
-  if (!visible) {
-    ctx.font = "900 16px ui-monospace, monospace";
+  ctx.fillText(say, 0, -40);
+  const where = pinned || Math.abs(ahead) > 14 ? `${dir} ${meters}` : meters;
+  ctx.font = "900 16px ui-monospace, monospace";
+  ctx.strokeStyle = "#070806";
+  ctx.lineWidth = 4;
+  ctx.strokeText(where, 0, 46);
+  ctx.fillStyle = "#efe6d2";
+  ctx.fillText(where, 0, 46);
+  if (m.shotCall && m.shotCallT > 0) {
+    ctx.font = "900 20px Impact, Arial Black, sans-serif";
     ctx.strokeStyle = "#070806";
-    ctx.strokeText(`${dir} ${meters}`, 0, 48);
-    ctx.fillStyle = "#efe6d2";
-    ctx.fillText(`${dir} ${meters}`, 0, 48);
+    ctx.strokeText(m.shotCall, 0, 70);
+    ctx.fillStyle = "#ff5a2a";
+    ctx.fillText(m.shotCall, 0, 70);
   }
   ctx.restore();
 }
@@ -676,7 +693,7 @@ function paintHits(
   ctx: CanvasRenderingContext2D,
   m: Match,
   dist: number,
-  airAt: (ahead: number, worldLane: number) => { x: number; y: number; sp: number },
+  carAt: (ahead: number, worldLane: number) => { x: number; y: number; sp: number },
 ) {
   ctx.save();
   ctx.textAlign = "center";
@@ -685,13 +702,17 @@ function paintHits(
     const a = Math.max(0, num.life / num.max);
     const big = num.dmg >= 8;
     const size = big ? 48 : 28;
-    const rise = (1 - a) * (big ? 36 : 18);
-    let x = 640 + num.drift * 0.4;
-    let y = 468 - rise;
+    const rise = (1 - a) * (big ? 28 : 14);
+    let x = 500;
+    let y = 540 - rise;
     if (!num.hud) {
-      const p = airAt(num.dist - dist, num.lane);
-      x = p.x + num.drift * 0.2;
-      y = p.y - 42 - rise;
+      const ahead = num.dist - dist;
+      const p = carAt(Math.max(-8, Math.min(ahead, 70)), num.lane);
+      x = p.x;
+      y = p.y - 64 - rise;
+      if (x > 980 && y > 420) x = 940;
+      if (x < 400 && y > 400 && y < 620) x = 420;
+      if (Math.hypot(x - 640, y - 400) < 64) y -= 56;
     }
     ctx.globalAlpha = Math.min(1, a + 0.2);
     ctx.font = `900 ${size}px Impact, Arial Black, sans-serif`;
@@ -932,9 +953,9 @@ function paintChaseCar(ctx: CanvasRenderingContext2D, m: Match, neon: string, no
     ctx.stroke();
     ctx.globalCompositeOperation = "source-over";
     ctx.fillStyle = "#d4ff3a";
-    ctx.font = "900 22px ui-monospace, monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("ESCUDO", 0, -150);
+    ctx.font = "900 18px ui-monospace, monospace";
+    ctx.textAlign = "left";
+    ctx.fillText("ESCUDO", -168, -36);
     ctx.restore();
   }
   if (m.player.nitroOn > 0) {
@@ -1095,6 +1116,15 @@ export function drawFrame(
     const sp = Math.min(0.9, CAM / z);
     const y = horizon + sp * (H - horizon) - sp * H * 0.16;
     const x = vp + (worldLane - lane) * sp * W * LAT;
+    return { x, y, sp };
+  };
+
+  const carAt = (ahead: number, worldLane: number) => {
+    const z = Math.max(2.4, 3.1 + Math.max(0, ahead) * 0.14);
+    const sp = Math.min(0.48, CAM / z);
+    const y = horizon + sp * (H - horizon);
+    const sep = Math.abs(ahead) < 22 ? 1.35 : 1;
+    const x = vp + (worldLane - lane) * sep * sp * W * LAT;
     return { x, y, sp };
   };
 
@@ -1590,8 +1620,8 @@ export function drawFrame(
 
   if (art.race && m.mode === "duel") paintChaseHud(ctx, m, now);
   else drawCluster(ctx, m, up, now, gaugeKey, digital);
-  paintHits(ctx, m, dist, airAt);
-  paintRivalMark(ctx, m, airAt);
+  paintHits(ctx, m, dist, carAt);
+  paintRivalMark(ctx, m, carAt);
   if (strip !== "off" && m.mode === "duel" && m.rival && !art.race) drawStrip(ctx, m, art, rivalSprite, youMark, strip);
   if (!art.race) drawHull(ctx, m, strip !== "off" && m.mode === "duel" && !!m.rival);
   if (m.debug) paintDebug(ctx, m, now);

@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.16",
-  "name": "peso",
+  "version": "2026-10-19.17",
+  "name": "colada",
   "built": "2026-10-19",
-  "notes": "A retícula fica presa no rival: NA MIRA, FORA ou LONGE. NA MIRA é acerto. O míssil tira uns 10 e o número aparece no carro, com clarão, tremida e som. Um pente bem mirado derruba o rival fácil. A faixa de teclas some no desktop para não cobrir a barra. AGORA só no ouro (PERFEITO); o verde é BOM. ESCUDO fica só na bolha. O rival que troca mal fica para trás, com seta e distância quando sai da tela."
+  "notes": "A retícula fica no rival, fora do velocímetro. Colado do lado ou na mesma faixa é NA MIRA e o F acerta; FORA escreve ERROU. A distância (FRENTE, ATRÁS, ESQUERDA, DIREITA) não some. A largada da IA mostra o grau real, não MORREU. Se o freio ficar preso, a largada é AUTO. O −10 fica no carro e o ESCUDO só na bolha."
 }

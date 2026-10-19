@@ -88,6 +88,7 @@ type Result = {
   rivalId: string;
   rivalReaction: number | null;
   rivalLaunch: LaunchGrade | null;
+  launchAuto?: boolean;
   rivalTrap: number;
   rivalGrades: Grade[];
   youPlace: 1 | 2;
@@ -195,11 +196,12 @@ function rivalUpgrades(sim: Match): Upgrades {
   return { engine: 0, gearbox: 0, nitro: 0, tires: 0, chassis: 0 };
 }
 
-function launchLabel(grade: LaunchGrade | null | undefined): string {
+function launchLabel(grade: LaunchGrade | null | undefined, auto = false): string {
+  if (auto) return "AUTO";
   if (grade === "perfeito") return "PERFEITO";
   if (grade === "ok") return "OK";
   if (grade === "patinou") return "PATINOU";
-  if (grade === "morreu") return "MORREU";
+  if (grade === "morreu") return "AFOGOU";
   if (grade === "queimou") return "QUEIMOU";
   if (grade === "atrasou") return "ATRASOU";
   return "—";
@@ -231,6 +233,7 @@ function ResultCard({
   reaction,
   trap,
   launch,
+  auto,
   grades,
   hp,
   hpMax,
@@ -244,6 +247,7 @@ function ResultCard({
   reaction: number | null;
   trap: number | null;
   launch: LaunchGrade | null;
+  auto?: boolean;
   grades: Grade[];
   hp?: number;
   hpMax?: number;
@@ -267,12 +271,12 @@ function ResultCard({
         </div>
       )}
       <p className="mt-1 text-sm text-muted">
-        reação {launch === "queimou" || (reaction != null && reaction < 0) ? "QUEIMOU" : reaction == null ? "—" : `${Math.round(reaction * 1000)} ms`} · trap {trap == null ? "—" : `${Math.round(mph(trap))} mph`}
+        reação {auto ? "AUTO" : launch === "queimou" || (reaction != null && reaction < 0) ? "QUEIMOU" : reaction == null ? "—" : `${Math.round(reaction * 1000)} ms`} · trap {trap == null ? "—" : `${Math.round(mph(trap))} mph`}
       </p>
       <div className="mt-3 grid gap-1" style={{ gridTemplateColumns: `repeat(${boxes + 1}, minmax(0, 1fr))` }}>
-        <div className={`px-1 py-2 text-center ${cellTone(launch)}`}>
+        <div className={`px-1 py-2 text-center ${auto ? "bg-[#ffb020] text-ink" : cellTone(launch)}`}>
           <p className="font-display text-lg leading-none">LARG</p>
-          <p className="mt-1 text-[10px] font-semibold tracking-widest">{launchLabel(launch)}</p>
+          <p className="mt-1 text-[10px] font-semibold tracking-widest">{launchLabel(launch, !!auto)}</p>
         </div>
         {Array.from({ length: boxes }, (_, i) => (
           <div key={i} className={`px-1 py-2 text-center ${cellTone(grades[i])}`}>
@@ -779,6 +783,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   rivalId: sim.rivalId ?? "fase-1",
                   rivalReaction: sim.rival?.reaction ?? null,
                   rivalLaunch: sim.rival?.launchGrade ?? null,
+                  launchAuto: sim.player.launchAuto,
                   rivalTrap: sim.rival?.trap ?? 0,
                   rivalGrades: sim.rival?.shifts.slice() ?? [],
                   youPlace: win || draw ? 1 : 2,
@@ -1771,6 +1776,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 reaction={result.reaction}
                 trap={result.et != null ? result.trap : null}
                 launch={result.launch}
+                auto={result.launchAuto}
                 grades={result.grades}
                 gears={result.gears}
                 hp={result.hp}
