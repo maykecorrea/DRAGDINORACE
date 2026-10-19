@@ -465,11 +465,18 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     ctx.fillText(m.banner, big ? 640 : slot.x + slot.w / 2, big ? 220 : slot.y + 24);
   }
   if (m.mode === "duel" && !m.player.launched && m.phase !== "finish") {
-    ctx.font = "700 22px ui-monospace, monospace";
-    ctx.fillStyle = "#efe6d2";
-    ctx.fillText("SEGURA ESPAÇO + W", 640, 300);
-    ctx.fillStyle = "#d6ff3f";
-    ctx.fillText("SOLTA O ESPAÇO NO VAI", 640, 330);
+    const y0 = 250;
+    for (let i = 0; i < 3; i++) {
+      const on = m.phase === "race" || (m.phase === "tree" && m.t >= i + 0.05);
+      const green = m.phase === "race";
+      ctx.fillStyle = on ? (green ? "#d6ff3f" : i === 2 ? "#ffb020" : "#ff3b1f") : "#1a140c";
+      ctx.beginPath();
+      ctx.arc(560 + i * 80, y0, 22, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.font = "900 28px ui-monospace, monospace";
+    ctx.fillStyle = m.phase === "race" ? "#d6ff3f" : "#efe6d2";
+    ctx.fillText(m.phase === "race" ? "SOLTA O ESPAÇO AGORA" : "SEGURA ESPAÇO + W", 640, y0 + 64);
   }
   const w = HUD_CHASE.weapons!;
   ctx.textAlign = "left";
@@ -542,10 +549,11 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   ctx.fillRect(meterX + meterW * live - 3, meterY - 6, 6, 48);
   const zone = !m.player.launched ? "" : live >= pLo && live <= pHi ? "PERFEITO" : live >= lo && live <= hi ? "BOM" : live < lo ? "CEDO" : "TARDE";
   if (zone) {
-    const say = zone === "CEDO" ? "CEDO — ESPERA O VERDE" : zone === "TARDE" ? "TARDE" : zone === "PERFEITO" ? "PERFEITO — TROCA" : "BOM — TROCA";
-    ctx.font = "900 28px ui-monospace, monospace";
-    ctx.fillStyle = zone === "PERFEITO" ? "#e6c15a" : zone === "BOM" ? "#d6ff3f" : "#ffb020";
-    ctx.fillText(say, meterX + meterW / 2, meterY - 10);
+    const near = zone === "CEDO" && lo - live < 0.1;
+    const say = zone === "PERFEITO" ? "AGORA — PERFEITO" : zone === "BOM" ? "AGORA — TROCA" : zone === "TARDE" ? "TARDE" : near ? "QUASE — SEGURA" : "SOBE O GIRO";
+    ctx.font = zone === "PERFEITO" || zone === "BOM" ? "900 36px ui-monospace, monospace" : "900 26px ui-monospace, monospace";
+    ctx.fillStyle = zone === "PERFEITO" ? "#e6c15a" : zone === "BOM" ? "#d6ff3f" : near ? "#ffb020" : "#efe6d2";
+    ctx.fillText(say, meterX + meterW / 2, meterY - 12);
   }
   if (m.noteT > 0 && m.note && m.note !== m.banner) {
     const note = HUD_CHASE.note!;
@@ -561,12 +569,13 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   paintRadar(ctx, m);
   for (const shot of m.shots) {
     if (!shot.live || shot.owner !== "ai" || (shot.kind !== "missil" && shot.kind !== "emp")) continue;
-    const gap = m.player.dist - shot.dist;
-    if (gap <= 0 || gap > 40) continue;
+    const ahead = shot.dist - m.player.dist;
+    const closing = (ahead > 0 && shot.speed < m.player.speed) || (ahead < 0 && shot.speed > m.player.speed);
+    if (!closing || Math.abs(ahead) > 40 || Math.abs(ahead) < 0.4) continue;
     const x = shot.lane < -1 ? 420 : shot.lane > 1 ? 860 : 640;
     ctx.fillStyle = shot.sure ? "#ff2a2a" : "#ff8a1f";
     ctx.font = "900 18px ui-monospace, monospace";
-    ctx.fillText(shot.agora ? "AGORA!" : `▲ ${Math.round(gap)} m`, x, 688);
+    ctx.fillText(shot.agora ? "AGORA!" : `${ahead > 0 ? "▼" : "▲"} ${Math.round(Math.abs(ahead))} m`, x, 688);
   }
   if (m.debug) paintDebug(ctx, m, now);
   if (m.player.hurt > 0.05) {

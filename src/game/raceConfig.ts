@@ -23,30 +23,30 @@ export const RACE_CONFIG = {
   launch: {
     green: [4000, 5500] as const,
     perfect: [4600, 5000] as const,
-    bogTime: 0.4,
-    bogMul: 0.6,
-    spinTime: 0.5,
-    spinMul: 0.7,
+    bogTime: 0.28,
+    bogMul: 0.75,
+    spinTime: 0.35,
+    spinMul: 0.8,
     perfectBonus: 0.1,
     perfectTime: 1,
-    rise: 4000,
-    fall: 3000,
-    redHold: 0.6,
+    rise: 5200,
+    fall: 2600,
+    redHold: 0.45,
   },
   shift: [
-    { lo: 6600, hi: 7700, pLo: 7250, pHi: 7550 },
-    { lo: 6700, hi: 7750, pLo: 7300, pHi: 7600 },
-    { lo: 6800, hi: 7800, pLo: 7350, pHi: 7650 },
-    { lo: 6900, hi: 7850, pLo: 7400, pHi: 7700 },
-    { lo: 7000, hi: 7900, pLo: 7450, pHi: 7750 },
-    { lo: 7100, hi: 7920, pLo: 7500, pHi: 7780 },
-    { lo: 7180, hi: 7950, pLo: 7540, pHi: 7820 },
+    { lo: 5400, hi: 7850, pLo: 6800, pHi: 7500 },
+    { lo: 5500, hi: 7880, pLo: 6850, pHi: 7550 },
+    { lo: 5600, hi: 7900, pLo: 6900, pHi: 7600 },
+    { lo: 5700, hi: 7920, pLo: 6950, pHi: 7650 },
+    { lo: 5800, hi: 7940, pLo: 7000, pHi: 7700 },
+    { lo: 5900, hi: 7960, pLo: 7050, pHi: 7740 },
+    { lo: 6000, hi: 7980, pLo: 7100, pHi: 7780 },
   ] as const,
-  shiftTime: { perfeito: 0.08, ok: 0.2, cedo: 0.3, tarde: 0.3, corte: 0.6 },
-  perfectBonus: 0.025,
+  shiftTime: { perfeito: 0.06, ok: 0.1, cedo: 0.4, tarde: 0.4, corte: 0.5 },
+  perfectBonus: 0.04,
   perfectTime: 1.2,
-  corteMul: 0.4,
-  corteHold: 0.6,
+  corteMul: 0.7,
+  corteHold: 0.45,
   nitro: { burn: 1.8, force: 0.3, cap: 0.06, perfectExtra: 0.4, lowRpm: 5000 },
   missile: { kick: 55, range: 150, cd: 1.2, dmg: 0.18, lockedDmg: 0.14, slow: 0.75, slowT: 1, lock: 0.5, guide: 0.4, band: [15, 150] as const },
   mine: { life: 8, arm: 0.3, max: 2, cd: 2, dmg: 0.18, slow: 0.7, slowT: 0.8, see: 120, warn: 40, drop: 6 },
@@ -69,10 +69,10 @@ export function driveMph(stat: number): number {
 }
 
 export function accelA(vmaxMph: number): number {
-  if (vmaxMph >= 210) return 13.6;
-  if (vmaxMph >= 198) return 12;
-  if (vmaxMph >= 183) return 10.7;
-  return 9.8;
+  if (vmaxMph >= 210) return 16.4;
+  if (vmaxMph >= 198) return 15.2;
+  if (vmaxMph >= 183) return 14.4;
+  return 13.8;
 }
 
 export function badgeForReaction(reaction: number): RaceBadge {
@@ -95,11 +95,12 @@ export function gearBox(count: number): { frac: number[]; mult: number[] } {
   const n = count >= 8 ? 8 : count >= 7 ? 7 : 6;
   const frac =
     n === 8
-      ? [0.24, 0.355, 0.47, 0.575, 0.675, 0.77, 0.875, 1]
+      ? [0.38, 0.5, 0.6, 0.69, 0.77, 0.85, 0.93, 1]
       : n === 7
-        ? [0.24, 0.37, 0.5, 0.625, 0.745, 0.87, 1]
-        : [0.24, 0.39, 0.54, 0.69, 0.85, 1];
-  return { frac, mult: frac.map((f) => 0.24 / f) };
+        ? [0.38, 0.52, 0.64, 0.75, 0.85, 0.93, 1]
+        : [0.38, 0.52, 0.65, 0.77, 0.88, 1];
+  const base = frac[0] ?? 0.38;
+  return { frac, mult: frac.map((f) => base / f) };
 }
 
 export type AiLevel = "facil" | "medio" | "dificil";

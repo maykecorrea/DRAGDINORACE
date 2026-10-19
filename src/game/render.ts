@@ -1,7 +1,7 @@
 import { NEON_HEX, type Upgrades } from "./data";
 import type { RaceArt } from "./raceArt";
 import { loadRaceArt } from "./raceArt";
-import { paintBeira, paintChaseHud, paintDebug, paintParallax, paintRaceHud, paintRaceWorld } from "./raceHud";
+import { paintBeira, paintChaseHud, paintDebug, paintParallax, paintRaceWorld } from "./raceHud";
 import { weaponReach } from "./weapons";
 import {
   LANE_GAP,
@@ -853,8 +853,9 @@ export function drawFrame(
 ) {
   const W = VIEW_W;
   const H = VIEW_H;
-  const chase = m.view !== "cockpit";
-  const horizon = chase ? 300 - (m.camPull || 0) * 16 : H * 0.36;
+  const cockpit = m.view === "cockpit";
+  const chase = !cockpit;
+  const horizon = 300 - (m.camPull || 0) * 16;
   const dist = m.player.dist;
   const yaw = m.player.yaw;
   const lane = m.player.lane;
@@ -864,7 +865,7 @@ export function drawFrame(
   const feel = Math.max(0, Math.min(1, m.player.speed / vmaxMs));
   const fov = 70 + 14 * Math.pow(feel, 1.5) + (m.fovKick || 0);
   CAM = 1.45 * (fov / 70);
-  if (chase) CAM *= 1 - (m.camPull || 0) * 0.22;
+  CAM *= 1 - (m.camPull || 0) * 0.22;
 
   for (const ev of events) {
     if (ev === "shift:perfeito") burst(W * 0.5, H * 0.62, "#d6ff3f", 18, 220);
@@ -958,14 +959,14 @@ export function drawFrame(
   drawRoadside(ctx, horizon, vp, lane, LAT, W, H, dist, art.scenery);
 
   const airAt = (ahead: number, worldLane: number) => {
-    if (chase && ahead < 0) {
+    if (ahead < 0) {
       const t = Math.max(0, Math.min(1, -ahead / 25));
       const sp = 0.42 + (m.camPull || 0) * 0.12;
       const y = 575 + t * (36 + (m.camPull || 0) * 48);
       const x = vp + (worldLane - lane) * sp * W * LAT;
       return { x, y: Math.min(700, y), sp };
     }
-    const z = Math.max(0.85, ahead);
+    const z = Math.max(2.4, 3.1 + Math.max(0, ahead) * 0.14);
     const sp = Math.min(0.9, CAM / z);
     const y = horizon + sp * (H - horizon) - sp * H * 0.16;
     const x = vp + (worldLane - lane) * sp * W * LAT;
@@ -1175,12 +1176,12 @@ export function drawFrame(
   ctx.globalAlpha = 1;
 
   const drawCar = (ahead: number, worldLane: number, sprite: number, nitro: boolean) => {
-    if (ahead < (chase ? -28 : -12) || ahead > 140) return;
-    const z = Math.max(3.2, ahead);
+    if (ahead < -28 || ahead > 90) return;
+    const z = Math.max(2.4, 3.1 + Math.max(0, ahead) * 0.14);
     const p = Math.min(0.48, CAM / z);
     const y = horizon + p * (H - horizon);
     const lanePx = LANE_GAP * p * W * LAT;
-    const w = Math.max(ahead > 50 ? 44 : 26, lanePx * 1.15);
+    const w = Math.max(ahead < 28 ? 96 : ahead > 50 ? 44 : 36, lanePx * 1.15);
     const img = art.cars[sprite] ?? art.cars[0];
     const h = w * (img.height / Math.max(1, img.width));
     const x = vp + (worldLane - lane) * p * W * LAT;
@@ -1208,7 +1209,7 @@ export function drawFrame(
   if (m.rival && (m.mode === "duel" || m.mode === "free")) {
     const ahead = m.rival.dist - dist;
     if (m.player.draft > 0.04 && ahead > 1.6 && ahead < 26) paintSlip(ctx, now, airAt, ahead, m.rival.lane, m.player.draft);
-    if (ahead < (chase ? -28 : -12) || ahead > 140) {
+    if (ahead < -28 || ahead > 90) {
       const pin = ahead > 0 ? 64 : 8;
       const p = airAt(pin, m.rival.lane);
       ctx.save();
@@ -1324,11 +1325,12 @@ export function drawFrame(
   }
 
   const clip = gaugeKey === "pescoco" ? null : plateVideo && plateVideo.readyState >= 2 ? plateVideo : null;
-  const box = plateBox(gaugeKey);
-  if (!chase) {
-    ctx.drawImage(plate, box.x, box.y, box.w, box.h);
-  } else {
-    paintChaseCar(ctx, m, neon, now, youMark);
+  paintChaseCar(ctx, m, neon, now, youMark);
+  if (cockpit) {
+    const s = 1.25;
+    const dw = W * s;
+    const dh = H * s;
+    ctx.drawImage(plate, (W - dw) / 2, (H - dh) / 2, dw, dh);
   }
   if (m.player.nitroOn > 0) {
     ctx.save();
@@ -1435,14 +1437,11 @@ export function drawFrame(
     ctx.fillRect(0, 0, W, H);
   }
 
-  if (art.race) {
-    /* HUD da pista substitui o cluster do cockpit pra não desenhar dois painéis. */
-  } else drawCluster(ctx, m, up, now, gaugeKey, digital);
+  if (art.race) paintChaseHud(ctx, m, now);
+  else drawCluster(ctx, m, up, now, gaugeKey, digital);
   if (strip !== "off" && m.mode === "duel" && m.rival && !art.race) drawStrip(ctx, m, art, rivalSprite, youMark, strip);
   if (!art.race) drawHull(ctx, m, strip !== "off" && m.mode === "duel" && !!m.rival);
-  if (chase) paintChaseHud(ctx, m, now);
-  else if (art.race) paintRaceHud(ctx, m, art.race, now);
-  if (m.debug && !chase) paintDebug(ctx, m, now);
+  if (m.debug) paintDebug(ctx, m, now);
 }
 
 /** Centro do velocímetro em fração do quadro. O mesmo papel de left/top de um CSS por cockpit. */
@@ -1599,7 +1598,7 @@ function drawKeyedClipInner(ctx: CanvasRenderingContext2D, clip: HTMLVideoElemen
   holdCtx.globalCompositeOperation = "source-over";
   const smooth = ctx.imageSmoothingEnabled;
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(holdScratch, 0, 0, VIEW_W, VIEW_H);
+  ctx.drawImage(holdScratch, (VIEW_W - VIEW_W * 1.25) / 2, (VIEW_H - VIEW_H * 1.25) / 2, VIEW_W * 1.25, VIEW_H * 1.25);
   ctx.imageSmoothingEnabled = smooth;
 }
 

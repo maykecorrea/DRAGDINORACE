@@ -353,21 +353,22 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       if ((e.code === "KeyD" || e.code === "ArrowRight") && e.timeStamp - edges.current.tapR <= 250) edges.current.ram = 1;
       if (e.code === "KeyD" || e.code === "ArrowRight") edges.current.tapR = e.timeStamp;
       const bind = readKeys(saveRef.current);
-      if (!keys.has(e.code) && (e.code === bind.gas || e.code === "KeyW" || e.code === "ArrowUp")) keyClock.gasDown = e.timeStamp;
+      if (!keys.has(e.code) && (e.code === bind.gas || e.code === "KeyW" || e.code === "ArrowUp")) keyClock.gasDown = performance.now();
+      if (screenRef.current === "drive" && (e.code === "KeyF" || e.code === "KeyG" || e.code === "Space" || e.code === "ShiftLeft" || e.code === "ShiftRight")) e.preventDefault();
       if (bind && Object.values(bind).includes(e.code)) e.preventDefault();
       keys.add(e.code);
     };
     const onUp = (e: KeyboardEvent) => {
-      if (e.code === "Space") keyClock.brakeUp = e.timeStamp;
+      if (e.code === "Space") keyClock.brakeUp = performance.now();
       keys.delete(e.code);
     };
     const onBlur = () => keys.clear();
-    window.addEventListener("keydown", onDown);
-    window.addEventListener("keyup", onUp);
+    window.addEventListener("keydown", onDown, true);
+    window.addEventListener("keyup", onUp, true);
     window.addEventListener("blur", onBlur);
     return () => {
-      window.removeEventListener("keydown", onDown);
-      window.removeEventListener("keyup", onUp);
+      window.removeEventListener("keydown", onDown, true);
+      window.removeEventListener("keyup", onUp, true);
       window.removeEventListener("blur", onBlur);
     };
   }, []);
@@ -397,13 +398,15 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       const throttle = down(bind.gas) || (injected?.includes("KeyW") ?? false) || hold.current.gas ? 1 : 0;
       const shiftDown =
         down(bind.shift) ||
+        down("ShiftLeft") ||
+        down("ShiftRight") ||
         (injected?.includes("ShiftLeft") ?? false) ||
         (injected?.includes("ShiftRight") ?? false) ||
         (injected?.includes("ArrowUp") ?? false) ||
         hold.current.shift;
       const nitroDown = down(bind.nitro) || (injected?.includes("KeyN") ?? false) || hold.current.nitro;
-      const fireDown = down(bind.fire) || hold.current.fire;
-      const rearDown = down(bind.rear) || hold.current.rear;
+      const fireDown = down(bind.fire) || down("KeyF") || hold.current.fire;
+      const rearDown = down(bind.rear) || down("KeyG") || hold.current.rear;
       const shift = shiftDown && !prev.current.shift;
       const nitro = nitroDown && !prev.current.nitro;
       const fireEdge = fireDown && !prev.current.fire;
@@ -853,7 +856,13 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                                 ? "QUEIMOU"
                                 : "VAI"
                       : "SOLTA"
-                    : "ESPAÇO FREIA · W GIRA · SOLTA O ESPAÇO NO VAI";
+                    : sim.phase === "tree"
+                      ? sim.t < 1
+                        ? "3"
+                        : sim.t < 2
+                          ? "2"
+                          : "1"
+                      : "SEGURA ESPAÇO + W";
                 const chaseView = sim.view !== "cockpit";
                 box.style.display = prep && !chaseView ? "block" : "none";
                 box.style.visibility = prep && !chaseView ? "visible" : "hidden";
