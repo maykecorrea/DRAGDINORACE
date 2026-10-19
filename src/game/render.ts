@@ -822,14 +822,23 @@ function paintChaseCar(ctx: CanvasRenderingContext2D, m: Match, neon: string, no
     ctx.stroke();
   }
   if (m.player.nitroOn > 0) {
-    ctx.fillStyle = "#7fd7ff";
-    const h = 36 + (Math.floor(now * 16) % 3) * 14;
+    const flick = Math.floor(now * 18) % 3;
+    const h = 78 + flick * 28;
     ctx.globalCompositeOperation = "lighter";
-    ctx.fillRect(-18, 28, 14, h);
-    ctx.fillRect(6, 28, 14, h);
+    ctx.fillStyle = "rgba(90,190,255,0.45)";
+    ctx.beginPath();
+    ctx.ellipse(0, 36, 54, h * 0.72, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#7fd7ff";
+    ctx.fillRect(-34, 24, 22, h);
+    ctx.fillRect(12, 24, 22, h);
+    ctx.fillStyle = "#e7f7ff";
+    ctx.fillRect(-22, 24, 16, h * 0.72);
+    ctx.fillRect(6, 24, 16, h * 0.62);
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(-8, 28, 8, h * 0.55);
-    ctx.fillRect(2, 28, 8, h * 0.55);
+    ctx.fillRect(-10, 24, 12, h * 0.48);
+    ctx.fillRect(2, 24, 10, h * 0.4);
+    ctx.globalCompositeOperation = "source-over";
   }
   ctx.restore();
 }
@@ -1208,7 +1217,6 @@ export function drawFrame(
 
   if (m.rival && (m.mode === "duel" || m.mode === "free")) {
     const ahead = m.rival.dist - dist;
-    if (m.player.draft > 0.04 && ahead > 1.6 && ahead < 26) paintSlip(ctx, now, airAt, ahead, m.rival.lane, m.player.draft);
     if (ahead < -28 || ahead > 90) {
       const pin = ahead > 0 ? 64 : 8;
       const p = airAt(pin, m.rival.lane);
@@ -1335,25 +1343,33 @@ export function drawFrame(
   if (m.player.nitroOn > 0) {
     ctx.save();
     const edge = ctx.createLinearGradient(0, 0, W, 0);
-    edge.addColorStop(0, "rgba(80,170,255,0.28)");
-    edge.addColorStop(0.16, "rgba(80,170,255,0)");
-    edge.addColorStop(0.84, "rgba(80,170,255,0)");
-    edge.addColorStop(1, "rgba(80,170,255,0.28)");
+    edge.addColorStop(0, "rgba(80,190,255,0.55)");
+    edge.addColorStop(0.22, "rgba(80,190,255,0)");
+    edge.addColorStop(0.78, "rgba(80,190,255,0)");
+    edge.addColorStop(1, "rgba(80,190,255,0.55)");
     ctx.fillStyle = edge;
     ctx.fillRect(0, 0, W, H);
+    const wash = ctx.createLinearGradient(0, H * 0.42, 0, H);
+    wash.addColorStop(0, "rgba(80,190,255,0)");
+    wash.addColorStop(1, "rgba(120,210,255,0.28)");
+    ctx.fillStyle = wash;
+    ctx.fillRect(0, H * 0.42, W, H * 0.58);
     ctx.globalCompositeOperation = "lighter";
     const fr = art.flames.length > 0 ? art.flames[Math.floor(now * 14) % art.flames.length] : undefined;
     if (fr?.width) {
-      const fw = 86;
-      const fh = 54;
-      ctx.translate(vp, 508);
+      const fw = 240;
+      const fh = 150;
+      ctx.translate(vp, 530);
       ctx.scale(1, -1);
       ctx.drawImage(fr, -fw / 2, 0, fw, fh);
+      ctx.globalAlpha = 0.75;
+      ctx.drawImage(fr, -fw * 0.72, 8, fw * 0.62, fh * 0.8);
+      ctx.drawImage(fr, fw * 0.1, 8, fw * 0.62, fh * 0.8);
     } else {
-      for (let i = 0; i < 5; i++) {
-        const h = 16 + ((Math.floor(now * 16) + i) % 3) * 8;
-        ctx.fillStyle = i % 2 === 0 ? "#7fd7ff" : "#e7f7ff";
-        ctx.fillRect(vp + (i - 2) * 16, 492 - h, 7, h);
+      for (let i = 0; i < 7; i++) {
+        const h = 48 + ((Math.floor(now * 16) + i) % 3) * 26;
+        ctx.fillStyle = i % 2 === 0 ? "#7fd7ff" : "#ffffff";
+        ctx.fillRect(vp + (i - 3) * 22, 520 - h, 14, h);
       }
     }
     ctx.restore();
@@ -1849,56 +1865,6 @@ function cutMagenta(img: CanvasImageSource): CanvasImageSource {
   return out;
 }
 
-function paintSlip(
-  ctx: CanvasRenderingContext2D,
-  now: number,
-  airAt: (ahead: number, worldLane: number) => { x: number; y: number; sp: number },
-  ahead: number,
-  worldLane: number,
-  draft: number,
-) {
-  const pocket = Math.max(0, Math.min(1, draft));
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
-  ctx.lineCap = "round";
-  const ribbons = [
-    { side: -0.18, tint: "#d7f4ff", weight: 0.75 },
-    { side: -0.06, tint: "#f4fffb", weight: 1 },
-    { side: 0.07, tint: "#f4fffb", weight: 1 },
-    { side: 0.18, tint: "#e7ffc7", weight: 0.75 },
-  ];
-  for (const ribbon of ribbons) {
-    for (let s = 0; s < 9; s++) {
-      const u = s / 9;
-      const z0 = Math.max(1.15, ahead * (0.9 - u * 0.74));
-      const z1 = Math.max(1.1, ahead * (0.9 - (u + 1 / 9) * 0.74));
-      const breathe = (v: number) => Math.sin(now * 2.2 + v * 7 + ribbon.side * 12) * (0.02 + v * 0.08);
-      const a = airAt(z0, worldLane + ribbon.side * (0.4 + u) + breathe(u));
-      const b = airAt(z1, worldLane + ribbon.side * (0.4 + u + 0.1) + breathe(u + 0.1));
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(b.x, b.y);
-      ctx.strokeStyle = ribbon.tint;
-      ctx.globalAlpha = (0.16 + pocket * 0.42) * ribbon.weight * (1 - u * 0.35);
-      ctx.lineWidth = Math.max(1.25, a.sp * (7 + pocket * 16));
-      ctx.stroke();
-    }
-  }
-  for (let i = 0; i < 14; i++) {
-    const u = (now * (0.38 + (i % 3) * 0.07) + i / 14) % 1;
-    const z = Math.max(1.1, 1.4 + (ahead - 2.4) * (1 - u));
-    const sway = Math.sin(now * 2.8 + i * 1.7) * 0.2 * u;
-    const p = airAt(z, worldLane + sway);
-    ctx.globalAlpha = (1 - u) * (0.2 + pocket * 0.55);
-    ctx.fillStyle = i % 2 === 0 ? "#f7fffc" : "#d9fff1";
-    const r = Math.max(1.1, p.sp * (2.4 + u * 11));
-    ctx.beginPath();
-    ctx.ellipse(p.x, p.y, r * (2.4 + pocket * 1.4), r * 0.62, sway * 0.6, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.restore();
-}
-
 function drawHull(ctx: CanvasRenderingContext2D, m: Match, underStrip: boolean) {
   const y = underStrip ? 74 : 14;
   const bar = (x: number, label: string, hp: number, max: number) => {
@@ -1930,7 +1896,6 @@ function drawHull(ctx: CanvasRenderingContext2D, m: Match, underStrip: boolean) 
     2,
     rearHot && m.player.rearAmmo > 0 ? "#ff5a1f" : m.player.rearAmmo > 0 ? rearDef.color : "#6d7464",
   );
-  if (m.player.draft > 0.08) text(ctx, "VACUO", 16, y + 58, 2, "#e7fff6");
   if (m.rival && (m.mode === "duel" || m.mode === "free")) bar(VIEW_W - 236, "ALVO", m.rival.hp, m.rival.hpMax);
 }
 

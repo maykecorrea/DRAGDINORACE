@@ -758,3 +758,61 @@ test("IA fácil na frente solta mina e tira vida", () => {
   assert.ok(m.player.hp < m.player.hpMax, `hp ${m.player.hp}/${m.player.hpMax} tiros ${m.shotsMade}`);
   assert.ok(m.feed.some((row) => row.text.includes("da IA")) || m.dmgLog.some((row) => row.who === "you"), "sem rótulo de dano");
 });
+
+test("depois da queima o shift não sobe marcha morta", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("queima-giro", bot, comum, comum, 6, 6, 8);
+  let wall = 100_000;
+  let brake = true;
+  let burned = false;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 8; i++) {
+    wall += 1000 * dt;
+    if (!burned && m.phase === "tree" && m.t > 2.2) {
+      brake = false;
+      burned = true;
+    }
+    stepMatch(
+      m,
+      { throttle: 1, steer: 0, shift: true, nitro: false, brake, nowMs: wall, brakeUpMs: burned ? wall - 500 : null },
+      dt,
+      up,
+      up,
+    );
+    if (m.phase === "race" && m.raceTime > 2.2) break;
+  }
+  assert.equal(m.player.launchGrade, "queimou");
+  assert.ok(m.player.gear <= 2, `marcha ${m.player.gear}`);
+  assert.ok(!m.player.shifts.includes("corte"), m.player.shifts.join(","));
+  assert.ok(mph(m.player.speed) > 30, `${mph(m.player.speed).toFixed(1)} mph marcha ${m.player.gear}`);
+});
+
+test("espaço e W juntos seguram o giro certo", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("giro-certo", bot, comum, comum, 6, 6, 9);
+  let wall = 110_000;
+  let brake = true;
+  let releaseAt = 0;
+  const dt = 1 / 60;
+  let sawGreen = false;
+  for (let i = 0; i < 60 * 8 && !m.player.launched; i++) {
+    wall += 1000 * dt;
+    if (m.phase === "tree" && m.t > 1.2) {
+      const [lo, hi] = RACE_CONFIG.launch.perfect;
+      if (m.player.rpm >= lo && m.player.rpm <= hi) sawGreen = true;
+    }
+    if (m.banner === "VAI" && m.raceTime >= 0.05 && brake) {
+      brake = false;
+      releaseAt = wall;
+    }
+    stepMatch(
+      m,
+      { throttle: 1, steer: 0, shift: false, nitro: false, brake, nowMs: wall, brakeUpMs: brake ? null : releaseAt },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.equal(sawGreen, true, `rpm ${m.player.rpm}`);
+  assert.ok(m.player.launchGrade === "perfeito" || m.player.launchGrade === "ok", String(m.player.launchGrade));
+});

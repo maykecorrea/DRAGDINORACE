@@ -1573,7 +1573,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
             <p className="pointer-events-none absolute left-1/2 top-44 z-20 max-w-sm -translate-x-1/2 bg-bg/80 px-3 py-2 text-center text-sm text-primary">
               {again.kind === "free"
                 ? "Segura o gás. Shift sobe a marcha quando aparecer TROCA. F atira na frente. G atira atrás."
-                : "SEGURA ESPAÇO + W. SOLTA O ESPAÇO NO VAI. W sozinho antes do verde queima. Shift na faixa verde (BOM) ou dourada (PERFEITO). F míssil. G mina. E escudo. N nitro."}
+                : "Segura ESPAÇO e W até o giro ficar verde (GIRO CERTO). Solta o ESPAÇO no VAI. W sozinho passa de 5500 e patina. Shift só quando aparecer AGORA. F míssil. G mina."}
             </p>
           )}
           <div className="pointer-events-auto flex items-center justify-between">
@@ -1653,7 +1653,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
           <p className="pointer-events-none hidden pb-3 text-right text-sm text-fg md:block">
             {again.kind === "free"
               ? "Segura o gás · Shift sobe a marcha · N nitro · F frente · G traseira · A e D na faixa"
-              : "SEGURA ESPAÇO + W · SOLTA O ESPAÇO NO VAI · depois o Espaço é o cuspe · Shift na faixa verde · N nitro · F míssil · G mina · E escudo · A/D faixa · V câmera"}
+              : "ESPAÇO + W até GIRO CERTO · solta o ESPAÇO no VAI · W sozinho patina · Shift quando disser AGORA · N nitro · F míssil · G mina · E escudo · A/D faixa · V câmera"}
           </p>
         </div>
       )}
