@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.2",
-  "name": "corrida-ia-largada",
+  "version": "2026-10-19.3",
+  "name": "racha-justo",
   "built": "2026-10-19",
-  "notes": "A IA da rua corre, aparece e atira. Queimada e reação reais. Countdown 3-2-1-VAI. Míssil e mina visíveis. Carro da perseguição usa o sprite."
+  "notes": "A rua enfrenta a sua faixa. Você termina e o tempo vale. Faixa de troca visível. Mina, míssil, escudo e dano aparecem. Fundo magenta do carro some."
 }

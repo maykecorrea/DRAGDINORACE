@@ -32,7 +32,7 @@ import { reportQuestRace } from "@/game/quests.functions";
 import { Prep } from "./Prep";
 import { P2PRoom } from "@/lib/multiplayer";
 import { applyCar, applyShot, asPvpMsg, type PvpMsg } from "./pvp";
-import { ownedLoot, rollLoot, streetAt, streetBuild, streetById, STREET_PRIZE } from "./street";
+import { ownedLoot, rollLoot, streetBuild, streetById, streetNear, bandStats, STREET_PRIZE } from "./street";
 
 type Screen = "menu" | "drive" | "rivals" | "result" | "intro" | "pvp";
 
@@ -626,7 +626,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 const stars: [boolean, boolean, boolean] = [
                   sim.player.launchGrade === "perfeito",
                   !!sim.rival?.wrecked,
-                  finished && sim.player.hp >= sim.player.hpMax && !sim.player.wrecked,
+                  !sim.player.wrecked && sim.player.hp >= sim.player.hpMax - 0.5,
                 ];
                 const boss = phase ? BOSSES[phase.chapter] : undefined;
                 const streetKey = sim.rivalId?.startsWith("racha-") ? sim.rivalId.slice(6) : "";
@@ -894,8 +894,31 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     const mark = sideMark(car);
     const img = new Image();
     img.onload = () => {
+      const punch = (source: CanvasImageSource) => {
+        const w = (source as { width?: number }).width ?? 0;
+        const h = (source as { height?: number }).height ?? 0;
+        if (w < 2 || h < 2) return source;
+        const board = document.createElement("canvas");
+        board.width = w;
+        board.height = h;
+        const g = board.getContext("2d", { willReadFrequently: true });
+        if (!g) return source;
+        g.drawImage(source, 0, 0);
+        const frame = g.getImageData(0, 0, w, h);
+        const px = frame.data;
+        for (let i = 0; i < px.length; i += 4) {
+          const r = px[i] ?? 0;
+          const gg = px[i + 1] ?? 0;
+          const b = px[i + 2] ?? 0;
+          const a = px[i + 3] ?? 0;
+          if (a < 20) continue;
+          if (r > 170 && b > 170 && gg < 150 && Math.abs(r - b) < 80) px[i + 3] = 0;
+        }
+        g.putImageData(frame, 0, 0);
+        return board;
+      };
       if (!mark.flip) {
-        youArt.current = img;
+        youArt.current = punch(img);
         return;
       }
       const board = document.createElement("canvas");
@@ -903,13 +926,13 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       board.height = img.height;
       const g = board.getContext("2d");
       if (!g) {
-        youArt.current = img;
+        youArt.current = punch(img);
         return;
       }
       g.translate(board.width, 0);
       g.scale(-1, 1);
       g.drawImage(img, 0, 0);
-      youArt.current = board;
+      youArt.current = punch(board);
     };
     img.src = mark.src;
   }, [car]);
@@ -989,16 +1012,17 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     unlock();
     const c = selectedCar(saveRef.current);
     const you = statsOf(c, saveRef.current.pilot, saveRef.current.kit);
-    const bot = botForLevel(levelForRarity(car.rarity));
-    const them = resolveStats(car.driver, car.rarity, streetBuild(car.rarity), car.id);
+    const bot = botForLevel(levelForRarity(c.rarity));
+    const them = bandStats(you, resolveStats(car.driver, car.rarity, streetBuild(car.rarity), car.id));
+    const gears = gearsFor(c.rarity);
     simRef.current = arm(
       createDuel(
         `racha-${car.id}`,
         bot,
         you,
         them,
-        gearsFor(c.rarity),
-        gearsFor(car.rarity),
+        gears,
+        gears,
       ),
     );
     resultLock.current = false;
@@ -1392,7 +1416,10 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       )}
 
       {screen === "menu" && (
-        <Prep save={save} ready={ready} treino={treino} onCommit={commit} onRun={treino ? goFree : () => goStreet(streetAt(saveRef.current.races ?? 0))} onStory={openStory} onPvp={openPvp} onBet={openBet} />
+        <Prep save={save} ready={ready} treino={treino} onCommit={commit} onRun={treino ? goFree : () => {
+          const c = selectedCar(saveRef.current);
+          goStreet(streetNear(c.rarity, saveRef.current.races ?? 0));
+        }} onStory={openStory} onPvp={openPvp} onBet={openBet} />
       )}
 
       {screen === "pvp" && (
@@ -1537,7 +1564,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
             <p className="pointer-events-none absolute left-1/2 top-44 z-20 max-w-sm -translate-x-1/2 bg-bg/80 px-3 py-2 text-center text-sm text-primary">
               {again.kind === "free"
                 ? "Segura o gás. Shift sobe a marcha quando aparecer TROCA. F atira na frente. G atira atrás."
-                : "Segura Espaço e W. Solta o Espaço no VAI — ou aperta W no VAI. W antes do verde queima. Shift sobe na faixa verde. F atira pra frente. G solta mina. Depois do VAI o Espaço é o cuspe."}
+                : "SEGURA ESPAÇO + W. SOLTA O ESPAÇO NO VAI. W sozinho antes do verde queima. Shift na faixa verde (BOM) ou dourada (PERFEITO). F míssil. G mina. E escudo. N nitro."}
             </p>
           )}
           <div className="pointer-events-auto flex items-center justify-between">
@@ -1617,7 +1644,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
           <p className="pointer-events-none hidden pb-3 text-right text-sm text-fg md:block">
             {again.kind === "free"
               ? "Segura o gás · Shift sobe a marcha · N nitro · F frente · G traseira · A e D na faixa"
-              : "Espaço freia até o VAI, depois é o cuspe · W gira e larga no VAI · Shift na faixa verde · N nitro · F frente · G trás · E escudo · A/D faixa · V câmera"}
+              : "SEGURA ESPAÇO + W · SOLTA O ESPAÇO NO VAI · depois o Espaço é o cuspe · Shift na faixa verde · N nitro · F míssil · G mina · E escudo · A/D faixa · V câmera"}
           </p>
         </div>
       )}

@@ -2,8 +2,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { CarShow, spinForNft } from "@/components/car-show";
 import { FossilWord } from "@/components/fossil-word";
-import { PILOTS, liveStats, pilotById, type NftCar } from "./data";
+import { PILOTS, liveStats, pilotById, resolveStats, type NftCar } from "./data";
 import { carArt, carLabel } from "./forge";
+import { driveMph } from "./raceConfig";
+import { bandStats, streetBuild, streetNear, STREET_PRIZE } from "./street";
 import { armArt, ARMS, type ArmPiece } from "./armory";
 import { canWear, wearReason } from "./parts";
 import { FRONTAL, REAR, weaponRole, type WeaponId } from "./weapons";
@@ -210,6 +212,15 @@ export function Prep({
       <div className="mx-auto w-full max-w-4xl border border-border bg-bg/95 p-4">
         <p className="font-pixel text-sm tracking-widest text-primary">{treino ? "TREINO" : "PREPARAÇÃO"}</p>
         {treino && <p className="mt-1 text-sm text-muted">Escolhe o set. START começa a pista.</p>}
+        {!treino && (() => {
+          const foe = streetNear(car.rarity, save.races ?? 0);
+          const foeStats = bandStats(carStats, resolveStats(foe.driver, foe.rarity, streetBuild(foe.rarity), foe.id));
+          return (
+            <p className="mt-1 text-sm text-fg">
+              Rival {foe.name} · {foe.rarity} · {Math.round(driveMph(foeStats.vmax))} mph · vida {Math.round(foeStats.durability)} · fóssil {STREET_PRIZE[foe.rarity]}
+            </p>
+          );
+        })()}
         <div className="mt-3 grid gap-2">
           <Shelf
             label="CARRO"

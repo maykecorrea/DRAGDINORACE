@@ -20,6 +20,7 @@ import {
   type Match,
 } from "./sim.ts";
 import { weaponById } from "./weapons.ts";
+import { bandStats, streetNearFrom, type BandCar } from "./streetBand.ts";
 
 const up: Upgrades = { engine: 0, gearbox: 0, nitro: 0, tires: 0, chassis: 0 };
 const comum: StatBlock = { durability: 53, vmax: 162, accel: 58, nitroTime: 1.8, power: 62 };
@@ -479,4 +480,135 @@ test("míssil sai mesmo com o rival atrás e o cuspe acerta na frente", () => {
     assert.ok(m.rival.hp < hp, `${m.rival.hp} vs ${hp}`);
     assert.ok(m.player.hits >= 1);
   }
+});
+
+test("rua comum não cai em épico e o épico é achatado na faixa", () => {
+  const cars: BandCar[] = [
+    { id: "vex", name: "Cromo", rarity: "Comum" },
+    { id: "nyx", name: "Franja", rarity: "Comum" },
+    { id: "gaiola", name: "GAIOLA", rarity: "Raro" },
+    { id: "luz", name: "LUZ-MORTA", rarity: "Épico" },
+    { id: "medula", name: "MEDULA", rarity: "Lendário" },
+  ];
+  for (let n = 0; n < 12; n++) {
+    const car = streetNearFrom(cars, "Comum", n);
+    assert.equal(car.rarity, "Comum", car.name);
+    assert.notEqual(car.id, "luz");
+    assert.notEqual(car.id, "gaiola");
+  }
+  assert.equal(streetNearFrom(cars, "Raro", 0).id, "gaiola");
+  const epic = { durability: 190, vmax: 2200, accel: 160, nitroTime: 2.2, power: 220 };
+  const clamped = bandStats(comum, epic);
+  assert.ok(clamped.vmax <= Math.round(comum.vmax * 1.06) && clamped.vmax >= Math.round(comum.vmax * 0.94), String(clamped.vmax));
+  assert.ok(clamped.durability <= Math.round(comum.durability * 1.2) && clamped.durability >= Math.round(comum.durability * 0.9), String(clamped.durability));
+});
+
+test("o jogador termina depois que o rival cruza", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("dnf", bot, comum, comum, 6, 6, 2);
+  m.phase = "race";
+  m.green = true;
+  m.player.launched = true;
+  m.player.dist = 400;
+  m.player.speed = 45;
+  m.player.gear = 4;
+  m.raceTime = 24;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.finished = true;
+    m.rival.finishTime = 23.4;
+    m.rival.dist = m.strip + 8;
+  }
+  m.firstCross = 23.4;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 10; i++) {
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+  }
+  assert.equal(m.phase, "race");
+  assert.ok(m.raceTime > 32, String(m.raceTime));
+  assert.equal(m.player.finishTime, null);
+  m.player.dist = m.strip - 2;
+  m.player.speed = 70;
+  for (let i = 0; i < 40; i++) {
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+  }
+  assert.equal(m.phase, "finish");
+  assert.ok(m.player.finishTime != null && m.player.finishTime > 23.4, String(m.player.finishTime));
+});
+
+test("mina cai com o rival na frente", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("mina-frente", bot, comum, comum, 6, 6, 5);
+  m.phase = "race";
+  m.green = true;
+  m.player.launched = true;
+  m.player.dist = 200;
+  m.player.speed = 40;
+  m.player.lane = 0;
+  m.raceTime = 6;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 700;
+    m.rival.speed = 55;
+    m.rival.lane = 0;
+  }
+  armRear(m.player, "mine", weaponById("mine"));
+  const rear = m.player.rearAmmo;
+  stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, rear: true, rearEdge: true, brake: false }, 1 / 60, up, up);
+  assert.ok(m.player.rearAmmo < rear, "G não gastou com o rival na frente");
+  assert.ok(m.shots.some((shot) => shot.live && shot.owner === "you" && shot.kind === "mina" && shot.dist < m.player.dist));
+});
+
+test("faixa de luta aproxima o fácil e não puxa o difícil", () => {
+  const easy = botForLevel("facil", mulberry(3));
+  easy.willFoul = false;
+  easy.aim = 0;
+  easy.mines = 0;
+  const m = createDuel("gap", easy, comum, comum, 6, 6, 3);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.dist = 300;
+  m.player.speed = 50;
+  m.player.gear = 4;
+  m.raceTime = 8;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 860;
+    m.rival.speed = 78;
+    m.rival.gear = 5;
+  }
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 4; i++) {
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+  }
+  const gap = (m.rival?.dist ?? 0) - m.player.dist;
+  assert.ok(gap < 140, `gap fácil ${gap.toFixed(1)}`);
+  assert.equal(m.phase, "race");
+
+  const hard = createDuel("gap-hard", botForLevel("dificil", mulberry(4)), comum, comum, 6, 6, 4);
+  hard.phase = "race";
+  hard.green = true;
+  hard.hazards = [];
+  hard.crates = [];
+  hard.player.launched = true;
+  hard.player.dist = 300;
+  hard.player.speed = 50;
+  hard.player.gear = 4;
+  hard.raceTime = 8;
+  if (hard.rival) {
+    hard.rival.launched = true;
+    hard.rival.dist = 860;
+    hard.rival.speed = 78;
+    hard.rival.gear = 5;
+    hard.rival.bot && (hard.rival.bot.rubber = 0);
+    hard.rival.bot && (hard.rival.bot.aim = 0);
+    hard.rival.bot && (hard.rival.bot.mines = 0);
+  }
+  const before = (hard.rival?.dist ?? 0) - hard.player.dist;
+  stepMatch(hard, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+  const after = (hard.rival?.dist ?? 0) - hard.player.dist;
+  assert.ok(after > before - 8, `difícil andou ${before.toFixed(1)} → ${after.toFixed(1)}`);
 });

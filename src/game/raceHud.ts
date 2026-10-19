@@ -106,7 +106,7 @@ export function paintRaceWorld(
       const gap = shot.dist - dist;
       if (gap < -40 || gap > RACE_CONFIG.mine.see) continue;
       const p = airAt(gap, shot.lane);
-      const h = Math.max(16, p.sp * 64);
+      const h = Math.max(42, p.sp * 90);
       blit(ctx, race.minaOsso, p.x, p.y, h);
       const near = gap < RACE_CONFIG.mine.warn && gap > -2;
       const blink = near ? 5 : 2;
@@ -123,7 +123,7 @@ export function paintRaceWorld(
     if (ahead < -8 || ahead > 150) continue;
     const p = airAt(Math.max(0.8, ahead), shot.lane);
     const img = shot.back ? race.missilTras : race.missilFrente;
-    const h = Math.max(18, Math.min(72, p.sp * 86));
+    const h = Math.max(48, Math.min(96, p.sp * 110));
     ctx.save();
     ctx.globalAlpha = ahead > 120 ? Math.max(0, 1 - (ahead - 120) / 30) : 1;
     blit(ctx, img, p.x, p.y, h);
@@ -459,10 +459,17 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   ctx.globalAlpha = 1;
   if (m.banner) {
     const slot = HUD_CHASE.banner!;
-    const big = m.banner === "3" || m.banner === "2" || m.banner === "1" || m.banner === "VAI" || m.banner === "QUEIMOU" || m.banner === "TROCA";
-    ctx.fillStyle = m.banner === "QUEIMOU" ? "#ff3b1f" : "#d6ff3f";
-    ctx.font = big ? "900 96px ui-monospace, monospace" : "900 22px ui-monospace, monospace";
-    ctx.fillText(m.banner, big ? 640 : slot.x + slot.w / 2, big ? 250 : slot.y + 24);
+    const big = ["3", "2", "1", "VAI", "QUEIMOU", "TROCA", "MÍSSIL", "MINA", "ESCUDO", "NITRO", "SEGURA ESPAÇO + W"].includes(m.banner);
+    ctx.fillStyle = m.banner === "QUEIMOU" ? "#ff3b1f" : m.banner === "MÍSSIL" || m.banner === "MINA" ? "#ff8a1f" : m.banner === "ESCUDO" || m.banner === "NITRO" ? "#7fd7ff" : "#d6ff3f";
+    ctx.font = big ? "900 84px ui-monospace, monospace" : "900 22px ui-monospace, monospace";
+    ctx.fillText(m.banner, big ? 640 : slot.x + slot.w / 2, big ? 220 : slot.y + 24);
+  }
+  if (m.mode === "duel" && !m.player.launched && m.phase !== "finish") {
+    ctx.font = "700 22px ui-monospace, monospace";
+    ctx.fillStyle = "#efe6d2";
+    ctx.fillText("SEGURA ESPAÇO + W", 640, 300);
+    ctx.fillStyle = "#d6ff3f";
+    ctx.fillText("SOLTA O ESPAÇO NO VAI", 640, 330);
   }
   const w = HUD_CHASE.weapons!;
   ctx.textAlign = "left";
@@ -521,6 +528,25 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   ctx.fillText(String(m.player.gear), cx, cy + 8);
   ctx.font = "700 16px ui-monospace, monospace";
   ctx.fillText(`${Math.round(mph(m.player.speed))} MPH`, cx, cy + 36);
+  const meterX = 360;
+  const meterY = 648;
+  const meterW = 560;
+  const live = Math.max(0, Math.min(1, m.player.rpm / REDLINE));
+  ctx.fillStyle = "rgba(7,10,8,0.88)";
+  ctx.fillRect(meterX, meterY, meterW, 36);
+  ctx.fillStyle = "#3f8f3a";
+  ctx.fillRect(meterX + meterW * lo, meterY, meterW * Math.max(0, hi - lo), 36);
+  ctx.fillStyle = "#e6c15a";
+  ctx.fillRect(meterX + meterW * pLo, meterY, meterW * Math.max(0, pHi - pLo), 36);
+  ctx.fillStyle = "#efe6d2";
+  ctx.fillRect(meterX + meterW * live - 3, meterY - 6, 6, 48);
+  const zone = !m.player.launched ? "" : live >= pLo && live <= pHi ? "PERFEITO" : live >= lo && live <= hi ? "BOM" : live < lo ? "CEDO" : "TARDE";
+  if (zone) {
+    const say = zone === "CEDO" ? "CEDO — ESPERA O VERDE" : zone === "TARDE" ? "TARDE" : zone === "PERFEITO" ? "PERFEITO — TROCA" : "BOM — TROCA";
+    ctx.font = "900 28px ui-monospace, monospace";
+    ctx.fillStyle = zone === "PERFEITO" ? "#e6c15a" : zone === "BOM" ? "#d6ff3f" : "#ffb020";
+    ctx.fillText(say, meterX + meterW / 2, meterY - 10);
+  }
   if (m.noteT > 0 && m.note && m.note !== m.banner) {
     const note = HUD_CHASE.note!;
     ctx.font = "700 18px ui-monospace, monospace";
@@ -543,6 +569,23 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     ctx.fillText(shot.agora ? "AGORA!" : `▲ ${Math.round(gap)} m`, x, 688);
   }
   if (m.debug) paintDebug(ctx, m, now);
+  if (m.player.hurt > 0.05) {
+    ctx.strokeStyle = `rgba(255,59,31,${Math.min(1, m.player.hurt * 1.4)})`;
+    ctx.lineWidth = 18;
+    ctx.strokeRect(10, 10, 1260, 700);
+    const hit = m.feed.find((row) => row.text.includes("da IA"));
+    if (hit) {
+      ctx.fillStyle = "#ff3b1f";
+      ctx.font = "900 32px ui-monospace, monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(hit.text, 640, 168);
+    }
+  }
+  if (m.player.shield > 0) {
+    ctx.strokeStyle = "#d4ff3a";
+    ctx.lineWidth = 10;
+    ctx.strokeRect(18, 18, 1244, 684);
+  }
   ctx.restore();
 }
 

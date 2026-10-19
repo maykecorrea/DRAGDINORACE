@@ -9,7 +9,7 @@ export const REDLINE = RACE_CONFIG.redline;
 export const STRIP = RACE_CONFIG.stripM;
 export const GEARS = 6;
 export const TREE_GREEN = 3;
-export const STAGE = 0.6;
+export const STAGE = 0.15;
 export const TREE_AMBERS = [1, 2, 2.99];
 export const REF_MPH = 232;
 export const TRACK_EDGE = 9;
@@ -812,7 +812,7 @@ function logDmg(m: Match, target: Racer, source: string, dmg: number) {
   const who: "you" | "ai" = target === m.player ? "you" : "ai";
   m.dmgLog.push({ who, source, dmg, hp: Math.round(target.hp) });
   if (m.dmgLog.length > 10) m.dmgLog.shift();
-  const from = who === "you" ? "em você" : "no rival";
+  const from = who === "you" ? "da IA" : "no rival";
   pushFeed(m, `-${dmg} ${source} ${from}`);
 }
 
@@ -884,7 +884,7 @@ function applyHit(m: Match, target: Racer, weapon: WeaponId, dmg: number, splash
     shooter.nitroLeft = Math.min(shooter.nitroMax, shooter.nitroLeft + steal);
   }
   target.hp = Math.max(0, target.hp - dealt);
-  target.hurt = 0.25;
+  target.hurt = target === m.player ? 0.85 : 0.25;
   if (!splash) target.taken[weapon] = (target.taken[weapon] ?? 0) + 1;
   const died = target.hp <= 0;
   if (died) {
@@ -1019,6 +1019,7 @@ function spawnShot(m: Match, r: Racer, owner: "you" | "ai", sure: boolean, force
     markFeedback(m, back ? "G" : "F");
     m.events.push(kind === "mina" ? "mine" : "shot");
     if (kind === "mina") note(m, "MINA");
+    else if (kind === "missil") note(m, "MÍSSIL");
   }
 }
 
@@ -1129,7 +1130,8 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
     const fire = !!input?.fire;
     const rear = !!input?.rear;
     if (rear) {
-      if (foe && ahead > 1.5) {
+      const dropping = r.rear === "mine";
+      if (!dropping && foe && ahead > 1.5) {
         m.blockRear = 0.3;
         m.events.push("blocked");
       } else if (r.rearCool <= 0 && r.rearAmmo > 0) spawnShot(m, r, "you", false, true);
@@ -1831,6 +1833,30 @@ export function stepMatch(m: Match, input: Input, dt: number, playerUp: Upgrades
   stepRacer(m, m.player, playerUp, liveInput, h, "you");
   if (m.rival && !m.pvp && m.mode === "duel" && rivalUp) stepRacer(m, m.rival, rivalUp, null, h, "ai");
   if (m.rival && !m.pvp && m.mode === "free") stepRacer(m, m.rival, playerUp, null, h, "ai");
+  if (
+    m.rival?.bot &&
+    !m.pvp &&
+    !m.ghost &&
+    !m.ranked &&
+    m.mode === "duel" &&
+    (m.rival.bot.rubber ?? 0) > 0 &&
+    m.rival.bot.level !== "dificil" &&
+    m.rival.launched &&
+    m.player.launched &&
+    !m.rival.wrecked &&
+    !m.player.wrecked &&
+    m.rival.dist < m.strip * 0.85 &&
+    m.player.dist < m.strip * 0.85
+  ) {
+    const gap = m.rival.dist - m.player.dist;
+    if (gap > 48) {
+      m.rival.speed = Math.min(m.rival.speed, Math.max(10, m.player.speed * 0.97));
+      if (gap > 72) m.rival.dist -= (gap - 72) * Math.min(1, h * 1.5);
+    } else if (gap < -48) {
+      m.rival.speed = Math.max(m.rival.speed, Math.min(m.player.speed * 1.06, m.player.speed + 8));
+      if (gap < -72) m.rival.dist += (-gap - 72) * Math.min(1, h * 1.5);
+    }
+  }
   stepShots(m, h);
   for (const box of m.crates) {
     if (box.taken || !m.player.launched || m.player.wrecked) continue;
@@ -1889,8 +1915,8 @@ export function stepMatch(m: Match, input: Input, dt: number, playerUp: Upgrades
       else if (m.rival?.finished && !m.rival.wrecked) m.firstCross = m.rival.finishTime;
     }
     const settled = (r: Racer | null) => !r || r.finished || r.wrecked;
-    const grace = m.firstCross != null && m.raceTime >= m.firstCross + COMBAT.fimAposS;
-    if ((settled(m.player) && settled(m.rival)) || grace || m.raceTime > RACE_CONFIG.timeout) {
+    const youOut = m.player.finished || m.player.wrecked || m.player.dq;
+    if ((youOut && settled(m.rival)) || m.raceTime > RACE_CONFIG.timeout) {
       m.phase = "finish";
       m.reason = raceReason(m);
     }
@@ -1913,7 +1939,7 @@ export function stepMatch(m: Match, input: Input, dt: number, playerUp: Upgrades
   m.camPull += ((behind ? 1 : 0) - m.camPull) * Math.min(1, h / Math.max(0.05, ease));
   if (m.player.dq) m.banner = "DESCLASSIFICADO";
   else if (m.player.jail) m.banner = "QUEIMOU";
-  else if (m.phase === "staging") m.banner = "ESPAÇO FREIA · W GIRA";
+  else if (m.phase === "staging") m.banner = "SEGURA ESPAÇO + W";
   else if (m.phase === "tree") m.banner = m.t < 1 ? "3" : m.t < 2 ? "2" : "1";
   else if (m.phase === "race" && !m.player.launched) m.banner = "VAI";
   else if (m.noteT > 0 && m.note) m.banner = m.note;

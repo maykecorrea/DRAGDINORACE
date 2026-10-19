@@ -779,9 +779,10 @@ function paintChaseCar(ctx: CanvasRenderingContext2D, m: Match, neon: string, no
   ctx.rotate(tilt);
   const img = sprite as CanvasImageSource & { width?: number; height?: number };
   if (img && (img.width ?? 0) > 8 && (img.height ?? 0) > 8) {
+    const src = cutMagenta(img);
     const w = 210;
     const h = w * ((img.height ?? 1) / (img.width ?? 1));
-    ctx.drawImage(img, -w / 2, -h * 0.78, w, h);
+    ctx.drawImage(src, -w / 2, -h * 0.78, w, h);
   } else {
     ctx.fillStyle = "#1a140f";
     ctx.fillRect(-100, -28, 200, 78);
@@ -813,15 +814,22 @@ function paintChaseCar(ctx: CanvasRenderingContext2D, m: Match, neon: string, no
   }
   if (m.player.shield > 0) {
     ctx.strokeStyle = "#d4ff3a";
-    ctx.lineWidth = 3;
+    ctx.fillStyle = "rgba(212,255,58,0.18)";
+    ctx.lineWidth = 6;
     ctx.beginPath();
-    ctx.arc(0, 0, 108, 0, Math.PI * 2);
+    ctx.arc(0, -10, 120, 0, Math.PI * 2);
+    ctx.fill();
     ctx.stroke();
   }
   if (m.player.nitroOn > 0) {
     ctx.fillStyle = "#7fd7ff";
-    const h = 18 + (Math.floor(now * 16) % 3) * 8;
-    ctx.fillRect(-8, 50, 16, h);
+    const h = 36 + (Math.floor(now * 16) % 3) * 14;
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillRect(-18, 28, 14, h);
+    ctx.fillRect(6, 28, 14, h);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(-8, 28, 8, h * 0.55);
+    ctx.fillRect(2, 28, 8, h * 0.55);
   }
   ctx.restore();
 }
@@ -860,9 +868,13 @@ export function drawFrame(
 
   for (const ev of events) {
     if (ev === "shift:perfeito") burst(W * 0.5, H * 0.62, "#d6ff3f", 18, 220);
-    if (ev === "nitro:limpo") burst(W * 0.5, H * 0.7, "#ff3b1f", 26, 280);
+    if (ev.startsWith("nitro")) burst(W * 0.5, H * 0.78, "#7fd7ff", 28, 320);
     if (ev === "redlight" || ev === "wall") burst(W * 0.5, H * 0.58, "#ff3b1f", 14, 180);
     if (ev === "band") burst(W * 0.62, H * 0.66, "#efe6d2", 6, 80);
+    if (ev === "shot") burst(W * 0.5, H * 0.62, "#ff7300", 22, 260);
+    if (ev === "mine") burst(W * 0.5, H * 0.86, "#ff3b1f", 20, 240);
+    if (ev === "shield") burst(W * 0.5, H * 0.7, "#d4ff3a", 24, 280);
+    if (ev === "hurt") burst(W * 0.5, H * 0.5, "#ff3b1f", 16, 200);
   }
 
   ctx.save();
