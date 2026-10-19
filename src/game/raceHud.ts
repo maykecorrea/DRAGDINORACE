@@ -1,3 +1,4 @@
+import versionInfo from "../../public/version.json";
 import { COMBAT, HUD_CHASE } from "./combat";
 import { sheetFrame, type RaceArt } from "./raceArt";
 import { HUD, RACE_CONFIG, type RaceBadge } from "./raceConfig";
@@ -195,6 +196,12 @@ function ring(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, fr
 }
 
 export function paintRaceHud(ctx: CanvasRenderingContext2D, m: Match, race: RaceArt, now: number) {
+  ctx.save();
+  ctx.font = "600 12px ui-monospace, monospace";
+  ctx.textAlign = "right";
+  ctx.fillStyle = "rgba(239,230,210,0.72)";
+  ctx.fillText(versionInfo.version, 1264, 16);
+  ctx.restore();
   const W = 1280;
   const hp = HUD.hp!;
   const rivalBox = HUD.hpRival!;
@@ -568,8 +575,7 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   ctx.fillRect(meterX + meterW * live - 3, meterY - 6, 6, 48);
   const coach = !m.player.launched && m.mode === "duel" ? launchCoach(m.player.rpm) : null;
   const liveCall = m.player.launched ? shiftCall(m.player.rpm, m.player.gear) : null;
-  const promised = m.player.shownT > 0 && (m.player.shown === "perfeito" || m.player.shown === "ok") ? m.player.shown : null;
-  const call = promised ?? liveCall;
+  const call = m.player.gear < m.player.gears ? liveCall : null;
   const zone = m.player.wrecked ? "QUEBRADO" : call ? shiftWord(call) : "";
   if (coach) {
     ctx.font = "900 22px ui-monospace, monospace";
@@ -577,7 +583,7 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     ctx.fillText(coach.say, meterX + meterW / 2, meterY - 12);
   } else if (zone) {
     const near = call === "cedo" && m.player.rpm / REDLINE > (RACE_CONFIG.shift[Math.min(RACE_CONFIG.shift.length - 1, Math.max(0, m.player.gear - 1))]?.lo ?? 5400) / REDLINE - 0.08;
-    const shiftNote = m.noteT > 0.12 && ["PERFEITO", "BOM", "CEDO", "TARDE", "CORTE"].includes(m.note);
+    const shiftNote = !call && m.noteT > 0.12 && ["PERFEITO", "BOM", "CEDO", "TARDE", "CORTE"].includes(m.note);
     const say = shiftNote
       ? m.note
       : zone === "QUEBRADO"
@@ -604,11 +610,18 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     ctx.fillStyle = "#d6ff3f";
     ctx.fillText(m.note, note.x + note.w / 2, note.y + 20);
   }
-  const alerts = HUD_CHASE.alerts!;
-  ctx.font = "700 14px ui-monospace, monospace";
-  const bits = [m.alertMissile > 0 ? "MÍSSIL" : "", m.alertMine > 0 ? "MINA" : ""].filter(Boolean);
-  ctx.fillStyle = "#ffb020";
-  ctx.fillText(bits.join("  "), alerts.x + alerts.w / 2, alerts.y + 24);
+  if (m.alertMissile > 0 || m.alertMine > 0) {
+    const alerts = HUD_CHASE.alerts!;
+    ctx.font = "700 13px ui-monospace, monospace";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#ffb020";
+    const bits = [m.alertMissile > 0 ? "MÍSSIL" : "", m.alertMine > 0 ? "MINA" : ""].filter(Boolean);
+    ctx.fillText(bits.join("  "), alerts.x, alerts.y + 16);
+  }
+  ctx.font = "600 12px ui-monospace, monospace";
+  ctx.textAlign = "right";
+  ctx.fillStyle = "rgba(239,230,210,0.72)";
+  ctx.fillText(versionInfo.version, 1264, 18);
   paintRadar(ctx, m);
   for (const shot of m.shots) {
     if (!shot.live || shot.owner !== "ai" || (shot.kind !== "missil" && shot.kind !== "emp")) continue;
@@ -616,6 +629,7 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     const closing = (ahead > 0 && shot.speed < m.player.speed) || (ahead < 0 && shot.speed > m.player.speed);
     if (!closing || Math.abs(ahead) > 40 || Math.abs(ahead) < 0.4) continue;
     const x = shot.lane < -1 ? 420 : shot.lane > 1 ? 860 : 640;
+    ctx.textAlign = "center";
     ctx.fillStyle = shot.sure ? "#ff2a2a" : "#ff8a1f";
     ctx.font = "900 18px ui-monospace, monospace";
     ctx.fillText(shot.agora ? "AGORA!" : `${ahead > 0 ? "▼" : "▲"} ${Math.round(Math.abs(ahead))} m`, x, 688);

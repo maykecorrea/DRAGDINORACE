@@ -71,7 +71,7 @@ export const HUD_CHASE: Record<string, HudBox> = {
   feed: { x: 320, y: 26, w: 520, h: 36 },
   banner: { x: 390, y: 78, w: 500, h: 36 },
   radar: { x: 1200, y: 110, w: 56, h: 360 },
-  alerts: { x: 392, y: 412, w: 496, h: 40 },
+  alerts: { x: 24, y: 48, w: 220, h: 22 },
   aim: { x: 560, y: 200, w: 160, h: 36 },
   note: { x: 1010, y: 456, w: 180, h: 28 },
   tacho: { x: 1010, y: 492, w: 200, h: 200 },

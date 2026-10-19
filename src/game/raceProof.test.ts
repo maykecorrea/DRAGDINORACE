@@ -1216,3 +1216,41 @@ test("o rival fácil fica na outra faixa e solta mina na frente", () => {
   assert.equal(sawAhead, true, "IA não soltou mina na frente");
 });
 
+test("banner PERFEITO apaga fora da faixa amarela e o Shift grava a nota da luz", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("luz", bot, comum, comum, 6, 6, 2);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.gear = 5;
+  const vMax = driveMph(comum.vmax) / 2.236936;
+  const vTop = vMax * 0.88;
+  m.player.speed = (7200 / 8000) * vTop;
+  m.player.rpm = 7200;
+  stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
+  assert.equal(m.banner, "AGORA — PERFEITO");
+  m.player.speed = (6400 / 8000) * vTop;
+  m.player.rpm = 6400;
+  stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
+  assert.equal(m.banner, "AGORA — BOM", `${m.banner} rpm ${m.player.rpm.toFixed(0)}`);
+  stepMatch(m, { throttle: 1, steer: 0, shift: true, nitro: false, brake: false }, 1 / 60, up, up);
+  assert.equal(m.player.shifts[0], "ok", m.player.shifts.join(","));
+});
+
+test("freio preso não deixa a reação em branco nem a corrida parada", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("freio-preso", bot, comum, comum, 6, 6, 3);
+  let wall = 20_000;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 12 && !m.player.launched; i++) {
+    wall += 1000 * dt;
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: true, nowMs: wall }, dt, up, up);
+  }
+  assert.equal(m.player.launched, true);
+  assert.ok(m.raceTime < 5, String(m.raceTime));
+  assert.ok(m.player.reaction != null && m.player.reaction > 0.4, String(m.player.reaction));
+  assert.equal(m.player.launchGrade, "atrasou");
+});
+

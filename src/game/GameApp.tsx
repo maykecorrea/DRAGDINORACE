@@ -20,6 +20,7 @@ import {
 import { createAudio, type AudioBus } from "./audio";
 import { VIEW_H, VIEW_W, cockpitMotion, drawFrame, loadArt, type Art } from "./render";
 import { freshSave, loadSave, selectedCar, subscribeGarageReady, subscribeSave, writeSave, type Save } from "./save";
+import versionInfo from "../../public/version.json";
 import { carLabel, cockpitKey, cockpitPlate, sideMark } from "./forge";
 import { keyLabel, readKeys } from "./hotkeys";
 import { raceXp, partById } from "./parts";
@@ -250,7 +251,7 @@ function ResultCard({
         </div>
       )}
       <p className="mt-1 text-sm text-muted">
-        reação {launch === "queimou" || (reaction != null && reaction < 0) ? "QUEIMOU" : reaction == null || reaction > 6 ? "—" : `${Math.round(reaction * 1000)} ms`} · trap {trap == null ? "—" : `${Math.round(mph(trap))} mph`}
+        reação {launch === "queimou" || (reaction != null && reaction < 0) ? "QUEIMOU" : reaction == null ? "—" : `${Math.round(reaction * 1000)} ms`} · trap {trap == null ? "—" : `${Math.round(mph(trap))} mph`}
       </p>
       <div className="mt-3 grid gap-1" style={{ gridTemplateColumns: `repeat(${boxes + 1}, minmax(0, 1fr))` }}>
         <div className={`px-1 py-2 text-center ${cellTone(launch)}`}>
@@ -1671,6 +1672,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         <section className="absolute inset-0 flex items-end overflow-y-auto bg-bg/70 p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-4 md:items-center md:justify-center">
           <div className="w-full max-w-3xl border border-border bg-bg p-5">
             <p className="text-xs tracking-widest text-primary">{result.draw ? "EMPATE" : result.win ? "VOCÊ GANHOU" : "VOCÊ PERDEU"}</p>
+            <p className="text-[10px] tracking-widest text-muted">{versionInfo.version}</p>
             {result.reason ? <p className="mt-1 text-sm text-fg">{result.reason}</p> : null}
             <div className="mt-3 grid gap-3 md:grid-cols-2">
               <ResultCard

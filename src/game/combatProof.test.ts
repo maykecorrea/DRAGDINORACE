@@ -239,3 +239,24 @@ test("tiro na faixa ao lado acerta quando o rival está do lado", () => {
   assert.ok(m.rival.hp < before, `vida ${m.rival.hp}`);
   assert.ok(m.player.hits >= 1, String(m.player.hits));
 });
+
+test("tiro nas faixas de fora acerta o rival do lado", () => {
+  const m = boot();
+  if (!m.rival) return;
+  m.player.lane = -2.2;
+  m.rival.lane = 2.2;
+  m.rival.dist = m.player.dist + 8;
+  m.rival.speed = 55;
+  m.player.speed = 55;
+  m.rival.hp = 50;
+  m.rival.hpMax = 50;
+  m.raceTime = 4;
+  armWeapon(m.player, "missile", weaponById("missile"));
+  armRear(m.player, "mine", weaponById("mine"));
+  const before = m.rival.hp;
+  stepMatch(m, { ...quiet, fireEdge: true, fire: true, cuspe: true }, 1 / 60, up, up);
+  stepMatch(m, { ...quiet, rearEdge: true, rear: true, cuspe: true }, 1 / 60, up, up);
+  for (let i = 0; i < 50 && m.rival.hp >= before; i++) stepMatch(m, { ...quiet, cuspe: i % 4 === 0 }, 1 / 60, up, up);
+  assert.ok(m.rival.hp < before, `vida ${m.rival.hp} tiros ${m.shotsMade} acertos ${m.shotsHit}`);
+  assert.ok(m.player.hits >= 1, String(m.player.hits));
+});
