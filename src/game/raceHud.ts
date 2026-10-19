@@ -508,19 +508,48 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   if (m.banner) {
     const slot = HUD_CHASE.banner!;
     const big = ["3", "2", "1", "VAI", "QUEIMOU", "QUEBRADO"].includes(m.banner);
-    ctx.fillStyle = m.banner === "QUEIMOU" || m.banner === "QUEBRADO" ? "#ff3b1f" : "#d6ff3f";
-    ctx.font = big ? "900 84px ui-monospace, monospace" : "900 22px ui-monospace, monospace";
-    ctx.fillText(m.banner, big ? 640 : slot.x + slot.w / 2, big ? 220 : slot.y + 24);
+    const vai = m.banner === "VAI";
+    const hold = m.banner === "1";
+    const count = m.banner === "3" || m.banner === "2";
+    const bad = m.banner === "QUEIMOU" || m.banner === "QUEBRADO";
+    const color = bad ? "#ff3b1f" : hold ? "#ffb020" : count ? "#ff5a3a" : "#d6ff3f";
+    if (vai) {
+      const kick = m.raceTime < 0.4 ? 1 - m.raceTime / 0.4 : 0;
+      ctx.fillStyle = `rgba(214,255,63,${0.22 * kick})`;
+      ctx.fillRect(0, 140, 1280, 160);
+    }
+    ctx.lineWidth = vai ? 12 : 8;
+    ctx.strokeStyle = "#070806";
+    ctx.fillStyle = color;
+    ctx.font = vai ? "900 128px ui-monospace, monospace" : big ? "900 84px ui-monospace, monospace" : "900 22px ui-monospace, monospace";
+    const by = vai ? 200 : big ? 220 : slot.y + 24;
+    const bx = big || vai ? 640 : slot.x + slot.w / 2;
+    if (big || vai) ctx.strokeText(m.banner, bx, by);
+    ctx.fillText(m.banner, bx, by);
+    if (hold) {
+      ctx.font = "900 28px ui-monospace, monospace";
+      ctx.lineWidth = 6;
+      ctx.fillStyle = "#ffb020";
+      ctx.strokeText("SEGURA", 640, 308);
+      ctx.fillText("SEGURA", 640, 308);
+    }
   }
   if (m.mode === "duel" && !m.player.launched && m.phase !== "finish") {
     const y0 = 250;
+    const green = m.phase === "race";
     for (let i = 0; i < 3; i++) {
-      const on = m.phase === "race" || (m.phase === "tree" && m.t >= i + 0.05);
-      const green = m.phase === "race";
+      const on = green || (m.phase === "tree" && m.t >= i + 0.05);
+      const r = green ? 30 : 22;
       ctx.fillStyle = on ? (green ? "#d6ff3f" : i === 2 ? "#ffb020" : "#ff3b1f") : "#1a140c";
       ctx.beginPath();
-      ctx.arc(560 + i * 80, y0, 22, 0, Math.PI * 2);
+      ctx.arc(560 + i * 80, y0, r, 0, Math.PI * 2);
       ctx.fill();
+      if (green) {
+        ctx.fillStyle = "#f4ffe0";
+        ctx.beginPath();
+        ctx.arc(560 + i * 80, y0, 9, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
     const coach = launchCoach(m.player.rpm);
     const [loRpm, hiRpm] = RACE_CONFIG.launch.green;

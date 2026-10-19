@@ -979,8 +979,10 @@ function applyHit(m: Match, target: Racer, weapon: WeaponId, dmg: number, splash
     return 1;
   };
   const easyIn = streetBot(shooter?.bot) && target === m.player;
+  const easyOut = streetBot(target.bot) && shooter === m.player;
   if (easyIn && label === "OSSADA") dealt = Math.max(2, Math.round(dealt * 0.55));
   else if (!easyIn && chip(shooter?.bot) < 1 && target === m.player) dealt = Math.max(1, Math.round(dealt * chip(shooter?.bot)));
+  if (easyOut) dealt = Math.max(1, Math.round(dealt * 0.55));
   const easyChip = easyIn;
   if (!named && kind === "emp" && !splash) target.empT = Math.max(target.empT, COMBAT.emp.efeitoS);
   if (!named && kind === "missil" && !splash && !easyChip) addSlow(target, COMBAT.missil.lentidao, COMBAT.missil.lentoS);
@@ -1359,7 +1361,7 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
     const medio = r.bot.level === "medio";
     const openAt = easy ? 2.25 : medio ? 1.6 : 1.1;
     const cadence = easy ? 1.55 : medio ? 1.15 : 0.85;
-    const aimP = easy ? 0.2 : medio ? 0.58 : 0.84;
+    const aimP = easy ? 0.34 : medio ? 0.58 : 0.84;
     r.bot.fireArm = (r.bot.fireArm ?? (easy ? 0.45 : medio ? 0.3 : 0.15)) - dt;
     r.bot.boneArm = (r.bot.boneArm ?? (easy ? 0.7 : medio ? 0.4 : 0.2)) - dt;
     const gap = ahead;
@@ -1368,7 +1370,7 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
     const laid = r.bot.minesLaid ?? 0;
     const fast = foe.speed > 30 && r.speed > 30;
     const taken = foe.hpMax - foe.hp;
-    const budget = easy ? 20 : medio ? 34 : 46;
+    const budget = easy ? 28 : medio ? 34 : 46;
     const full = taken >= budget;
     const hungry = easy && taken < 8 && m.raceTime > 6.5;
     if (
@@ -2187,6 +2189,8 @@ export function stepMatch(m: Match, input: Input, dt: number, playerUp: Upgrades
       }
       m.events.push("green");
       m.goTick = m.tick;
+      m.flash = Math.max(m.flash, 0.72);
+      m.flashHot = false;
     }
   } else if (m.phase === "race" || m.phase === "free") {
     if (m.phase === "race") m.raceTime += h;

@@ -1393,7 +1393,7 @@ test("depois do corte o giro cabe na marcha nova", () => {
   assert.ok(cuts >= 2, String(cuts));
 });
 
-test("pente cheio derruba o rival fácil", () => {
+test("pente cheio fere o fácil sem quebrar a corrida", () => {
   const easy = botForLevel("facil", mulberry(4));
   easy.willFoul = false;
   const m = createDuel("casco", easy, { ...comum, durability: 400 }, { ...comum, vmax: 165, durability: 50 }, 6, 6, 4);
@@ -1436,7 +1436,8 @@ test("pente cheio derruba o rival fácil", () => {
       up,
     );
   }
-  assert.ok(m.rival?.wrecked === true || (m.rival?.hp ?? 50) <= 10, `hp ${m.rival?.hp} wrecked ${m.rival?.wrecked}`);
+  assert.equal(m.rival?.wrecked, false, `hp ${m.rival?.hp}`);
+  assert.ok((m.rival?.hp ?? 0) >= 8 && (m.rival?.hp ?? 99) <= 40, `hp ${m.rival?.hp}`);
   assert.ok(m.player.hits >= 3, String(m.player.hits));
 });
 
@@ -1818,4 +1819,46 @@ test("freio preso até os 4 s marca largada AUTO", () => {
   assert.equal(m.player.launchGrade, "atrasou");
   assert.equal(m.note, "LARGADA AUTO");
 });
+
+test("seis mísseis no fácil deixam o rival vivo", () => {
+  const easy = botForLevel("facil", mulberry(5));
+  easy.willFoul = false;
+  easy.aim = 0;
+  easy.mines = 0;
+  const m = createDuel("briga-hp", easy, comum, { ...comum, durability: 52 }, 6, 6, 5);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.dist = 200;
+  m.player.speed = 55;
+  m.player.lane = 0;
+  m.player.gear = 3;
+  m.raceTime = 4;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 214;
+    m.rival.speed = 52;
+    m.rival.lane = 0;
+    m.rival.hp = m.rival.hpMax;
+  }
+  armWeapon(m.player, "missile", weaponById("missile"));
+  const max = m.rival?.hpMax ?? 0;
+  for (let n = 0; n < 6; n++) {
+    m.player.cool = 0;
+    m.player.ammo = Math.max(1, m.player.ammo);
+    const before = m.rival?.hp ?? 0;
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, fire: true, fireEdge: true, brake: false }, 1 / 60, up, up);
+    for (let i = 0; i < 40 && (m.rival?.hp ?? 0) >= before; i++) {
+      stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
+    }
+  }
+  const hp = m.rival?.hp ?? 0;
+  const chip = m.dmgLog.find((row) => row.who === "ai");
+  assert.ok(chip && chip.dmg >= 4 && chip.dmg <= 7, `tiro ${chip?.dmg}`);
+  assert.equal(m.rival?.wrecked, false);
+  assert.ok(hp >= 12 && hp <= 34, `hp ${hp}/${max}`);
+});
+
 

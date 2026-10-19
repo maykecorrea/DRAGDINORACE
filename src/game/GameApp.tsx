@@ -646,7 +646,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 if (ev === "hit") audio.blip("hit");
                 if (ev === "ammo") audio.blip("good");
                 if (ev === "band" || ev === "lamp") audio.blip("tick");
-                if (ev === "green") audio.blip("nitro");
+                if (ev === "green") audio.blip("go");
                 if (ev === "lock" || ev === "shot" || ev === "agora" || ev === "shield" || ev === "ram") audio.blip("good");
                 if (ev === "cuspe") audio.blip("tick");
                 if (ev === "mine" || ev === "heat") audio.blip("bad");

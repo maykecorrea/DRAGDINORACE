@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.17",
-  "name": "colada",
+  "version": "2026-10-19.18",
+  "name": "briga",
   "built": "2026-10-19",
-  "notes": "A retícula fica no rival, fora do velocímetro. Colado do lado ou na mesma faixa é NA MIRA e o F acerta; FORA escreve ERROU. A distância (FRENTE, ATRÁS, ESQUERDA, DIREITA) não some. A largada da IA mostra o grau real, não MORREU. Se o freio ficar preso, a largada é AUTO. O −10 fica no carro e o ESCUDO só na bolha."
+  "notes": "A retícula gruda no sprite do rival, com direção e metros, e o ERROU vai junto. O −N fica no carro atingido. No fácil um pente deixa o rival vivo (cerca de 15–30) e ele revida. O 1 é âmbar SEGURA; o VAI é verde, grande, e manda soltar."
 }
