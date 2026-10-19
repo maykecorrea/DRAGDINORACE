@@ -25,7 +25,6 @@ import { keyLabel, readKeys } from "./hotkeys";
 import { raceXp, partById } from "./parts";
 import { BOSSES, STORY, grantStoryPart, storyLoadout, storyOpen, storyRivalStats, type StoryPhase } from "./story";
 import { createDuel, createFree, createPvp, raceVerdict, raceReason, stepMatch, stripFor, LANE_GAP, armWeapon, armRear, gearsFor, mph, botForLevel, levelForChapter, purse, raceStatsOf, type Grade, type LaunchGrade, type Match } from "./sim";
-import { resolveHull } from "./garage.functions";
 import { armById, armedDef, armedRear } from "./armory";
 import { bumpDaily, missionReady } from "./missions";
 import { reportQuestRace } from "@/game/quests.functions";
@@ -108,6 +107,7 @@ type Result = {
   fired?: number;
   crates?: number;
   nitroPerfect?: number;
+  nitroUsed?: boolean;
   dodged?: number;
   draftTime?: number;
   reason?: string;
@@ -115,6 +115,7 @@ type Result = {
 
 const keys = new Set<string>();
 const keyClock = { brakeUp: 0, gasDown: 0 };
+const pending = { fire: false, rear: false, nitro: false, shield: false };
 let injected: string[] | null = null;
 let steerOverride: number | null = null;
 
@@ -348,22 +349,44 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         writeSave(next);
         setSave(next);
       }
-      if (e.code === "KeyE") edges.current.shield = true;
+      if (e.code === "KeyE" || (e.key.length === 1 && e.key.toLowerCase() === "e")) {
+        edges.current.shield = true;
+        pending.shield = true;
+      }
+      const letter = e.key.length === 1 ? e.key.toLowerCase() : "";
+      if (e.code === "KeyF" || letter === "f") pending.fire = true;
+      if (e.code === "KeyG" || letter === "g") pending.rear = true;
+      if (e.code === "KeyN" || letter === "n") pending.nitro = true;
       if ((e.code === "KeyA" || e.code === "ArrowLeft") && e.timeStamp - edges.current.tapL <= 250) edges.current.ram = -1;
       if (e.code === "KeyA" || e.code === "ArrowLeft") edges.current.tapL = e.timeStamp;
       if ((e.code === "KeyD" || e.code === "ArrowRight") && e.timeStamp - edges.current.tapR <= 250) edges.current.ram = 1;
       if (e.code === "KeyD" || e.code === "ArrowRight") edges.current.tapR = e.timeStamp;
       const bind = readKeys(saveRef.current);
       if (!keys.has(e.code) && (e.code === bind.gas || e.code === "KeyW" || e.code === "ArrowUp")) keyClock.gasDown = performance.now();
-      if (screenRef.current === "drive" && (e.code === "KeyF" || e.code === "KeyG" || e.code === "Space" || e.code === "ShiftLeft" || e.code === "ShiftRight")) e.preventDefault();
+      if (screenRef.current === "drive" && (e.code === "KeyF" || e.code === "KeyG" || e.code === "KeyN" || e.code === "KeyE" || e.code === "Space" || e.code === "ShiftLeft" || e.code === "ShiftRight")) e.preventDefault();
       if (bind && Object.values(bind).includes(e.code)) e.preventDefault();
       keys.add(e.code);
+      if (letter === "f") keys.add("KeyF");
+      if (letter === "g") keys.add("KeyG");
+      if (letter === "n") keys.add("KeyN");
+      if (letter === "e") keys.add("KeyE");
     };
     const onUp = (e: KeyboardEvent) => {
       if (e.code === "Space") keyClock.brakeUp = performance.now();
       keys.delete(e.code);
+      const letter = e.key.length === 1 ? e.key.toLowerCase() : "";
+      if (e.code === "KeyF" || letter === "f") keys.delete("KeyF");
+      if (e.code === "KeyG" || letter === "g") keys.delete("KeyG");
+      if (e.code === "KeyN" || letter === "n") keys.delete("KeyN");
+      if (e.code === "KeyE" || letter === "e") keys.delete("KeyE");
     };
-    const onBlur = () => keys.clear();
+    const onBlur = () => {
+      keys.clear();
+      pending.fire = false;
+      pending.rear = false;
+      pending.nitro = false;
+      pending.shield = false;
+    };
     window.addEventListener("keydown", onDown, true);
     window.addEventListener("keyup", onUp, true);
     window.addEventListener("blur", onBlur);
@@ -405,13 +428,19 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         (injected?.includes("ShiftRight") ?? false) ||
         (injected?.includes("ArrowUp") ?? false) ||
         hold.current.shift;
-      const nitroDown = down(bind.nitro) || (injected?.includes("KeyN") ?? false) || hold.current.nitro;
-      const fireDown = down(bind.fire) || down("KeyF") || hold.current.fire;
-      const rearDown = down(bind.rear) || down("KeyG") || hold.current.rear;
+      const nitroDown = down(bind.nitro) || down("KeyN") || (injected?.includes("KeyN") ?? false) || hold.current.nitro || pending.nitro;
+      const fireDown = down(bind.fire) || down("KeyF") || hold.current.fire || pending.fire;
+      const rearDown = down(bind.rear) || down("KeyG") || hold.current.rear || pending.rear;
       const shift = shiftDown && !prev.current.shift;
-      const nitro = nitroDown && !prev.current.nitro;
-      const fireEdge = fireDown && !prev.current.fire;
-      const rearEdge = rearDown && !prev.current.rear;
+      const nitro = (nitroDown && !prev.current.nitro) || pending.nitro;
+      const fireEdge = (fireDown && !prev.current.fire) || pending.fire;
+      const rearEdge = (rearDown && !prev.current.rear) || pending.rear;
+      pending.fire = false;
+      pending.rear = false;
+      pending.nitro = false;
+      const shield = edges.current.shield || pending.shield;
+      pending.shield = false;
+      edges.current.shield = false;
       prev.current.shift = shiftDown;
       prev.current.nitro = nitroDown;
       prev.current.fire = fireDown;
@@ -422,9 +451,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       const space = down("Space") || (injected?.includes("Space") ?? false) || hold.current.brake;
       if (!launched && space) edges.current.spaceHeld = true;
       if (!space) edges.current.spaceHeld = false;
-      const shield = edges.current.shield;
       const ram = edges.current.ram;
-      edges.current.shield = false;
       edges.current.ram = 0;
       return {
         throttle,
@@ -728,6 +755,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   fired: sim.player.fired,
                   crates: sim.player.crates,
                   nitroPerfect: sim.player.nitroPerfect,
+                  nitroUsed: sim.player.nitroUsed,
                   dodged: sim.player.dodged,
                   draftTime: sim.player.draftTime,
                   reason: raceReason(sim),
@@ -777,30 +805,6 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   });
                   saveRef.current = next;
                   writeSave(next);
-                  const tokenId = car.tokenId;
-                  void resolveHull({
-                    data: {
-                      tokenId,
-                      walls: sim.player.walls,
-                      bumps: sim.player.bumps,
-                      taken: sim.player.taken,
-                      poisonTime: sim.player.poisonTime,
-                    },
-                  })
-                    .then((hull) => {
-                      if (!hull) return;
-                      setResult((prev) => (prev ? { ...prev, hp: hull.hp, hpMax: hull.max, wrecked: hull.wrecked } : prev));
-                      setSave((prevSave) => {
-                        const patched: Save = {
-                          ...prevSave,
-                          cars: prevSave.cars.map((item) => (item.tokenId === tokenId ? { ...item, hull } : item)),
-                        };
-                        saveRef.current = patched;
-                        writeSave(patched);
-                        return patched;
-                      });
-                    })
-                    .catch(() => undefined);
                   return next;
                 });
               }
@@ -1426,7 +1430,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         </section>
       )}
 
-      {screen === "menu" && (
+      {screen === "menu" && ready && (
         <Prep save={save} ready={ready} treino={treino} onCommit={commit} onRun={treino ? goFree : () => {
           const c = selectedCar(saveRef.current);
           goStreet(streetNear(c.rarity, saveRef.current.races ?? 0));
@@ -1604,7 +1608,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               {save.muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
             </button>
           </div>
-          <div className="pointer-events-auto grid grid-cols-4 gap-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] md:hidden">
+          <div className="pointer-events-auto grid grid-cols-5 gap-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
             <button type="button" className="min-h-14 bg-surface text-fg" {...press("left")} aria-label="Faixa esquerda">
               <span className="block text-xs">Esq</span>
               <span className="font-display text-sm leading-none">{keyLabel(readKeys(save).left)}</span>
@@ -1620,6 +1624,18 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
             <button type="button" className="min-h-14 bg-surface text-fg" {...press("fire")}>
               <span className="block font-display text-sm leading-none">Frente</span>
               <span className="text-xs">{keyLabel(readKeys(save).fire)}</span>
+            </button>
+            <button
+              type="button"
+              className="min-h-14 bg-danger text-fg"
+              onPointerDown={(e) => {
+                (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                hold.current.nitro = true;
+                pending.nitro = true;
+              }}
+            >
+              <span className="block font-display text-sm leading-none">Nitro</span>
+              <span className="text-xs">{keyLabel(readKeys(save).nitro)}</span>
             </button>
             <button type="button" className="min-h-14 bg-surface text-fg" {...press("right")} aria-label="Faixa direita">
               <span className="block text-xs">Dir</span>
@@ -1642,17 +1658,18 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
             </button>
             <button
               type="button"
-              className="min-h-14 bg-danger text-fg"
+              className="min-h-14 bg-surface text-fg"
               onPointerDown={(e) => {
                 (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-                hold.current.nitro = true;
+                edges.current.shield = true;
+                pending.shield = true;
               }}
             >
-              <span className="block font-display text-sm leading-none">Nitro</span>
-              <span className="text-xs">{keyLabel(readKeys(save).nitro)}</span>
+              <span className="block font-display text-sm leading-none">Escudo</span>
+              <span className="text-xs">E</span>
             </button>
           </div>
-          <p className="pointer-events-none hidden pb-3 text-right text-sm text-fg md:block">
+          <p className="pointer-events-none pb-1 text-right text-xs text-muted">
             {again.kind === "free"
               ? "Segura o gás · Shift sobe a marcha · N nitro · F frente · G traseira · A e D na faixa"
               : "ESPAÇO + W até GIRO CERTO · solta o ESPAÇO no VAI · W sozinho patina · Shift quando disser AGORA · N nitro · F míssil · G mina · E escudo · A/D faixa · V câmera"}
@@ -1707,7 +1724,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               </p>
             )}
             <p className="mt-1 text-sm text-fg">
-              {result.hits ?? 0} acertos / {result.fired ?? 0} tiros · {result.crates ?? 0} caixas · vácuo {(result.draftTime ?? 0).toFixed(1)}s · nitro perfeito {result.nitroPerfect ?? 0} · desvios {result.dodged ?? 0}
+              {result.hits ?? 0} acertos / {result.fired ?? 0} tiros · {result.crates ?? 0} caixas · vácuo {(result.draftTime ?? 0).toFixed(1)}s · nitro {result.nitroUsed ? "saiu" : "não saiu"} · nitro perfeito {result.nitroPerfect ?? 0} · desvios {result.dodged ?? 0}
             </p>
             {result.mission && <p className="mt-1 text-sm text-primary">{result.mission}</p>}
             <p className="mt-2 text-sm text-fg">

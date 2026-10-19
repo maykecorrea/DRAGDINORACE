@@ -12,6 +12,7 @@ import {
   performanceOf,
   purse,
   raceVerdict,
+  REDLINE,
   rubberMul,
   sampleReaction,
   stepMatch,
@@ -836,6 +837,68 @@ test("shift guardado entra na faixa e não vira corte", () => {
   }
   assert.equal(m.player.gear, 2);
   assert.notEqual(m.player.shifts[0], "corte");
+});
+
+test("shift no verde não vira corte se a marcha ainda está engatando", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("verde-trava", bot, comum, comum, 6, 6, 4);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.gear = 5;
+  m.player.gears = 6;
+  const row = rowFor(5);
+  const vMax = driveMph(comum.vmax) / 2.236936;
+  const frac = 0.88;
+  m.player.speed = vMax * frac * (7200 / 8000);
+  m.player.rpm = (row.pLo + row.pHi) / 2;
+  m.player.shiftLock = 0.45;
+  m.player.redlineT = 0;
+  const dt = 1 / 60;
+  stepMatch(m, { throttle: 1, steer: 0, shift: true, nitro: false, brake: false }, dt, up, up);
+  assert.equal(m.player.gear, 5);
+  assert.equal(m.player.shiftMark, "perfeito");
+  for (let i = 0; i < 40 && m.player.gear < 6; i++) {
+    m.player.rpm = REDLINE;
+    m.player.redlineT = 1;
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+  }
+  assert.equal(m.player.gear, 6);
+  assert.equal(m.player.shifts.at(-1), "perfeito", m.player.shifts.join(","));
+});
+
+test("mina da IA fácil não cai na largada", () => {
+  const easy = botForLevel("facil", mulberry(7));
+  easy.willFoul = false;
+  const m = createDuel("mina-vai", easy, comum, comum, 6, 6, 7);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.dist = 8;
+  m.player.speed = 18;
+  m.player.gear = 1;
+  m.player.lane = 0;
+  m.raceTime = 0.2;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 14;
+    m.rival.speed = 20;
+    m.rival.gear = 1;
+    m.rival.lane = 0;
+    armWeapon(m.rival, "missile", weaponById("missile"));
+    armRear(m.rival, "mine", weaponById("mine"));
+  }
+  const dt = 1 / 60;
+  for (let i = 0; i < 90; i++) {
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+  }
+  assert.ok(m.raceTime < 2.1, `tempo ${m.raceTime.toFixed(2)}`);
+  assert.equal(m.shots.some((shot) => shot.kind === "mina" && shot.owner === "ai"), false);
+  assert.equal(m.player.hp, m.player.hpMax);
 });
 
 test("carro quebrado para antes da linha e não leva tempo", () => {

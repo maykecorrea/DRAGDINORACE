@@ -116,7 +116,7 @@ export const AI_TABLE = {
     mines: 2,
     dodge: 0.2,
     dodgeDelay: 0.4,
-    laneDelay: 1,
+    laneDelay: 1.6,
     crate: 0.35,
     draft: 0,
     rubber: 0.03,

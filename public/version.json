@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.6",
-  "name": "troca-justa",
+  "version": "2026-10-19.7",
+  "name": "tiro-certo",
   "built": "2026-10-19",
-  "notes": "A IA fácil acerta menos e a mina dá para desviar. O cuspe tira 2. Carro quebrado para antes da linha, sem tempo; se cruzou vivo, o tempo conta. Reação não mostra mais 0 ms. Shift cedo fica guardado até a faixa verde. O preparo mostra FÁCIL, MÉDIO e DIFÍCIL. O rótulo fantasma da mina saiu."
+  "notes": "F e G disparam de novo, também pelos botões na tela. A IA fácil atira depois da largada e aguenta o cuspe. A mina não cai no VAI. A vida do resultado não muda depois e a próxima corrida começa cheia. Shift na faixa verde não vira CORTE. O preparo espera o save carregar. O cuspe mostra 2, não um pacote de 10. O resultado diz se o nitro saiu."
 }
