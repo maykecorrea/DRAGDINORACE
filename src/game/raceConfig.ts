@@ -1,6 +1,7 @@
 /** Números da corrida. Ajuste aqui, sem mexer na lógica. */
 export const RACE_CONFIG = {
-  stripM: 1400,
+  /** 560 m: trap de ~162 mph fecha em 10–12 s. No 402 m puro o mesmo carro já estava a 162 e cruzava em 8 s. */
+  stripM: 560,
   redline: 8000,
   idle: 1000,
   lanes: [-2.2, 0, 2.2] as const,
@@ -69,10 +70,10 @@ export function driveMph(stat: number): number {
 }
 
 export function accelA(vmaxMph: number): number {
-  if (vmaxMph >= 210) return 16.4;
-  if (vmaxMph >= 198) return 15.2;
-  if (vmaxMph >= 183) return 14.4;
-  return 13.8;
+  if (vmaxMph >= 210) return 28;
+  if (vmaxMph >= 198) return 26.4;
+  if (vmaxMph >= 183) return 25.2;
+  return 24.2;
 }
 
 export function badgeForReaction(reaction: number): RaceBadge {

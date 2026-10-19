@@ -183,6 +183,7 @@ function launchLabel(grade: LaunchGrade | null | undefined): string {
   if (grade === "patinou") return "PATINOU";
   if (grade === "morreu") return "MORREU";
   if (grade === "queimou") return "QUEIMOU";
+  if (grade === "atrasou") return "ATRASOU";
   return "—";
 }
 
@@ -199,7 +200,7 @@ function cellTone(grade: string | null | undefined): string {
   if (grade === "perfeito") return "bg-primary text-ink";
   if (grade === "ok") return "bg-fg text-ink";
   if (grade === "queimou" || grade === "corte") return "bg-danger text-fg";
-  if (grade === "patinou" || grade === "cedo") return "bg-[#ffb020] text-ink";
+  if (grade === "patinou" || grade === "cedo" || grade === "atrasou") return "bg-[#ffb020] text-ink";
   if (grade === "morreu" || grade === "ok") return "bg-fg text-ink";
   return "bg-surface text-muted";
 }
@@ -431,7 +432,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       const nitroDown = down(bind.nitro) || down("KeyN") || (injected?.includes("KeyN") ?? false) || hold.current.nitro || pending.nitro;
       const fireDown = down(bind.fire) || down("KeyF") || hold.current.fire || pending.fire;
       const rearDown = down(bind.rear) || down("KeyG") || hold.current.rear || pending.rear;
-      const shift = shiftDown && !prev.current.shift;
+      const shift = shiftDown;
       const nitro = (nitroDown && !prev.current.nitro) || pending.nitro;
       const fireEdge = (fireDown && !prev.current.fire) || pending.fire;
       const rearEdge = (rearDown && !prev.current.rear) || pending.rear;
@@ -570,7 +571,13 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               const rivalUp = sim.mode === "duel" ? rivalUpgrades(sim) : null;
               while (acc.v >= 1 / 60 && guard < 5) {
                 const stepIn = {
-                  ...(first ? input : { ...input, shift: false, nitro: false, fireEdge: false, rearEdge: false, shield: false, ram: 0 }),
+                  ...input,
+                  shift: input.shift,
+                  nitro: first ? input.nitro : false,
+                  fireEdge: first ? input.fireEdge : false,
+                  rearEdge: first ? input.rearEdge : false,
+                  shield: first ? input.shield : false,
+                  ram: first ? input.ram : 0,
                   nowMs: now + stepI * (1000 / 60),
                 };
                 stepI += 1;
@@ -655,7 +662,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 const table = potOf(stake);
                 const finished = sim.player.finishTime != null;
                 const stars: [boolean, boolean, boolean] = [
-                  sim.player.launchGrade === "perfeito",
+                  sim.player.launchGrade === "perfeito" && (sim.player.reaction ?? 9) <= 0.2,
                   !!sim.rival?.wrecked,
                   !sim.player.wrecked && sim.player.hp >= sim.player.hpMax - 0.5,
                 ];
@@ -832,7 +839,9 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                         ? "BOA"
                         : sim.player.launchGrade === "ok"
                           ? "FOI"
-                          : sim.player.launchGrade === "patinou"
+                          : sim.player.launchGrade === "atrasou"
+                            ? "ATRASOU"
+                            : sim.player.launchGrade === "patinou"
                             ? "PATINOU"
                             : sim.player.launchGrade === "morreu"
                               ? "MORREU"

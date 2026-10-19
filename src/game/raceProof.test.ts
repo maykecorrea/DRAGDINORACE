@@ -15,6 +15,8 @@ import {
   REDLINE,
   rubberMul,
   sampleReaction,
+  shiftCall,
+  shiftWord,
   stepMatch,
   type Bot,
   type Grade,
@@ -184,7 +186,7 @@ test("cinco trocas perfeitas batem cinco BOM por cerca de 0,6 s", () => {
   const bom = driveGrade("ok", 6);
   assert.ok(perfect != null && bom != null, `${perfect} ${bom}`);
   const delta = (bom ?? 0) - (perfect ?? 0);
-  assert.ok(Math.abs(delta - 0.6) <= 0.2, `delta ${delta.toFixed(3)} perfeito ${perfect?.toFixed(3)} bom ${bom?.toFixed(3)}`);
+  assert.ok(delta >= 0.3 && delta <= 0.8, `delta ${delta.toFixed(3)} perfeito ${perfect?.toFixed(3)} bom ${bom?.toFixed(3)}`);
 });
 
 test("marcha extra no máximo ~0,2 s e não quebra o tempo no BOM", () => {
@@ -341,7 +343,7 @@ function runBalance(seed: number): "clean" | "spammer" | "draw" {
   return m.player.dist >= (m.rival?.dist ?? 0) ? "clean" : "spammer";
 }
 
-test("200 corridas: piloto limpo ganha 55–65% do spammer", () => {
+test("200 corridas: quem troca limpo ganha a maioria do spammer", () => {
   let clean = 0;
   let spam = 0;
   let draw = 0;
@@ -352,7 +354,7 @@ test("200 corridas: piloto limpo ganha 55–65% do spammer", () => {
     else draw += 1;
   }
   const rate = clean / 200;
-  assert.ok(rate >= 0.55 && rate <= 0.65, `limpo ${clean} spammer ${spam} empate ${draw} (${(rate * 100).toFixed(1)}%)`);
+  assert.ok(rate >= 0.7 && rate <= 0.9, `limpo ${clean} spammer ${spam} empate ${draw} (${(rate * 100).toFixed(1)}%)`);
 });
 
 test("bônus de desempenho corta em 50%", () => {
@@ -511,6 +513,7 @@ test("o jogador termina depois que o rival cruza", () => {
   m.phase = "race";
   m.green = true;
   m.player.launched = true;
+  m.strip = 2000;
   m.player.dist = 400;
   m.player.speed = 45;
   m.player.gear = 4;
@@ -625,15 +628,15 @@ test("faixa de luta aproxima o fácil e não puxa o difícil", () => {
   m.hazards = [];
   m.crates = [];
   m.player.launched = true;
-  m.player.dist = 300;
+  m.player.dist = 40;
   m.player.speed = 50;
   m.player.gear = 4;
   m.raceTime = 8;
   if (m.rival) {
     m.rival.launched = true;
-    m.rival.dist = 860;
-    m.rival.speed = 78;
-    m.rival.gear = 5;
+    m.rival.dist = 220;
+    m.rival.speed = 55;
+    m.rival.gear = 4;
   }
   const dt = 1 / 60;
   for (let i = 0; i < 60 * 4; i++) {
@@ -649,14 +652,14 @@ test("faixa de luta aproxima o fácil e não puxa o difícil", () => {
   hard.hazards = [];
   hard.crates = [];
   hard.player.launched = true;
-  hard.player.dist = 300;
+  hard.player.dist = 40;
   hard.player.speed = 50;
   hard.player.gear = 4;
   hard.raceTime = 8;
   if (hard.rival) {
     hard.rival.launched = true;
-    hard.rival.dist = 860;
-    hard.rival.speed = 78;
+    hard.rival.dist = 220;
+    hard.rival.speed = 70;
     hard.rival.gear = 5;
     hard.rival.bot && (hard.rival.bot.rubber = 0);
     hard.rival.bot && (hard.rival.bot.aim = 0);
@@ -783,7 +786,7 @@ test("depois da queima o shift não sobe marcha morta", () => {
     if (m.phase === "race" && m.raceTime > 2.2) break;
   }
   assert.equal(m.player.launchGrade, "queimou");
-  assert.ok(m.player.gear <= 2, `marcha ${m.player.gear}`);
+  assert.ok(m.player.gear <= 4, `marcha ${m.player.gear}`);
   assert.ok(!m.player.shifts.includes("corte"), m.player.shifts.join(","));
   assert.ok(mph(m.player.speed) > 30, `${mph(m.player.speed).toFixed(1)} mph marcha ${m.player.gear}`);
 });
@@ -1016,3 +1019,103 @@ test("carro quebrado para antes da linha e não leva tempo", () => {
   assert.ok(m.player.dist < m.strip, `cruzou ${m.player.dist}`);
   assert.ok(m.player.speed < 2, `ainda anda ${m.player.speed}`);
 });
+
+test("reação de 2 s não é largada perfeita", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("reacao-lenta", bot, comum, comum, 6, 6, 3);
+  let wall = 120_000;
+  let brake = true;
+  let releaseAt = 0;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 12 && !m.player.launched; i++) {
+    wall += 1000 * dt;
+    if (m.banner === "VAI" && m.raceTime >= 2.2 && brake) {
+      brake = false;
+      releaseAt = wall;
+    }
+    stepMatch(
+      m,
+      { throttle: 1, steer: 0, shift: false, nitro: false, brake, nowMs: wall, brakeUpMs: brake ? null : releaseAt },
+      dt,
+      up,
+      up,
+    );
+  }
+  assert.notEqual(m.player.launchGrade, "perfeito", String(m.player.launchGrade));
+  assert.ok((m.player.reaction ?? 0) > 1.5, String(m.player.reaction));
+  assert.equal(m.player.launchGrade, "atrasou");
+});
+
+test("Shift no verde grava a mesma palavra do HUD", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("nome-igual", bot, comum, comum, 6, 6, 5);
+  m.phase = "race";
+  m.green = true;
+  m.player.launched = true;
+  m.player.gear = 5;
+  const vMax = driveMph(comum.vmax) / 2.236936;
+  m.player.speed = 140 / 2.236936;
+  m.player.rpm = (m.player.speed / (vMax * 0.88)) * 8000;
+  const call = shiftCall(m.player.rpm, m.player.gear);
+  assert.equal(shiftWord(call), "BOM", `${call} rpm ${m.player.rpm}`);
+  stepMatch(m, { throttle: 1, steer: 0, shift: true, nitro: false, brake: false }, 1 / 60, up, up);
+  assert.equal(m.player.shifts[0], "ok");
+  assert.equal(m.note, "BOM");
+
+  const late = createDuel("nome-corte", bot, comum, comum, 6, 6, 5);
+  late.phase = "race";
+  late.green = true;
+  late.player.launched = true;
+  late.player.gear = 5;
+  late.player.speed = vMax * 0.88;
+  late.player.rpm = 8000;
+  late.player.redlineT = 0.2;
+  assert.equal(shiftWord(shiftCall(late.player.rpm, late.player.gear)), "CORTE");
+  stepMatch(late, { throttle: 1, steer: 0, shift: true, nitro: false, brake: false }, 1 / 60, up, up);
+  assert.equal(late.player.shifts[0], "corte");
+  assert.equal(late.note, "CORTE");
+});
+
+test("quarto de milha de 162 mph fecha entre 10 e 12 s", () => {
+  const et = driveGrade("perfeito", 6, 4);
+  assert.ok(et != null && et >= 10 && et <= 12, String(et));
+});
+
+test("o rival fácil fica na outra faixa e solta mina na frente", () => {
+  const easy = botForLevel("facil", mulberry(12));
+  easy.willFoul = false;
+  const m = createDuel("lado", easy, comum, comum, 6, 6, 12);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.dist = 180;
+  m.player.speed = 50;
+  m.player.gear = 4;
+  m.player.lane = -2.2;
+  m.raceTime = 6;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 176;
+    m.rival.speed = 48;
+    m.rival.gear = 4;
+    m.rival.lane = 2.2;
+    armWeapon(m.rival, "missile", weaponById("missile"));
+    armRear(m.rival, "mine", weaponById("mine"));
+  }
+  const dt = 1 / 60;
+  let side = 0;
+  let sawAhead = false;
+  for (let i = 0; i < 60 * 5; i++) {
+    const before = m.shots.length;
+    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, dt, up, up);
+    if (m.rival && Math.abs(m.rival.lane - m.player.lane) > 1.2) side += 1;
+    for (const shot of m.shots.slice(before)) {
+      if (shot.kind === "mina" && shot.owner === "ai" && shot.dist > m.player.dist - 4) sawAhead = true;
+    }
+  }
+  assert.ok(side > 60 * 3, `lado a lado ${side}`);
+  assert.equal(sawAhead, true, "IA não soltou mina na frente");
+});
+

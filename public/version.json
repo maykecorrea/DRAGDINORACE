@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.8",
-  "name": "lado-a-lado",
+  "version": "2026-10-19.9",
+  "name": "faixa-verde",
   "built": "2026-10-19",
-  "notes": "Largada no giro certo não morre mais. O rival fica ao lado e atira. Shift na faixa verde não vira CORTE. A queima mostra QUEIMOU, sem milissegundo negativo. A derrota não tira peça. O HUD da preparação não mostra F 125 G 90, e a caixa não enche o pente que ainda tem tiro. A mina da IA não cai a 40 mph."
+  "notes": "Shift na faixa verde grava BOM ou PERFEITO, o mesmo nome do HUD. No limitador o HUD diz CORTE, igual ao resultado. Largada perfeita exige reação curta. Os dois correm lado a lado, cada um na sua faixa. A prova de 162 mph fecha em cerca de 10 s. O escudo aparece em volta do carro. A IA fácil solta mina na frente."
 }

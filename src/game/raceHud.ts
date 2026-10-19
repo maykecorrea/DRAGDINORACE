@@ -1,7 +1,7 @@
 import { COMBAT, HUD_CHASE } from "./combat";
 import { sheetFrame, type RaceArt } from "./raceArt";
 import { HUD, RACE_CONFIG, type RaceBadge } from "./raceConfig";
-import { mph, REDLINE, type Match } from "./sim";
+import { mph, REDLINE, shiftCall, shiftWord, type Match } from "./sim";
 
 type Air = { x: number; y: number; sp: number };
 
@@ -567,23 +567,14 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   ctx.fillStyle = "#efe6d2";
   ctx.fillRect(meterX + meterW * live - 3, meterY - 6, 6, 48);
   const coach = !m.player.launched && m.mode === "duel" ? launchCoach(m.player.rpm) : null;
-  const zone = m.player.wrecked
-    ? "QUEBRADO"
-    : !m.player.launched
-      ? ""
-      : live >= pLo && live <= pHi
-        ? "PERFEITO"
-        : live >= lo && live <= hi
-          ? "BOM"
-          : live < lo
-            ? "CEDO"
-            : "TARDE";
+  const call = m.player.launched ? shiftCall(m.player.rpm, m.player.gear) : null;
+  const zone = m.player.wrecked ? "QUEBRADO" : call ? shiftWord(call) : "";
   if (coach) {
     ctx.font = "900 22px ui-monospace, monospace";
     ctx.fillStyle = coach.color;
     ctx.fillText(coach.say, meterX + meterW / 2, meterY - 12);
   } else if (zone) {
-    const near = zone === "CEDO" && lo - live < 0.1;
+    const near = call === "cedo" && m.player.rpm / REDLINE > (RACE_CONFIG.shift[Math.min(RACE_CONFIG.shift.length - 1, Math.max(0, m.player.gear - 1))]?.lo ?? 5400) / REDLINE - 0.08;
     const shiftNote = m.noteT > 0.12 && ["PERFEITO", "BOM", "CEDO", "TARDE", "CORTE"].includes(m.note);
     const say = shiftNote
       ? m.note
@@ -592,14 +583,17 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
         : zone === "PERFEITO"
           ? "AGORA — PERFEITO"
           : zone === "BOM"
-            ? "AGORA — TROCA"
+            ? "AGORA — BOM"
             : zone === "TARDE"
               ? "TARDE"
-              : near
-                ? "QUASE — SEGURA"
-                : "SOBE O GIRO";
+              : zone === "CORTE"
+                ? "CORTE"
+                : near
+                  ? "QUASE — SEGURA"
+                  : "SOBE O GIRO";
     ctx.font = zone === "PERFEITO" || zone === "BOM" ? "900 36px ui-monospace, monospace" : "900 26px ui-monospace, monospace";
-    ctx.fillStyle = zone === "QUEBRADO" ? "#ff3b1f" : zone === "PERFEITO" ? "#e6c15a" : zone === "BOM" ? "#d6ff3f" : near ? "#ffb020" : "#efe6d2";
+    ctx.fillStyle =
+      zone === "QUEBRADO" || zone === "CORTE" ? "#ff3b1f" : zone === "PERFEITO" ? "#e6c15a" : zone === "BOM" ? "#d6ff3f" : zone === "TARDE" ? "#ffb020" : near ? "#ffb020" : "#efe6d2";
     ctx.fillText(say, meterX + meterW / 2, meterY - 12);
   }
   if (m.noteT > 0 && m.note && m.note !== m.banner) {

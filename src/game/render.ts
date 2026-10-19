@@ -813,13 +813,27 @@ function paintChaseCar(ctx: CanvasRenderingContext2D, m: Match, neon: string, no
     ctx.globalAlpha = 1;
   }
   if (m.player.shield > 0) {
-    ctx.strokeStyle = "#d4ff3a";
-    ctx.fillStyle = "rgba(212,255,58,0.18)";
-    ctx.lineWidth = 6;
+    const pulse = 0.55 + 0.45 * Math.sin(now * 14);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = `rgba(212,255,58,${0.22 + pulse * 0.16})`;
+    ctx.strokeStyle = "#eaff7a";
+    ctx.lineWidth = 8;
     ctx.beginPath();
-    ctx.arc(0, -10, 120, 0, Math.PI * 2);
+    ctx.ellipse(0, -24, 150, 118, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.ellipse(0, -24, 128, 98, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = "#d4ff3a";
+    ctx.font = "900 22px ui-monospace, monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("ESCUDO", 0, -150);
+    ctx.restore();
   }
   if (m.player.nitroOn > 0) {
     const flick = Math.floor(now * 18) % 3;
@@ -868,7 +882,7 @@ export function drawFrame(
   const dist = m.player.dist;
   const yaw = m.player.yaw;
   const lane = m.player.lane;
-  const LAT = 0.1;
+  const LAT = 0.16;
   const vp = W * 0.5 + yaw * W * 0.045;
   const vmaxMs = Math.max(12, (m.player.bot ? m.rivalPace : m.pace) * (232 / 2.237));
   const feel = Math.max(0, Math.min(1, m.player.speed / vmaxMs));
@@ -1184,22 +1198,35 @@ export function drawFrame(
   ctx.fillRect(vp + W * 0.14, glowY, W * 0.08, 6);
   ctx.globalAlpha = 1;
 
-  const drawCar = (ahead: number, worldLane: number, sprite: number, nitro: boolean) => {
-    if (ahead < -28 || ahead > 90) return;
+  const drawCar = (ahead: number, worldLane: number, sprite: number, nitro: boolean, shielded = false) => {
+    if (ahead < -18 || ahead > 90) return;
     const z = Math.max(2.4, 3.1 + Math.max(0, ahead) * 0.14);
     const p = Math.min(0.48, CAM / z);
     const y = horizon + p * (H - horizon);
     const lanePx = LANE_GAP * p * W * LAT;
-    const w = Math.max(ahead < 28 ? 96 : ahead > 50 ? 44 : 36, lanePx * 1.15);
+    const w = Math.max(64, Math.min(ahead < 22 ? 168 : 96, lanePx * 0.78));
     const img = art.cars[sprite] ?? art.cars[0];
     const h = w * (img.height / Math.max(1, img.width));
-    const x = vp + (worldLane - lane) * p * W * LAT;
+    const sep = Math.abs(ahead) < 22 ? 1.35 : 1;
+    const x = vp + (worldLane - lane) * sep * p * W * LAT;
     ctx.drawImage(img, x - w / 2, y - h * 0.92, w, h);
     if (w < 90) {
       ctx.save();
       ctx.strokeStyle = "#d6ff3f";
       ctx.lineWidth = 2;
       ctx.strokeRect(x - w / 2 - 2, y - h * 0.92 - 2, w + 4, h + 4);
+      ctx.restore();
+    }
+    if (shielded) {
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.strokeStyle = "#eaff7a";
+      ctx.fillStyle = "rgba(212,255,58,0.28)";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.ellipse(x, y - h * 0.45, w * 0.72, h * 0.7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
       ctx.restore();
     }
     if (nitro) {
@@ -1216,12 +1243,8 @@ export function drawFrame(
   };
 
   if (m.rival && (m.mode === "duel" || m.mode === "free")) {
-    let ahead = m.rival.dist - dist;
-    let showLane = m.rival.lane;
-    if (Math.abs(ahead) < 28 && Math.abs(showLane - lane) < 1.05) {
-      showLane = lane >= 0 ? -2.2 : 2.2;
-      ahead = Math.max(6, ahead);
-    }
+    const ahead = m.rival.dist - dist;
+    const showLane = m.rival.lane;
     if (ahead < -28 || ahead > 90) {
       const pin = ahead > 0 ? 64 : 8;
       const p = airAt(pin, m.rival.lane);
@@ -1243,7 +1266,7 @@ export function drawFrame(
       const far = `${Math.abs(Math.round(ahead))}M`;
       text(ctx, far, p.x - far.length * 4, p.y + (ahead > 0 ? 12 : -22), 2, "#d6ff3f");
     } else {
-      drawCar(ahead, showLane, rivalSprite, m.rival.nitroOn > 0);
+      drawCar(ahead, showLane, rivalSprite, m.rival.nitroOn > 0, m.rival.shield > 0);
     }
     const coat = m.rival.poison > 0 ? art.booms?.poison : m.rival.freeze > 0 ? art.booms?.ice : m.rival.slow < 1 && m.rival.slowT > 0 ? art.weapons?.ray : null;
     if (coat && coat.width && coat.height) {

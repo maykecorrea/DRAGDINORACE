@@ -27,7 +27,7 @@ export const COMBAT = {
   rastro: { comprimentoM: 40, duracaoS: 3, danoPctS: 0.02, forca: 0.8, cd: 5 },
   tiroTras: { danoPct: 0.12, lentidao: 0.12, lentoS: 0.8, velRel: 45, cd: 1.5 },
   pancada: { distM: 4, alvoPct: 0.06, muretaPct: 0.04, muretaLento: 0.2, muretaS: 0.5, atacantePct: 0.02, atacanteLento: 0.05, atacanteS: 0.3, cd: 3, erroS: 0.2, trombadaPct: 0.03 },
-  escudo: { max: 100, regen: 6, pausa: 1, custo: 60, janelaS: 0.4, perfeitoS: 0.15, devolve: 30, adrenalina: 0.05, adrenalinaS: 0.5 },
+  escudo: { max: 100, regen: 6, pausa: 1, custo: 60, janelaS: 1.15, perfeitoS: 0.15, devolve: 30, adrenalina: 0.05, adrenalinaS: 0.5 },
   lentoMax: 0.35,
   imuneS: 0.5,
   hitStop: { dado: 0.05, sofrido: 0.07, mina: 0.08, pancada: 0.05, perfeito: 0.04, dnf: 0.15, intervalo: 0.3 },
