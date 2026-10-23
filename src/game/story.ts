@@ -112,12 +112,12 @@ export function storyOpen(cleared: number, chapter: number): boolean {
 }
 
 export const BOSSES: Record<number, { rear: string; before: string; win: string; loss: string }> = {
-  1: { rear: "arm-mine-Comum", before: "GECK: deixa mina no chão.", win: "Você passou por cima das minas.", loss: "A mina te pegou." },
-  2: { rear: "arm-spark-Comum", before: "CLAW: o raio só pega de perto.", win: "O raio não te alcançou.", loss: "Perto demais do raio." },
-  3: { rear: "arm-leech-Normal", before: "NYX: o míssil te segue. A cauda rouba nitro.", win: "Você quebrou a mira.", loss: "O teleguiado não errou." },
-  4: { rear: "arm-frost-Raro", before: "LUA: gelo deixa lerdo.", win: "O gelo não te segurou.", loss: "Você ficou lento." },
-  5: { rear: "arm-bile-Épico", before: "SHELL: o veneno sangra até o fim.", win: "O casco aguentou o veneno.", loss: "O veneno te comeu." },
-  6: { rear: "arm-mine-Lendário", before: "VEX: ou chega primeiro, ou eu te derrubo.", win: "A mandíbula ficou na pista.", loss: "O rex te passou." },
+  1: { rear: "arm-mine-Comum", before: "GECK: ele corre do seu lado e joga mina. Desvia com A/D.", win: "Você passou por cima das minas.", loss: "A mina te pegou." },
+  2: { rear: "arm-mine-Comum", before: "CLAW: troca tiro de perto. A seta mostra de onde vem.", win: "O raio não te alcançou.", loss: "Perto demais do raio." },
+  3: { rear: "arm-mine-Normal", before: "NYX: mesma briga da rua, carro mais rápido. Desvia o míssil.", win: "Você quebrou a mira.", loss: "O míssil não errou." },
+  4: { rear: "arm-mine-Raro", before: "LUA: médio. Ele cola e atira mais. A/D tira você da linha.", win: "O gelo não te segurou.", loss: "Você ficou lento." },
+  5: { rear: "arm-mine-Épico", before: "SHELL: difícil. Não deixa ele abrir. Revida quando estiver colado.", win: "O casco aguentou o veneno.", loss: "O veneno te comeu." },
+  6: { rear: "arm-mine-Lendário", before: "VEX: ou chega primeiro, ou eu te derrubo. Mesma briga, sem piedade.", win: "A mandíbula ficou na pista.", loss: "O rex te passou." },
 };
 
 export type StoryKit = {

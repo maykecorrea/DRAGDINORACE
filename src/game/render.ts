@@ -651,11 +651,12 @@ function paintRivalMark(
   ctx.fillStyle = "#efe6d2";
   ctx.fillText(meters, 0, hh + 22);
   if (m.shotCall && m.shotCallT > 0) {
-    ctx.font = "900 20px Impact, Arial Black, sans-serif";
+    ctx.font = "900 28px Impact, Arial Black, sans-serif";
+    ctx.lineWidth = 6;
     ctx.strokeStyle = "#070806";
-    ctx.strokeText(m.shotCall, 0, hh + 46);
-    ctx.fillStyle = "#ff5a2a";
-    ctx.fillText(m.shotCall, 0, hh + 46);
+    ctx.strokeText(m.shotCall, 0, hh + 50);
+    ctx.fillStyle = "#ff3b1f";
+    ctx.fillText(m.shotCall, 0, hh + 50);
   }
   ctx.restore();
 }
@@ -666,7 +667,7 @@ function paintHits(ctx: CanvasRenderingContext2D, m: Match, rival: { x: number; 
   ctx.textBaseline = "middle";
   for (const num of m.floats ?? []) {
     const a = Math.max(0, num.life / num.max);
-    const big = num.dmg >= 5;
+    const big = num.dmg >= 3 || (num.label ?? "").includes("OSSADA");
     const size = big ? 48 : 28;
     const rise = (1 - a) * (big ? 28 : 14);
     const x = (num.hud ? 640 : (rival?.x ?? 640)) + (num.drift || 0);
@@ -877,13 +878,25 @@ function paintChaseCar(ctx: CanvasRenderingContext2D, m: Match, neon: string, no
   ctx.fillStyle = "#8a8172";
   ctx.fillRect(-16, 36, 10, 16);
   ctx.fillRect(6, 36, 10, 16);
-  if (m.player.hp < m.player.hpMax * 0.5) {
-    ctx.globalAlpha = 0.45;
-    ctx.fillStyle = m.player.hp < m.player.hpMax * 0.25 ? "#1a1a1a" : "#9aa0a6";
-    ctx.beginPath();
-    ctx.arc(-20 + Math.sin(now * 6) * 6, -58, 14, 0, Math.PI * 2);
-    ctx.arc(18, -64, 10, 0, Math.PI * 2);
-    ctx.fill();
+  if (m.player.hp < m.player.hpMax * 0.85) {
+    const wound = Math.max(0, Math.min(1, 1 - m.player.hp / Math.max(1, m.player.hpMax)));
+    const puffs = 1 + Math.round(wound * 3);
+    ctx.globalAlpha = 0.25 + wound * 0.45;
+    ctx.fillStyle = wound > 0.55 ? "#1a1a1a" : "#9aa0a6";
+    for (let i = 0; i < puffs; i++) {
+      const ox = -28 + i * 18 + Math.sin(now * 5 + i) * 6;
+      ctx.beginPath();
+      ctx.arc(ox, -52 - i * 8, 8 + wound * 10, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    if (wound > 0.15) {
+      ctx.globalCompositeOperation = "lighter";
+      ctx.fillStyle = `rgba(255,140,40,${0.25 + wound * 0.4})`;
+      for (let i = 0; i < Math.round(wound * 4); i++) {
+        ctx.fillRect(-40 + ((now * 40 + i * 23) % 80), -20 - ((now * 30 + i * 17) % 40), 3, 3);
+      }
+      ctx.globalCompositeOperation = "source-over";
+    }
     ctx.globalAlpha = 1;
   }
   if (m.player.empT > 0) {
@@ -978,7 +991,8 @@ export function drawFrame(
     if (ev === "shot") burst(W * 0.5, H * 0.62, "#ff7300", 22, 260);
     if (ev === "mine") burst(W * 0.5, H * 0.86, "#ff3b1f", 20, 240);
     if (ev === "shield") burst(W * 0.5, H * 0.7, "#d4ff3a", 24, 280);
-    if (ev === "hurt") burst(W * 0.5, H * 0.5, "#ff3b1f", 16, 200);
+    if (ev === "hurt") burst(W * 0.5, H * 0.5, "#ff3b1f", 22, 260);
+    if (ev === "hit") burst(W * 0.5, H * 0.55, "#ffb020", 18, 220);
   }
 
   ctx.save();
@@ -1301,6 +1315,28 @@ export function drawFrame(
     const h = box.h;
     const img = art.cars[sprite] ?? art.cars[0];
     ctx.drawImage(img, x - w / 2, y - h * 0.92, w, h);
+    if (m.rival && m.rival.hp < m.rival.hpMax * 0.85) {
+      const wound = Math.max(0, Math.min(1, 1 - m.rival.hp / Math.max(1, m.rival.hpMax)));
+      ctx.save();
+      ctx.globalAlpha = 0.3 + wound * 0.45;
+      ctx.fillStyle = wound > 0.55 ? "#141414" : "#b0b6bc";
+      const puffs = 1 + Math.round(wound * 3);
+      for (let i = 0; i < puffs; i++) {
+        ctx.beginPath();
+        ctx.arc(x - w * 0.15 + i * w * 0.12, y - h * 0.95 - i * 6, Math.max(4, w * (0.06 + wound * 0.05)), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (wound > 0.2) {
+        ctx.globalCompositeOperation = "lighter";
+        ctx.fillStyle = `rgba(255,150,40,${0.35 + wound * 0.4})`;
+        for (let i = 0; i < Math.round(2 + wound * 4); i++) {
+          const sx = x - w * 0.3 + ((now * 50 + i * 29) % (w * 0.6));
+          const sy = y - h * 0.4 - ((now * 24 + i * 13) % (h * 0.4));
+          ctx.fillRect(sx, sy, 3, 3);
+        }
+      }
+      ctx.restore();
+    }
     if (w < 90) {
       ctx.save();
       ctx.strokeStyle = "#d6ff3f";

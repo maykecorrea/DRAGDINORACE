@@ -23,3 +23,14 @@ export function bandStats(you: StatBlock, them: StatBlock): StatBlock {
   const accel = Math.round(Math.min(Math.max(them.accel, you.accel * 0.95), you.accel * 1.08));
   return { ...them, vmax, durability, accel };
 }
+
+/** Mesma IA da rua, com o teto do nível. Fácil ≈ você. Médio um pouco acima. Difícil puxa. */
+export function levelBand(you: StatBlock, them: StatBlock, level: "facil" | "medio" | "dificil"): StatBlock {
+  const band = level === "dificil" ? { lo: 1.02, hi: 1.06, hpLo: 1.1, hpHi: 1.25, aLo: 1.02, aHi: 1.1 } : level === "medio" ? { lo: 0.98, hi: 1.03, hpLo: 1, hpHi: 1.12, aLo: 0.98, aHi: 1.06 } : { lo: 0.94, hi: 1.0, hpLo: 0.9, hpHi: 1.05, aLo: 0.95, aHi: 1.02 };
+  return {
+    ...them,
+    vmax: Math.round(Math.min(Math.max(them.vmax, you.vmax * band.lo), you.vmax * band.hi)),
+    durability: Math.round(Math.min(Math.max(them.durability, you.durability * band.hpLo), you.durability * band.hpHi)),
+    accel: Math.round(Math.min(Math.max(them.accel, you.accel * band.aLo), you.accel * band.aHi)),
+  };
+}

@@ -33,7 +33,7 @@ import { reportQuestRace } from "@/game/quests.functions";
 import { Prep } from "./Prep";
 import { P2PRoom } from "@/lib/multiplayer";
 import { applyCar, applyShot, asPvpMsg, type PvpMsg } from "./pvp";
-import { rollLoot, streetBuild, streetById, streetNear, bandStats, STREET_PRIZE } from "./street";
+import { rollLoot, streetBuild, streetById, streetNear, bandStats, levelBand, STREET_PRIZE } from "./street";
 
 type Screen = "menu" | "drive" | "rivals" | "result" | "intro" | "pvp";
 
@@ -181,8 +181,8 @@ function statsOf(car: NftCar, pilot?: string, kit?: Save["kit"]) {
   return liveStats(car, pilot, kit);
 }
 
-function rivalStats(phase: StoryPhase) {
-  return storyRivalStats(phase);
+function rivalStats(phase: StoryPhase, you: StatBlock) {
+  return levelBand(you, storyRivalStats(phase), levelForChapter(phase.chapter));
 }
 
 function rivalUpgrades(sim: Match): Upgrades {
@@ -200,8 +200,8 @@ function launchLabel(grade: LaunchGrade | null | undefined, auto = false): strin
   if (auto) return "AUTO";
   if (grade === "perfeito") return "PERFEITO";
   if (grade === "ok") return "OK";
-  if (grade === "patinou") return "PATINOU";
-  if (grade === "morreu") return "AFOGOU";
+  if (grade === "patinou") return "GIRO ALTO";
+  if (grade === "morreu") return "GIRO BAIXO";
   if (grade === "queimou") return "QUEIMOU";
   if (grade === "atrasou") return "ATRASOU";
   return "—";
@@ -273,6 +273,9 @@ function ResultCard({
       <p className="mt-1 text-sm text-muted">
         reação {auto ? "AUTO" : launch === "queimou" || (reaction != null && reaction < 0) ? "QUEIMOU" : reaction == null ? "—" : `${Math.round(reaction * 1000)} ms`} · trap {trap == null ? "—" : `${Math.round(mph(trap))} mph`}
       </p>
+      {trap != null && (launch === "morreu" || launch === "patinou" || launch === "atrasou" || auto) && (
+        <p className="mt-1 text-xs text-[#ffb020]">{launchLabel(launch, !!auto)} segurou a velocidade final</p>
+      )}
       <div className="mt-3 grid gap-1" style={{ gridTemplateColumns: `repeat(${boxes + 1}, minmax(0, 1fr))` }}>
         <div className={`px-1 py-2 text-center ${auto ? "bg-[#ffb020] text-ink" : cellTone(launch)}`}>
           <p className="font-display text-lg leading-none">LARG</p>
@@ -892,9 +895,9 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                           : sim.player.launchGrade === "atrasou"
                             ? "ATRASOU"
                             : sim.player.launchGrade === "patinou"
-                            ? "PATINOU"
+                            ? "GIRO ALTO"
                             : sim.player.launchGrade === "morreu"
-                              ? "MORREU"
+                              ? "GIRO BAIXO"
                               : sim.player.launchGrade === "queimou"
                                 ? "QUEIMOU"
                                 : "VAI"
@@ -905,7 +908,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                         : sim.t < 2
                           ? "2"
                           : "1"
-                      : "SEGURA ESPAÇO + W";
+                      : "SEGURA O ESPAÇO";
                 const chaseView = sim.view !== "cockpit";
                 box.style.display = prep && !chaseView ? "block" : "none";
                 box.style.visibility = prep && !chaseView ? "visible" : "hidden";
@@ -1005,21 +1008,13 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     armWeapon(sim.player, worn.id, worn);
     armRear(sim.player, tail.id, tail);
     const phase = STORY.find((item) => `fase-${item.chapter}` === sim.rivalId);
-    if (phase && sim.rival) {
-      const piece = armById(storyLoadout(phase).arm);
-      if (piece) armWeapon(sim.rival, piece.kind, piece.weapon);
-      const boss = BOSSES[phase.chapter];
-      const rear = boss ? armById(boss.rear) : undefined;
-      if (rear) armRear(sim.rival, rear.kind, rear.weapon);
-      if (boss) {
-        sim.callout = boss.before;
-        sim.calloutT = 2.8;
-      }
-    } else if (sim.rival && sim.mode === "duel") {
+    if (sim.rival && sim.mode === "duel" && !sim.pvp && !sim.ghost && !sim.ranked) {
       const front = armedDef(undefined, "missile");
       const back = armedRear(undefined, "mine");
       armWeapon(sim.rival, front.id, front);
       armRear(sim.rival, back.id, back);
+      const boss = phase ? BOSSES[phase.chapter] : undefined;
+      sim.briefing = boss?.before ?? "";
     }
     return sim;
   }
@@ -1052,17 +1047,20 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     unlock();
     parkFocus();
     const c = selectedCar(saveRef.current);
+    const you = statsOf(c, saveRef.current.pilot, saveRef.current.kit);
     const load = storyLoadout(phase);
-    const bot = botForLevel(levelForChapter(phase.chapter));
+    const level = levelForChapter(phase.chapter);
+    const bot = botForLevel(level);
     bot.aim = Math.max(bot.aim ?? 0, load.aim);
+    const gears = gearsFor(c.rarity);
     simRef.current = arm(
       createDuel(
         `fase-${phase.chapter}`,
         bot,
-        statsOf(c, saveRef.current.pilot, saveRef.current.kit),
-        rivalStats(phase),
-        gearsFor(c.rarity),
-        gearsFor(phase.rarity),
+        you,
+        rivalStats(phase, you),
+        gears,
+        gears,
       ),
     );
     resultLock.current = false;
@@ -1597,7 +1595,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
           </button>
           <h2 className="font-display text-5xl leading-none">Modo história</h2>
           <p className="mt-2 max-w-xl text-sm text-pretty text-muted">
-            A arma não era pedra. Era osso, samambaia e gosma. Os líderes não sentaram de terno: vestiram sucata de nave, vigia, antena e visor rachado. A guerra virou corrida numa faixa larga. Você troca de faixa. O rival fica na dele.
+            A arma não era pedra. Era osso, samambaia e gosma. Os líderes vestiram sucata de nave, vigia, antena e visor rachado. Cada fase escolhe o carro e o nível. A briga é a mesma da rua: ele corre colado, troca de faixa e revida.
           </p>
           <button type="button" className="mt-3 text-sm text-primary" onClick={openStory}>
             Ver o prólogo de novo
@@ -1755,7 +1753,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
           <p className="pointer-events-none pb-1 text-right text-xs text-muted">
             {again.kind === "free"
               ? "Segura o gás · Shift sobe a marcha · N nitro · F frente · G traseira · A e D na faixa"
-              : "ESPAÇO + W até GIRO CERTO · solta o ESPAÇO no VAI · W sozinho patina · Shift quando disser AGORA · N nitro · F míssil · G mina · E escudo · A/D faixa · V câmera"}
+              : "ESPAÇO sobe o giro · solta no VAI · W preso larga no verde · Shift no AGORA · N nitro · F míssil · G mina · E escudo · A/D desvia · V câmera"}
           </p>
           </div>
         </div>

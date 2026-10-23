@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-19.18",
-  "name": "briga",
+  "version": "2026-10-19.19",
+  "name": "duelo",
   "built": "2026-10-19",
-  "notes": "A retícula gruda no sprite do rival, com direção e metros, e o ERROU vai junto. O −N fica no carro atingido. No fácil um pente deixa o rival vivo (cerca de 15–30) e ele revida. O 1 é âmbar SEGURA; o VAI é verde, grande, e manda soltar."
+  "notes": "Uma tecla: o Space sobe o giro até a zona verde e soltar no VAI larga. W preso larga no verde sem queimar e sem AUTO. O rival da história usa a mesma IA da rua, na faixa do seu carro, e revida. Míssil fácil é curto e desviável, com seta do lado. ERROU diz o motivo. SEM MÍSSIL some em 1 s. Empate na chegada é FOTO-CHEGADA."
 }

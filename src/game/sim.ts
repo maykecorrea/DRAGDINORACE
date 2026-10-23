@@ -215,6 +215,8 @@ export type Shot = {
   side?: boolean;
   /** Nome na tela, quando o tiro não é o da arma. */
   label?: string;
+  /** Por que o tiro do jogador errou, se errou. */
+  why?: string;
 };
 
 export type Impact = {
@@ -251,6 +253,8 @@ export type Match = {
   flashHot: boolean;
   callout: string;
   calloutT: number;
+  /** Fala do chefe, pintada até a largada. note() não apaga. */
+  briefing: string;
   events: string[];
   rewarded: boolean;
   rivalId: string | null;
@@ -278,6 +282,8 @@ export type Match = {
   blockRear: number;
   alertMissile: number;
   alertMine: number;
+  /** −1 esquerda, 1 direita, 0 em cima. De onde o próximo tiro vem. */
+  alertSide: number;
   note: string;
   noteT: number;
   /** ERROU, desenhado na retícula. Não vai para o centro da tela. */
@@ -537,7 +543,7 @@ function layTrack(strip: number, seed: number): Pick<Match, "crates" | "hazards"
   return { crates, hazards };
 }
 
-function blankMatch(player: Racer, rival: Racer | null, strip: number, pace: number, rivalPace: number, seedIn?: number): Omit<Match, "mode" | "phase" | "green" | "t" | "raceTime" | "callout" | "calloutT" | "rivalId"> {
+function blankMatch(player: Racer, rival: Racer | null, strip: number, pace: number, rivalPace: number, seedIn?: number): Omit<Match, "mode" | "phase" | "green" | "t" | "raceTime" | "callout" | "calloutT" | "briefing" | "rivalId"> {
   const seed = seedIn && seedIn > 0 ? seedIn : (Math.random() * 1e9) | 0;
   const track = layTrack(strip, seed);
   const rng = mulberry32(seed ^ 0x9e3779b9);
@@ -573,6 +579,7 @@ function blankMatch(player: Racer, rival: Racer | null, strip: number, pace: num
     blockRear: 0,
     alertMissile: 0,
     alertMine: 0,
+    alertSide: 0,
     note: "",
     noteT: 0,
     shotCall: "",
@@ -676,6 +683,7 @@ function torqueAt(rpm: number): number {
 }
 
 function note(m: Match, text: string, time = 0.6) {
+  if (text === "SEM MÍSSIL" && m.note === "SEM MÍSSIL" && m.noteT > 0) return;
   m.note = text;
   m.noteT = time;
   m.callout = text;
@@ -835,7 +843,7 @@ function doLaunch(m: Match, r: Racer, _up: Upgrades, green: boolean, since: numb
       r.wheelspin = 0.8;
       if (who === "you") {
         m.events.push("launch:patinou");
-        note(m, "PATINOU");
+        note(m, "GIRO ALTO", 1);
       }
     } else if (!decent) {
       r.launchGrade = "atrasou";
@@ -843,7 +851,7 @@ function doLaunch(m: Match, r: Racer, _up: Upgrades, green: boolean, since: numb
       r.chokeT = Math.min(0.7, 0.25 + r.reaction * 0.15);
       if (who === "you") {
         m.events.push("launch:atrasou");
-        note(m, "ATRASOU", 0.8);
+        note(m, "ATRASOU", 1);
       }
     } else if (rpm < lo) {
       r.launchGrade = "morreu";
@@ -851,7 +859,7 @@ function doLaunch(m: Match, r: Racer, _up: Upgrades, green: boolean, since: numb
       r.chokeT = RACE_CONFIG.launch.bogTime;
       if (who === "you") {
         m.events.push("launch:morreu");
-        note(m, "AFOGOU");
+        note(m, "GIRO BAIXO", 1);
       }
     } else if (quick && rpm >= pLo && rpm <= pHi) {
       r.launchGrade = "perfeito";
@@ -902,6 +910,8 @@ function popHit(m: Match, target: Racer, weapon: WeaponId, dmg: number, label?: 
   });
   m.shakePx = Math.max(m.shakePx, dmg >= 8 ? 14 : boom ? 8 : 4);
   m.shake = Math.max(m.shake, dmg >= 8 ? 0.7 : boom ? 0.45 : 0.22);
+  m.flash = Math.max(m.flash, dmg >= 8 ? 0.42 : boom ? 0.28 : 0.18);
+  m.flashHot = true;
 }
 
 function pushFeed(m: Match, text: string) {
@@ -981,6 +991,7 @@ function applyHit(m: Match, target: Racer, weapon: WeaponId, dmg: number, splash
   const easyIn = streetBot(shooter?.bot) && target === m.player;
   const easyOut = streetBot(target.bot) && shooter === m.player;
   if (easyIn && label === "OSSADA") dealt = Math.max(2, Math.round(dealt * 0.55));
+  else if (easyIn && kind === "missil") dealt = Math.max(2, Math.round(dealt * 0.42));
   else if (!easyIn && chip(shooter?.bot) < 1 && target === m.player) dealt = Math.max(1, Math.round(dealt * chip(shooter?.bot)));
   if (easyOut) dealt = Math.max(1, Math.round(dealt * 0.55));
   const easyChip = easyIn;
@@ -1009,17 +1020,21 @@ function applyHit(m: Match, target: Racer, weapon: WeaponId, dmg: number, splash
     stopFor(m, COMBAT.hitStop.dnf);
   }
   if (target === m.player) {
-    m.shakePx = Math.max(m.shakePx, weapon === "mine" ? 12 : 8);
-    m.shake = Math.max(m.shake, weapon === "mine" ? 0.7 : 0.5);
-    m.flash = Math.max(m.flash, 0.32);
+    m.shakePx = Math.max(m.shakePx, weapon === "mine" ? 14 : 10);
+    m.shake = Math.max(m.shake, weapon === "mine" ? 0.8 : 0.6);
+    m.flash = Math.max(m.flash, 0.55);
     m.flashHot = true;
     if (!died) stopFor(m, weapon === "mine" ? COMBAT.hitStop.mina : COMBAT.hitStop.sofrido);
   } else if (shooter === m.player && !splash) {
     m.player.hits += 1;
-    m.shakePx = Math.max(m.shakePx, dealt >= 8 ? 14 : 7);
-    m.flash = Math.max(m.flash, dealt >= 8 ? 0.42 : 0.22);
-    m.flashHot = true;
+    m.shakePx = Math.max(m.shakePx, dealt >= 8 ? 16 : 9);
+    m.shake = Math.max(m.shake, dealt >= 8 ? 0.7 : 0.4);
+    m.flash = Math.max(m.flash, dealt >= 8 ? 0.5 : 0.32);
+    m.flashHot = false;
     if (!died) stopFor(m, weapon === "mine" ? COMBAT.hitStop.mina : COMBAT.hitStop.dado);
+  } else {
+    m.shakePx = Math.max(m.shakePx, 6);
+    m.flash = Math.max(m.flash, 0.22);
   }
   logDmg(m, target, label, dealt);
   if (label === "CUSPE") {
@@ -1316,6 +1331,7 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
           shot.hit = Math.max(shot.hit, 1.25);
           shot.side = Math.abs(foe.lane - r.lane) > 0.55;
           shot.speed = Math.max(shot.speed, Math.abs(foe.speed) + 46);
+          shot.why = "";
           if (gapNow < 22 && gapNow > -12) {
             shot.dist = foe.dist - 2.6;
             shot.born = shot.dist;
@@ -1329,8 +1345,9 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
           shot.sure = false;
           shot.side = false;
           shot.lane = r.lane;
-          m.shotCall = "ERROU";
-          m.shotCallT = 0.75;
+          shot.why = look === "longe" ? "LONGE" : "FORA DO ÂNGULO";
+          m.shotCall = `ERROU · ${shot.why}`;
+          m.shotCallT = 1.3;
         }
       }
       m.bufFire = 0;
@@ -1342,7 +1359,7 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
       m.aim = Math.max(0, m.aim - dt * 3);
       if (m.aim <= 0) m.aimLock = false;
       if (m.bufFire > 0 && r.ammo <= 0) {
-        note(m, "SEM MÍSSIL");
+        note(m, "SEM MÍSSIL", 1);
         m.bufFire = 0;
       }
     }
@@ -1359,9 +1376,9 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
   if (street) {
     const easy = r.bot.level === "facil";
     const medio = r.bot.level === "medio";
-    const openAt = easy ? 2.25 : medio ? 1.6 : 1.1;
-    const cadence = easy ? 1.55 : medio ? 1.15 : 0.85;
-    const aimP = easy ? 0.34 : medio ? 0.58 : 0.84;
+    const openAt = easy ? 1.6 : medio ? 1.35 : 1.0;
+    const cadence = easy ? 0.85 : medio ? 0.7 : 0.55;
+    const aimP = easy ? 0.72 : medio ? 0.78 : 0.86;
     r.bot.fireArm = (r.bot.fireArm ?? (easy ? 0.45 : medio ? 0.3 : 0.15)) - dt;
     r.bot.boneArm = (r.bot.boneArm ?? (easy ? 0.7 : medio ? 0.4 : 0.2)) - dt;
     const gap = ahead;
@@ -1370,7 +1387,7 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
     const laid = r.bot.minesLaid ?? 0;
     const fast = foe.speed > 30 && r.speed > 30;
     const taken = foe.hpMax - foe.hp;
-    const budget = easy ? 28 : medio ? 34 : 46;
+    const budget = easy ? 34 : medio ? 40 : 48;
     const full = taken >= budget;
     const hungry = easy && taken < 8 && m.raceTime > 6.5;
     if (
@@ -1399,9 +1416,9 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
     }
     const near = gap > -55 && gap < 90;
     if (m.raceTime >= openAt && near && (r.bot.boneArm ?? 0) <= 0 && !foe.finished) {
-      const aimed = full ? false : m.rng() < (easy ? 0.2 : medio ? 0.68 : 0.86);
+      const aimed = full ? false : m.rng() < (easy ? 0.35 : medio ? 0.68 : 0.86);
       const dir = gap >= -4 ? 1 : -1;
-      const chase = aimed ? foe.speed + 50 : dir > 0 ? foe.speed + 48 : -(Math.abs(foe.speed) + 36);
+      const chase = aimed ? foe.speed + 28 : dir > 0 ? foe.speed + 48 : -(Math.abs(foe.speed) + 36);
       m.shots.push({
         id: m.shotId++,
         owner: "ai",
@@ -1425,7 +1442,7 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
         label: "OSSADA",
       });
       m.shotsMade += 1;
-      r.bot.boneArm = easy ? 1.55 : medio ? 1.15 : 0.85;
+      r.bot.boneArm = easy ? 1.4 : medio ? 1.05 : 0.8;
     }
     if (m.raceTime >= openAt && near && (r.bot.fireArm ?? 0) <= 0 && r.cool <= 0 && r.ammo > 0) {
       const kindNow = combatKind(r.load.id);
@@ -1439,9 +1456,9 @@ function stepWeapons(m: Match, r: Racer, input: Input | null, dt: number, who: "
           shot.side = false;
           if (aimed) {
             shot.lane = foe.lane;
-            shot.guide = easy ? 0.9 : medio ? 0.9 : 1.2;
+            shot.guide = easy ? 0.14 : medio ? 0.22 : 0.4;
             shot.lock = shot.guide;
-            shot.speed = Math.max(shot.speed, Math.abs(foe.speed) + 48);
+            shot.speed = Math.max(shot.speed, Math.abs(foe.speed) + (easy ? 32 : 40));
             if (gap < 16 && gap > -4) {
               shot.dist = Math.max(r.dist + 1.2, foe.dist - 3.2);
               shot.born = shot.dist;
@@ -1581,8 +1598,9 @@ function stepShots(m: Match, dt: number) {
     else if (shot.life <= 0 && shot.live) retireShot(m, shot, "miss");
     if (shot.live && (shot.dist < m.player.dist - 80 || shot.dist > m.player.dist + 180)) retireShot(m, shot, "miss");
     if (!shot.live && shot.resolved === "miss" && shot.owner === "you" && (shot.kind === "missil" || shot.kind === "emp")) {
-      m.shotCall = "ERROU";
-      m.shotCallT = 0.75;
+      const why = shot.why || (shot.sure ? "DESVIOU" : "FORA DO ÂNGULO");
+      m.shotCall = `ERROU · ${why}`;
+      m.shotCallT = 1.3;
     }
   }
   m.shots = m.shots.filter((shot) => shot.live && shot.life > 0);
@@ -1775,21 +1793,22 @@ function stepRacer(m: Match, r: Racer, up: Upgrades, input: Input | null, dt: nu
         const [lo, hi] = RACE_CONFIG.launch.green;
         const [pLo, pHi] = RACE_CONFIG.launch.perfect;
         const hold = (pLo + pHi) / 2;
-        if (brake && gas) {
+        // Uma tecla: o Space sobe sozinho até a faixa perfeita e trava lá.
+        if (brake) {
           const step = 3400 * dt;
           r.rpm = r.rpm < hold ? Math.min(hold, r.rpm + step) : Math.max(hold, r.rpm - step);
-        } else if (brake && r.stageMem > 0) {
+          if (r.rpm >= lo && r.rpm <= hi) {
+            r.launchRpm = r.rpm;
+            r.stageMem = 0.45;
+          }
+        } else if (r.stageMem > 0) {
           r.rpm = r.launchRpm;
+          r.stageMem = Math.max(0, r.stageMem - dt);
         } else if (gas) {
           r.rpm = Math.max(IDLE, Math.min(REDLINE, r.rpm + RACE_CONFIG.launch.rise * dt));
         } else {
-          const fall = r.stageMem > 0 ? 650 : RACE_CONFIG.launch.fall;
-          r.rpm = Math.max(IDLE, r.rpm - fall * dt);
+          r.rpm = Math.max(IDLE, r.rpm - RACE_CONFIG.launch.fall * dt);
         }
-        if (brake && gas && r.rpm >= lo && r.rpm <= hi) {
-          r.launchRpm = r.rpm;
-          r.stageMem = 0.45;
-        } else r.stageMem = Math.max(0, r.stageMem - dt);
       }
       const greenNow = (m.green || m.phase === "race") && m.phase !== "staging";
       const pedalUp = !brake;
@@ -1801,10 +1820,12 @@ function stepRacer(m: Match, r: Racer, up: Upgrades, input: Input | null, dt: nu
       const released = (m.brakeHeld && pedalUp && m.usedBrake) || (pulseUp && m.usedBrake);
       const gasDown = input?.gasDownMs ?? 0;
       const earlyMs = m.greenWall > 0 && gasDown > 0 ? gasDown - m.greenWall : 0;
-      const jumped = !m.usedBrake && !r.jail && gas && greenNow && gasDown > 0 && earlyMs < -40;
-      const gasGo = !m.usedBrake && !r.jail && gas && !m.heldGas && greenNow && !jumped;
-      const holdAcross = !m.usedBrake && !r.jail && gas && m.heldGas && greenNow && !jumped && gasDown > 0 && earlyMs >= -40;
-      const abandoned = greenNow && m.raceTime > 4 && !r.jail;
+      // W preso antes do verde larga no primeiro quadro do VAI. Não queima e não espera os 4 s.
+      // Soltar o Space no quadro em que o verde acende não conta: o freio ainda estava preso.
+      const heldIntoGreen = brake && m.brakeHeld && greenNow && m.raceTime < dt * 1.5;
+      const gasHeld = !m.usedBrake && !r.jail && gas && m.heldGas && greenNow;
+      const gasGo = !m.usedBrake && !r.jail && gas && !m.heldGas && greenNow && !heldIntoGreen;
+      const abandoned = greenNow && m.raceTime > 4 && !r.jail && brake;
       if (released && input?.brakeUpMs) m.brakeUpWall = input.brakeUpMs;
       if (r.jail && greenNow && m.raceTime >= RACE_CONFIG.launch.redHold) {
         r.jail = false;
@@ -1829,12 +1850,9 @@ function stepRacer(m: Match, r: Racer, up: Upgrades, input: Input | null, dt: nu
         m.events.push("redlight");
         note(m, "QUEIMOU", 0.8);
         pulse(m, true, 0.3);
-      } else if (!r.jail && jumped) {
-        doLaunch(m, r, up, false, earlyMs / 1000, "you");
-        justLaunched = true;
-      } else if (!r.jail && (released || gasGo || holdAcross || abandoned)) {
-        const manual = released || gasGo || holdAcross;
-        const raw = released || gasGo ? reactionSeconds(m, input, Math.max(0, m.raceTime)) : holdAcross ? earlyMs / 1000 : Math.max(0, m.raceTime);
+      } else if (!r.jail && (released || gasGo || gasHeld || abandoned)) {
+        const manual = released || gasGo || gasHeld;
+        const raw = released || gasGo ? reactionSeconds(m, input, Math.max(0, m.raceTime)) : gasHeld ? Math.max(0.25, earlyMs / 1000) : Math.max(0, m.raceTime);
         const legal = greenNow && raw >= -0.001;
         doLaunch(m, r, up, legal, legal ? Math.max(0, raw) : raw, "you");
         if (!manual && abandoned) {
@@ -2025,6 +2043,7 @@ export function createFree(stats: StatBlock, gears = 5): Match {
     green: true,
     callout: "",
     calloutT: 0,
+    briefing: "",
     rivalId: null,
     ...blankMatch(player, rival, stripFor(stats), pace, pace),
   };
@@ -2052,6 +2071,7 @@ export function createDuel(
     green: false,
     callout: "GAS",
     calloutT: 1.2,
+    briefing: "",
     rivalId,
     ...blankMatch(
       Object.assign(zeroRacer(null, player, playerGears), { lane: -LANE_GAP }),
@@ -2368,16 +2388,24 @@ export function stepMatch(m: Match, input: Input, dt: number, playerUp: Upgrades
   else m.banner = "";
   m.alertMissile = 0;
   m.alertMine = 0;
+  m.alertSide = 0;
+  let alertGap = 99;
   for (const shot of m.shots) {
     if (!shot.live || shot.owner === "you") continue;
-    if (shot.weapon === "mine") {
+    if (shot.weapon === "mine" || shot.kind === "mina") {
       const gap = shot.dist - m.player.dist;
       if (gap > 0 && gap < COMBAT.mina.verM && Math.abs(shot.lane - m.player.lane) < 0.9) m.alertMine = 1;
     }
-    if (shot.weapon === "missile" || shot.weapon === "homing") {
+    if (shot.kind === "missil" || shot.kind === "emp" || shot.kind === "rajada" || shot.weapon === "missile" || shot.weapon === "homing") {
       const ahead = shot.dist - m.player.dist;
-      const closing = (ahead > 0 && shot.speed < m.player.speed) || (ahead < 0 && shot.speed > m.player.speed);
-      if (Math.abs(ahead) > 0.4 && Math.abs(ahead) < 50 && closing && Math.abs(shot.lane - m.player.lane) < 0.9) m.alertMissile = 1;
+      const close = Math.abs(ahead) < 55 && Math.abs(ahead) > 0.3;
+      if (!close) continue;
+      const side = shot.lane < m.player.lane - 0.35 ? -1 : shot.lane > m.player.lane + 0.35 ? 1 : 0;
+      if (Math.abs(ahead) < alertGap) {
+        alertGap = Math.abs(ahead);
+        m.alertMissile = 1;
+        m.alertSide = side;
+      }
     }
   }
 
@@ -2416,8 +2444,10 @@ export function raceReason(m: Match): string {
   if (m.player.wrecked && them) return "Você DNF";
   if (you && them && m.player.finishTime != null && m.rival?.finishTime != null) {
     const d = Math.abs(m.player.finishTime - m.rival.finishTime);
+    if (d < 0.005) return "FOTO-CHEGADA";
     const ahead = m.player.finishTime <= m.rival.finishTime;
-    return ahead ? `Você cruzou ${d.toFixed(2)} s antes` : `Ele cruzou ${d.toFixed(2)} s antes`;
+    const ms = Math.round(d * 1000);
+    return ahead ? `Você cruzou ${ms} ms antes` : `Ele cruzou ${ms} ms antes`;
   }
   if (you && !them) return "Ele não terminou";
   if (!you && them) return "Você não terminou";

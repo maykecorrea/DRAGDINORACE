@@ -446,10 +446,10 @@ export function paintRadar(ctx: CanvasRenderingContext2D, m: Match) {
 function launchCoach(rpm: number): { say: string; color: string } {
   const [lo, hi] = RACE_CONFIG.launch.green;
   const [pLo, pHi] = RACE_CONFIG.launch.perfect;
-  if (rpm > hi) return { say: "GIRO ALTO — SOLTA O W", color: "#ff3b1f" };
-  if (rpm >= pLo && rpm <= pHi) return { say: "GIRO CERTO — SOLTA O ESPAÇO", color: "#d6ff3f" };
+  if (rpm > hi) return { say: "GIRO ALTO — SOLTA", color: "#ff3b1f" };
+  if (rpm >= pLo && rpm <= pHi) return { say: "GIRO CERTO — SOLTA NO VAI", color: "#d6ff3f" };
   if (rpm >= lo) return { say: "GIRO BOM — SOLTA NO VAI", color: "#e6c15a" };
-  return { say: "W — SOBE ATÉ O VERDE", color: "#efe6d2" };
+  return { say: "SEGURA O ESPAÇO — SOBE O GIRO", color: "#efe6d2" };
 }
 
 function paintVersion(ctx: CanvasRenderingContext2D) {
@@ -553,24 +553,43 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     }
     const coach = launchCoach(m.player.rpm);
     const [loRpm, hiRpm] = RACE_CONFIG.launch.green;
+    const [pLo, pHi] = RACE_CONFIG.launch.perfect;
     const line =
       m.phase === "race"
         ? m.player.rpm > hiRpm
-          ? "GIRO ALTO — SOLTA O W"
+          ? "GIRO ALTO — SOLTA"
           : m.player.rpm < loRpm
-            ? "W — SOBE ATÉ O VERDE"
+            ? "GIRO BAIXO — SEGURA"
             : "SOLTA O ESPAÇO AGORA"
         : coach.say;
     ctx.font = "900 22px ui-monospace, monospace";
     ctx.fillStyle = m.phase === "race" && m.player.rpm >= loRpm && m.player.rpm <= hiRpm ? "#d6ff3f" : coach.color;
     ctx.fillText(line, 640, y0 + 64);
+    const barX = 470;
+    const barY = y0 + 82;
+    const barW = 340;
+    const n = Math.max(0, Math.min(1, m.player.rpm / REDLINE));
+    ctx.fillStyle = "rgba(7,10,8,0.88)";
+    ctx.fillRect(barX, barY, barW, 22);
+    const at = (rpm: number) => (rpm / REDLINE) * barW;
+    ctx.fillStyle = "#3f8f3a";
+    ctx.fillRect(barX + at(loRpm), barY, at(hiRpm) - at(loRpm), 22);
+    ctx.fillStyle = "#e6c15a";
+    ctx.fillRect(barX + at(pLo), barY + 3, at(pHi) - at(pLo), 16);
+    ctx.fillStyle = n >= pLo / REDLINE && n <= pHi / REDLINE ? "#d6ff3f" : "#efe6d2";
+    ctx.fillRect(barX + barW * n - 2, barY - 4, 4, 30);
+    if (m.briefing) {
+      ctx.font = "700 16px ui-monospace, monospace";
+      ctx.fillStyle = "#efe6d2";
+      ctx.fillText(m.briefing, 640, barY + 48);
+    }
   }
   const w = HUD_CHASE.weapons!;
   ctx.textAlign = "left";
   ctx.font = "700 13px ui-monospace, monospace";
   ctx.fillStyle = "#efe6d2";
-  ctx.fillText(`F ${m.player.ammo}`, w.x, w.y + 16);
-  ctx.fillText(`G ${m.player.rearAmmo}`, w.x + 70, w.y + 16);
+  ctx.fillText(`MÍSSIL ${m.player.ammo}/${Math.max(m.player.ammo, m.player.ammoMax)}`, w.x, w.y + 16);
+  ctx.fillText(`MINA ${m.player.rearAmmo}/${Math.max(m.player.rearAmmo, m.player.rearAmmoMax)}`, w.x + 150, w.y + 16);
   ctx.fillText("CALOR", w.x, w.y + 36);
   ctx.fillStyle = "#24160f";
   ctx.fillRect(w.x + 52, w.y + 26, 120, 8);
@@ -687,16 +706,37 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     ctx.fillText(bits.join("  "), alerts.x, alerts.y + 16);
   }
   paintRadar(ctx, m);
-  for (const shot of m.shots) {
-    if (!shot.live || shot.owner !== "ai" || (shot.kind !== "missil" && shot.kind !== "emp")) continue;
-    const ahead = shot.dist - m.player.dist;
-    const closing = (ahead > 0 && shot.speed < m.player.speed) || (ahead < 0 && shot.speed > m.player.speed);
-    if (!closing || Math.abs(ahead) > 40 || Math.abs(ahead) < 0.4) continue;
-    const x = shot.lane < -1 ? 420 : shot.lane > 1 ? 860 : 640;
-    ctx.textAlign = "center";
-    ctx.fillStyle = shot.sure ? "#ff2a2a" : "#ff8a1f";
+  if (m.alertMissile > 0) {
+    const side = m.alertSide < 0 ? -1 : m.alertSide > 0 ? 1 : 0;
+    const x = side < 0 ? 70 : side > 0 ? 1210 : 640;
+    const y = side === 0 ? 150 : 360;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = "rgba(255,40,20,0.9)";
+    ctx.strokeStyle = "#070806";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    if (side < 0) {
+      ctx.moveTo(-28, 0);
+      ctx.lineTo(18, -26);
+      ctx.lineTo(18, 26);
+    } else if (side > 0) {
+      ctx.moveTo(28, 0);
+      ctx.lineTo(-18, -26);
+      ctx.lineTo(-18, 26);
+    } else {
+      ctx.moveTo(0, -28);
+      ctx.lineTo(-26, 16);
+      ctx.lineTo(26, 16);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
     ctx.font = "900 18px ui-monospace, monospace";
-    ctx.fillText(shot.agora ? "AGORA!" : `${ahead > 0 ? "▼" : "▲"} ${Math.round(Math.abs(ahead))} m`, x, 688);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#fff2e4";
+    ctx.fillText("MÍSSIL", 0, side === 0 ? 42 : 46);
+    ctx.restore();
   }
   if (m.debug) paintDebug(ctx, m, now);
   if (m.player.hurt > 0.05) {

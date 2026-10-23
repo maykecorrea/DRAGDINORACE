@@ -1,6 +1,6 @@
 import type { DriverId, NftCar, Rarity, Upgrades } from "./data";
 import { partById, PARTS, type PartTier } from "./parts";
-import { bandStats, streetNearFrom } from "./streetBand";
+import { bandStats, levelBand, streetNearFrom } from "./streetBand";
 
 /** Carros que circulam na cidade. O id é o modelo e também a chave do racha. */
 export type StreetCar = {
@@ -111,7 +111,7 @@ export function streetNear(rarity: string | undefined, n: number): StreetCar {
   return streetNearFrom(STREET, rarity, n);
 }
 
-export { bandStats };
+export { bandStats, levelBand };
 
 export function streetBuild(rarity: Rarity): Upgrades {
   if (rarity === "Lendário") return { engine: 3, gearbox: 2, nitro: 2, tires: 2, chassis: 2 };

@@ -13,6 +13,7 @@ import {
   performanceOf,
   purse,
   raceVerdict,
+  raceReason,
   REDLINE,
   rubberMul,
   sampleReaction,
@@ -26,7 +27,7 @@ import {
   type Match,
 } from "./sim.ts";
 import { weaponById } from "./weapons.ts";
-import { bandStats, streetNearFrom, type BandCar } from "./streetBand.ts";
+import { bandStats, levelBand, streetNearFrom, type BandCar } from "./streetBand.ts";
 
 const up: Upgrades = { engine: 0, gearbox: 0, nitro: 0, tires: 0, chassis: 0 };
 const comum: StatBlock = { durability: 53, vmax: 162, accel: 58, nitroTime: 1.8, power: 62 };
@@ -378,13 +379,13 @@ test("bônus de desempenho corta em 50%", () => {
   assert.equal(pay.total, 150);
 });
 
-test("W antes do verde queima e não dá bônus de 0 ms", () => {
+test("W preso no verde larga no VAI e não queima", () => {
   const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
   const m = createDuel("cedo", bot, comum, comum, 6, 6, 5);
   let wall = 10_000;
   const gasDown = wall + 400;
   const dt = 1 / 60;
-  let saw: string[] = [];
+  const saw: string[] = [];
   for (let i = 0; i < 60 * 8; i++) {
     wall += 1000 * dt;
     const input: Input = {
@@ -398,22 +399,43 @@ test("W antes do verde queima e não dá bônus de 0 ms", () => {
     };
     stepMatch(m, input, dt, up, up);
     if (m.banner) saw.push(m.banner);
-    if (m.player.launched && m.raceTime > 0.7) break;
+    if (m.player.launched && m.raceTime > 0.2) break;
   }
-  assert.equal(m.player.launchGrade, "queimou");
-  assert.equal(m.player.redlight, true);
-  assert.ok((m.player.reaction ?? 0) < -0.2, String(m.player.reaction));
+  assert.notEqual(m.player.launchGrade, "queimou");
+  assert.equal(m.player.redlight, false);
+  assert.equal(m.player.launchAuto, false);
+  assert.ok((m.player.reaction ?? 0) >= 0.2, String(m.player.reaction));
   assert.equal(performanceOf(m).lines.some((line) => line.label.includes("reação")), false);
+  assert.ok(m.player.launchGrade === "patinou" || m.player.launchGrade === "ok", String(m.player.launchGrade));
   assert.ok(saw.includes("3") && saw.includes("2") && saw.includes("1"), saw.join(","));
-  const wait = createDuel("vai", bot, comum, comum, 6, 6, 6);
-  let wall2 = 20_000;
-  let vai = false;
-  for (let i = 0; i < 60 * 6 && !vai; i++) {
-    wall2 += 1000 * dt;
-    stepMatch(wait, { throttle: 0, steer: 0, shift: false, nitro: false, brake: true, nowMs: wall2 }, dt, up, null);
-    if (wait.banner === "VAI") vai = true;
+});
+
+test("espaço sozinho sobe o giro até o verde", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("uma-tecla", bot, comum, comum, 6, 6, 9);
+  let wall = 110_000;
+  const dt = 1 / 60;
+  for (let i = 0; i < 60 * 6 && m.phase !== "race"; i++) {
+    wall += 1000 * dt;
+    stepMatch(m, { throttle: 0, steer: 0, shift: false, nitro: false, brake: true, nowMs: wall }, dt, up, up);
   }
-  assert.equal(vai, true);
+  const [lo, hi] = RACE_CONFIG.launch.perfect;
+  assert.ok(m.player.rpm >= lo && m.player.rpm <= hi, `rpm ${m.player.rpm}`);
+});
+
+test("foto-chegada quando os tempos empatam", () => {
+  const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
+  const m = createDuel("foto", bot, comum, comum, 6, 6, 1);
+  m.player.finished = true;
+  m.player.finishTime = 10.2;
+  if (m.rival) {
+    m.rival.finished = true;
+    m.rival.finishTime = 10.202;
+  }
+  assert.equal(raceReason(m), "FOTO-CHEGADA");
+  m.player.finishTime = 10.2;
+  if (m.rival) m.rival.finishTime = 10.48;
+  assert.match(raceReason(m), /280 ms/);
 });
 
 test("rival de rua com upgrades termina a prova", () => {
@@ -1777,7 +1799,7 @@ test("mesma faixa na frente é NA MIRA e a outra faixa longe é FORA", () => {
   armWeapon(wide.player, "missile", weaponById("missile"));
   const hp = wide.rival?.hp ?? 0;
   stepMatch(wide, { throttle: 1, steer: 0, shift: false, nitro: false, fire: true, fireEdge: true, brake: false }, 1 / 60, up, up);
-  assert.equal(wide.shotCall, "ERROU");
+  assert.equal(wide.shotCall.startsWith("ERROU"), true, wide.shotCall);
   const shot = wide.shots.find((s) => s.owner === "you" && s.kind === "missil");
   assert.equal(shot?.sure, false);
   for (let i = 0; i < 30; i++) stepMatch(wide, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
@@ -1859,6 +1881,48 @@ test("seis mísseis no fácil deixam o rival vivo", () => {
   assert.ok(chip && chip.dmg >= 4 && chip.dmg <= 7, `tiro ${chip?.dmg}`);
   assert.equal(m.rival?.wrecked, false);
   assert.ok(hp >= 12 && hp <= 34, `hp ${hp}/${max}`);
+});
+
+test("A/D tira o carro da linha do míssil fácil", () => {
+  const easy = botForLevel("facil", mulberry(3));
+  easy.willFoul = false;
+  const m = createDuel("desvia", easy, comum, comum, 6, 6, 3);
+  m.phase = "race";
+  m.green = true;
+  m.hazards = [];
+  m.crates = [];
+  m.player.launched = true;
+  m.player.dist = 200;
+  m.player.speed = 50;
+  m.player.lane = -2.2;
+  m.player.gear = 3;
+  m.raceTime = 5;
+  if (m.rival) {
+    m.rival.launched = true;
+    m.rival.dist = 206;
+    m.rival.speed = 50;
+    m.rival.lane = 2.2;
+    armWeapon(m.rival, "missile", weaponById("missile"));
+    armRear(m.rival, "mine", weaponById("mine"));
+  }
+  const hp = m.player.hp;
+  let jumped = false;
+  for (let i = 0; i < 90; i++) {
+    const shot = m.shots.find((s) => s.live && s.owner === "ai" && s.kind === "missil");
+    const steer = shot && !jumped ? 1 : 0;
+    if (shot) jumped = true;
+    stepMatch(m, { throttle: 1, steer, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
+  }
+  assert.equal(m.alertMissile > 0 || jumped, true);
+  assert.ok(m.player.hp > hp * 0.7, `desvio ${m.player.hp}/${hp}`);
+});
+
+test("história fácil fica na faixa do jogador", () => {
+  const raw = { durability: 103, vmax: 204, accel: 90, nitroTime: 2, power: 80 };
+  const them = levelBand(comum, raw, "facil");
+  assert.ok(them.vmax <= comum.vmax, `trap ${them.vmax}`);
+  assert.ok(them.vmax >= comum.vmax * 0.94, `trap baixo ${them.vmax}`);
+  assert.ok(them.durability <= comum.durability * 1.05 + 1, `hp ${them.durability}`);
 });
 
 
