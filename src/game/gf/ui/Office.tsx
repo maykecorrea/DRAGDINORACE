@@ -15,7 +15,9 @@ import { Face } from "./Face";
 import { CardModal, PhoneDesk } from "./Phone";
 import { GF } from "./pixel";
 import { AuctionDesk } from "./AuctionDesk";
-import { DistrictMap } from "./DistrictMap";
+import { CityStage } from "./v2/CityStage";
+import { HubScene } from "./v2/HubScene";
+import { HudV2 } from "./v2/HudV2";
 import { Notebook } from "./Notebook";
 import { ReserveDesk } from "./ReserveDesk";
 import { StockDesk } from "./StockDesk";
@@ -23,6 +25,7 @@ import { SundayClose } from "./SundayClose";
 import { GLOSS, dayShort, describeEvents, priceFromPct } from "./text";
 import { blip } from "./sound";
 import { Workshop } from "./Workshop";
+import "./v2/v2.css";
 
 type Screen = "hub" | "clients" | "bays" | "stock" | "crew" | "bank" | "reserve" | "phone" | "notebook" | "obra" | "auction" | "map" | "shop";
 type FeedLine = { icon: string; text: string };
@@ -147,6 +150,7 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
   const [need, setNeed] = useState<{ material: MaterialId; qty: number } | null>(null);
   const [openCard, setOpenCard] = useState<string | null>(null);
   const [tips, setTips] = useState(true);
+  const [dad, setDad] = useState(true);
   const lock = useRef(false);
   const openedSent = useRef(new Set<string>());
 
@@ -302,15 +306,27 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
   const phone = layout.phone;
   const body = (
     <>
-      <Hud state={state} pack={pack} busy={busy} blocked={Boolean(blockingId)} tips={tips} onAct={(action) => void go(action)} onMap={() => setMapOpen(true)} stat={focusStat} />
+      <HudV2
+        state={state}
+        pack={pack}
+        busy={busy}
+        blocked={Boolean(blockingId)}
+        tips={tips}
+        dad={dad}
+        onTips={setTips}
+        onDad={setDad}
+        onAct={(action) => void go(action)}
+        onMap={() => setMapOpen(true)}
+        onOpen={(next) => setScreen(next)}
+      />
       <div className="gf-body">
         {screen === "hub" && (
-          <Hub
+          <HubScene
             state={state}
-            pack={pack}
             busy={busy}
+            dad={dad}
             onAct={(action) => void go(action)}
-            onScreen={(next) => {
+            onOpen={(next) => {
               if (next === "map") {
                 setMapOpen(true);
                 return;
@@ -390,16 +406,11 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
       </div>
       <Feed hint={hint} lines={feed} />
       {phone && (
-        <nav className="gf-tabs" aria-label="Oficina">
-          <button type="button" aria-current={screen === "hub" ? "page" : undefined} onClick={() => setScreen("hub")}>
-            Oficina
-          </button>
-          <button type="button" aria-current={screen === "clients" ? "page" : undefined} onClick={() => setScreen("clients")}>
-            Clientes
-          </button>
-          <button type="button" aria-current={screen === "bays" ? "page" : undefined} onClick={() => setScreen("bays")}>
-            Baias
-          </button>
+        <nav className="gf-v2-tabs" aria-label="Oficina">
+          <button type="button" aria-current={screen === "hub" ? "page" : undefined} onClick={() => setScreen("hub")}>Oficina</button>
+          <button type="button" aria-current={mapOpen ? "page" : undefined} onClick={() => setMapOpen(true)}>Cidade</button>
+          <button type="button" aria-current={screen === "stock" ? "page" : undefined} onClick={() => setScreen("stock")}>Peças</button>
+          <button type="button" aria-current={screen === "notebook" ? "page" : undefined} onClick={() => setScreen("notebook")}>Caderno</button>
         </nav>
       )}
       {proposal && (
@@ -440,7 +451,7 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
   const mapModal = mapOpen ? (
     <div className="gf-mapmodal" role="dialog" aria-modal="true" aria-label="Mapa mundial" onClick={() => setMapOpen(false)}>
       <div className="gf-mapsheet" onClick={(event) => event.stopPropagation()}>
-        <DistrictMap
+        <CityStage
           state={state}
           pack={pack}
           busy={busy}
@@ -462,7 +473,7 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
 
   if (phone) {
     return (
-      <div className="gf-ui gf-phone">
+      <div className="gf-ui gf-phone gf-v2">
         <a href="/modos" className="gf-exit">
           Modos
         </a>
@@ -477,7 +488,7 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
       <a href="/modos" className="gf-exit">
         Modos
       </a>
-      <div className="gf-ui gf-pixel gf-flow">{body}</div>
+      <div className="gf-ui gf-pixel gf-flow gf-v2">{body}</div>
       {mapModal}
     </div>
   );

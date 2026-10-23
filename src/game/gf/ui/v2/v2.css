@@ -1,0 +1,703 @@
+/* Garagem Falida v2 — palco HD, sem pixel. */
+.gf-v2 {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  width: auto;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+  background: #1a120e;
+  color: #2a1a12;
+  font-family: "Fredoka", "Outfit", sans-serif;
+  font-size: 18px;
+  image-rendering: auto;
+}
+.gf-v2,
+.gf-v2 img {
+  image-rendering: auto;
+}
+.gf-shell:has(.gf-v2) {
+  background: #1a120e;
+}
+.gf-shell:has(.gf-v2) > .gf-exit {
+  position: absolute;
+  z-index: 8;
+  top: 8px;
+  left: 8px;
+  padding: 0;
+  color: #2a1a12;
+  font-family: "Lilita One", sans-serif;
+  text-shadow: 0 2px 0 #e6d2a2;
+}
+.gf-v2 .gf-body {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: block;
+}
+.gf-v2 .gf-body > .gf-screen,
+.gf-v2 .gf-body > section {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 54%;
+  width: min(880px, calc(100% - 28px));
+  max-height: min(68vh, 640px);
+  overflow: auto;
+  transform: translate(-50%, -42%);
+  padding: 22px 22px 18px;
+  border: 28px solid transparent;
+  border-image: url("/assets/gf/v2/ui/ui_painel_9slice.png") 100 fill / 28px / 0 stretch;
+  background: transparent;
+  color: #2a1a12;
+}
+.gf-v2 .gf-kicker,
+.gf-v2 h2,
+.gf-v2 h3 {
+  font-family: "Lilita One", sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.gf-v2 .gf-body button,
+.gf-v2 .gf-city-actions button,
+.gf-v2 .gf-bed button,
+.gf-v2 .gf-gearbox button,
+.gf-v2 .gf-visit > button,
+.gf-v2 .gf-city-back,
+.gf-v2-tabs button {
+  min-height: 56px;
+  border: 0;
+  border-radius: 18px;
+  background: #e6d2a2;
+  color: #2a1a12;
+  font-family: "Lilita One", sans-serif;
+  font-size: 20px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 0 #2a1a12;
+}
+.gf-v2 .is-go,
+.gf-v2 .gf-go {
+  background: #78c850;
+  color: #fff;
+  text-shadow: 0 2px 0 #2a1a12;
+}
+.gf-frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: pan-y;
+  container-type: size;
+}
+.gf-scene {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  width: max(100cqw, calc(100cqh * 1376 / 768));
+  aspect-ratio: 1376 / 768;
+}
+.gf-scene-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+}
+.gf-hud2 {
+  position: absolute;
+  z-index: 6;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  pointer-events: none;
+}
+.gf-hud2 button,
+.gf-hud2 .gf-gearbox {
+  pointer-events: auto;
+}
+.gf-clock2 {
+  position: relative;
+  width: 168px;
+  flex: none;
+}
+.gf-clock2 > img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.gf-clock2 > b {
+  position: absolute;
+  left: 38%;
+  top: 28%;
+  width: 54%;
+  text-align: center;
+  color: #e7fff6;
+  font-family: "Lilita One", sans-serif;
+  font-size: 22px;
+  text-shadow: 0 2px 0 #14302a;
+}
+.gf-week2 {
+  position: relative;
+  margin-top: 2px;
+}
+.gf-week2 img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.gf-week2 span {
+  position: absolute;
+  inset: 18% 8% 22%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.gf-week2 i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+}
+.gf-week2 i.is-on {
+  background: #78c850;
+  box-shadow: 0 0 0 2px #2a1a12;
+}
+.gf-speeds {
+  display: flex;
+  gap: 2px;
+  margin-top: 36px;
+}
+.gf-speeds button {
+  width: 46px;
+  height: 46px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.gf-speeds img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.gf-speeds button.is-on {
+  filter: drop-shadow(0 0 6px #ffd84a);
+}
+.gf-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.gf-pill {
+  position: relative;
+  width: 132px;
+  height: 46px;
+  flex: none;
+}
+.gf-pill > img:first-child {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+.gf-pill-ico {
+  position: absolute;
+  left: 2%;
+  top: 8%;
+  width: 30%;
+  height: 84%;
+  object-fit: contain;
+}
+.gf-pill b {
+  position: absolute;
+  left: 34%;
+  right: 6%;
+  top: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  color: #e7fff6;
+  font-family: "Lilita One", sans-serif;
+  font-size: 18px;
+  text-shadow: 0 2px 0 #14302a;
+}
+.gf-pill.is-hot b {
+  color: #ffd84a;
+}
+.gf-round {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gf-round button {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.gf-round img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.gf-selo {
+  position: absolute;
+  right: -2px;
+  top: -2px;
+  width: 22px !important;
+  height: 22px !important;
+}
+.gf-gearbox {
+  position: absolute;
+  top: 74px;
+  right: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 7;
+}
+.gf-hs {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  min-width: 64px;
+  min-height: 64px;
+  cursor: pointer;
+}
+.gf-hs img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.gf-hs:hover img,
+.gf-hs:focus-visible img,
+.gf-hs.is-next img {
+  filter: drop-shadow(0 0 10px #ffd84a);
+}
+.gf-hs-badge {
+  position: absolute;
+  right: 6%;
+  top: 0;
+  width: 36px;
+  height: 36px;
+}
+.gf-hs-badge b {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-family: "Lilita One", sans-serif;
+}
+.gf-arrow {
+  position: absolute;
+  left: 50%;
+  top: -18%;
+  width: 54px !important;
+  height: 54px !important;
+  transform: translateX(-50%);
+  animation: gf-bob 0.8s ease-in-out infinite;
+}
+@keyframes gf-bob {
+  50% {
+    transform: translateX(-50%) translateY(8px);
+  }
+}
+.gf-goal {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  width: min(340px, 42%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.gf-goal img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.gf-goal p {
+  position: absolute;
+  left: 18%;
+  right: 10%;
+  top: 48%;
+  margin: 0;
+  color: #2a1a12;
+  font-family: "Fredoka", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.15;
+  text-align: center;
+}
+.gf-dad {
+  position: absolute;
+  left: 1%;
+  bottom: 0;
+  width: 28%;
+  max-width: 280px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  min-height: 0;
+  box-shadow: none;
+  text-align: left;
+}
+.gf-dad-body {
+  width: 58%;
+  height: auto;
+  animation: gf-float 2s ease-in-out infinite;
+  opacity: 0.94;
+}
+@keyframes gf-float {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.gf-balloon {
+  position: absolute;
+  left: 38%;
+  bottom: 46%;
+  width: 78%;
+}
+.gf-balloon img {
+  width: 100%;
+  height: auto;
+}
+.gf-balloon p {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 16%;
+  bottom: 30%;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  color: #2a1a12;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+}
+.gf-bed {
+  position: absolute;
+  left: 62%;
+  bottom: 24%;
+  display: flex;
+  gap: 8px;
+  z-index: 4;
+}
+.gf-city2 {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  background: #1a120e;
+}
+.gf-lot {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  min-width: 64px;
+  min-height: 64px;
+  box-shadow: none;
+}
+.gf-lot img {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none;
+}
+.gf-lot.is-pick img {
+  filter: drop-shadow(0 0 12px #ffd84a);
+}
+.gf-sign {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  pointer-events: none;
+  width: 28%;
+}
+.gf-sign-name,
+.gf-sign-tag {
+  position: relative;
+  display: block;
+}
+.gf-sign-name {
+  width: 62%;
+}
+.gf-sign-tag {
+  width: 36%;
+}
+.gf-sign img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.gf-sign b,
+.gf-sign small {
+  position: absolute;
+  left: 28%;
+  right: 6%;
+  text-align: center;
+  color: #2a1a12;
+  font-family: "Lilita One", sans-serif;
+}
+.gf-sign-name b {
+  top: 28%;
+  font-size: 16px;
+}
+.gf-sign-tag b {
+  top: 18%;
+  font-size: 12px;
+  color: #fff;
+  text-shadow: 0 1px 0 #2a1a12;
+}
+.gf-sign-tag small {
+  top: 52%;
+  font-family: "Fredoka", sans-serif;
+  font-size: 10px;
+}
+.gf-traffic {
+  position: absolute;
+  height: 12%;
+  width: auto;
+  top: 46%;
+  pointer-events: none;
+  animation: gf-drive 16s linear infinite;
+}
+.gf-traffic-1 {
+  top: 57%;
+  animation-duration: 20s;
+  animation-delay: -6s;
+}
+.gf-traffic-2 {
+  animation-duration: 13s;
+  animation-delay: -3s;
+}
+.gf-traffic-3 {
+  top: 59%;
+  animation-duration: 24s;
+  animation-delay: -11s;
+}
+.gf-traffic.is-back {
+  transform: scaleX(-1);
+  animation-name: gf-drive-back;
+}
+@keyframes gf-drive {
+  from { left: -14%; }
+  to { left: 108%; }
+}
+@keyframes gf-drive-back {
+  from { left: 108%; }
+  to { left: -14%; }
+}
+.gf-folk {
+  position: absolute;
+  width: 7%;
+  height: auto;
+  top: 63%;
+  pointer-events: none;
+  animation: gf-stroll 22s linear infinite;
+}
+.gf-folk-1 {
+  top: 40%;
+  width: 6%;
+  animation-duration: 28s;
+  animation-direction: reverse;
+}
+@keyframes gf-stroll {
+  from { left: -8%; }
+  to { left: 104%; }
+}
+.gf-smoke {
+  position: absolute;
+  width: 8%;
+  height: auto;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+}
+.gf-smoke-a { left: 30%; top: 38%; }
+.gf-smoke-b { left: 72%; top: 36%; }
+.gf-neon {
+  position: absolute;
+  left: 68%;
+  top: 70%;
+  width: 9%;
+  height: auto;
+  pointer-events: none;
+}
+.gf-teo {
+  position: absolute;
+  width: 8%;
+  height: auto;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  z-index: 3;
+}
+.gf-teo.is-flip {
+  transform: translate(-50%, -100%) scaleX(-1);
+}
+.gf-city-back {
+  position: absolute;
+  z-index: 13;
+  top: 12px;
+  left: 12px;
+}
+.gf-city-card {
+  position: absolute;
+  z-index: 13;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 24px));
+  padding: 12px 16px;
+  border: 22px solid transparent;
+  border-image: url("/assets/gf/v2/ui/ui_painel_9slice.png") 100 fill / 22px / 0 stretch;
+  color: #2a1a12;
+}
+.gf-city-card p {
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.gf-city-actions {
+  display: flex;
+  gap: 8px;
+}
+.gf-v2 .gf-mapmodal {
+  padding: 0;
+  background: transparent;
+  align-items: stretch;
+}
+.gf-v2 .gf-mapsheet {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.gf-visit {
+  position: absolute;
+  inset: 0;
+  z-index: 14;
+  background: #1a120e;
+}
+.gf-visit-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.gf-visit-npc {
+  position: absolute;
+  left: 4%;
+  bottom: 0;
+  height: 78%;
+  width: auto;
+}
+.gf-visit-say {
+  position: absolute;
+  left: 28%;
+  top: 12%;
+  width: min(420px, 50%);
+}
+.gf-visit-say img { width: 100%; height: auto; }
+.gf-visit-say p {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 18%;
+  bottom: 32%;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #2a1a12;
+  font-weight: 700;
+}
+.gf-visit-row,
+.gf-visit-plans {
+  position: absolute;
+  right: 3%;
+  top: 18%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: min(280px, 34%);
+}
+.gf-visit-row img,
+.gf-visit-plans img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  background: rgb(230 210 162 / 0.85);
+  border-radius: 16px;
+}
+.gf-visit-plans { top: auto; bottom: 18%; }
+.gf-visit > button {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
+}
+.gf-v2-tabs {
+  position: absolute;
+  z-index: 8;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 8px;
+  background: rgb(26 18 14 / 0.9);
+}
+.gf-v2 .gf-toast {
+  position: absolute;
+  z-index: 9;
+  left: 50%;
+  bottom: 88px;
+  transform: translateX(-50%);
+  background: #e6d2a2;
+  color: #2a1a12;
+  border-radius: 16px;
+  padding: 8px 14px;
+  font-family: "Lilita One", sans-serif;
+}
+@media (max-width: 767px) {
+  .gf-round button,
+  .gf-hs,
+  .gf-lot,
+  .gf-v2-tabs button,
+  .gf-v2 .gf-body button {
+    min-height: 64px;
+  }
+  .gf-round button {
+    width: 64px;
+    height: 64px;
+  }
+  .gf-pill { width: 108px; height: 40px; }
+  .gf-pill b,
+  .gf-clock2 > b { font-size: 16px; }
+  .gf-clock2 { width: 132px; }
+  .gf-pills { max-width: 46%; }
+  .gf-v2 .gf-body > .gf-screen,
+  .gf-v2 .gf-body > section { max-height: 58vh; }
+}

@@ -14,10 +14,21 @@ export const GF = {
   cardFrame: "ui_moldura_carta.png",
 };
 
+const ALIAS: Record<string, string> = {
+  "icon_divida.png": "/assets/gf/v2/hud/icon_divida_boleto.png",
+  "icon_fossil.png": "/assets/gf/v2/hud/icon_fosseis.png",
+  "icon_alerta.png": "/assets/gf/v2/ui/ui_selo_alerta.png",
+  "icon_cadeado.png": "/assets/gf/v2/ui/ui_selo_alerta.png",
+  "icon_relogio.png": "/assets/gf/v2/hud/hud_relogio_frame.png",
+  "ui_telefone.png": "/assets/gf/v2/hud/btn_telefone.png",
+  "ui_moldura_carta.png": "/assets/gf/v2/ui/ui_painel_9slice.png",
+};
+
 export function PixelFile({ file, className = "gf-ico" }: { file: string; className?: string }) {
   const [failed, setFailed] = useState(false);
-  if (failed) return <span className="gf-filechip">{file}</span>;
-  return <img className={className} src={`/assets/gf/${file}`} alt="" onError={() => setFailed(true)} />;
+  const known = ALIAS[file];
+  const src = known ?? (failed ? "/assets/gf/v2/hud/icon_fosseis.png" : `/assets/gf/${file}`);
+  return <img className={className} src={src} alt="" onError={() => setFailed(true)} />;
 }
 
 export function Interior({ file }: { file: string }) {
