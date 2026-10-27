@@ -1,0 +1,17 @@
+node_modules/
+.vercel/
+.netlify/
+.tanstack/
+dist/
+.output/
+screenshots/
+attachments/
+artifacts/
+.grok/
+.env
+.env.*
+*.log
+.project_id
+.DS_Store
+public/pack.zip
+scripts/__pycache__/

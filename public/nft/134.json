@@ -1,0 +1,43 @@
+{
+ "name": "Ovo de plasma",
+ "description": "Dino Drag Race — Ovo de plasma (Épico). 66 de dano. 11 tiros. 0.81s. Voa reto. Em cheio dói mais. Se passar perto, estoura com menos dano.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/134.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "missile"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 66,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 11,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.81,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-missile-Épico-2",
+  "stats": "dmg=66;clip=11;cd=0.81"
+ }
+}

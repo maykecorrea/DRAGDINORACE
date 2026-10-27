@@ -1,0 +1,48 @@
+{
+ "name": "Glândula ciano",
+ "description": "Dino Drag Race — Glândula ciano (Raro). 13 de dano. 6 tiros. 1.16s. Veneno 8/s. Se acerta, sangra até o fim da corrida.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/121.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "poison"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 13,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 6,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.16,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Poison",
+   "value": 8,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-poison-Raro",
+  "stats": "dmg=13;clip=6;cd=1.16;poison=8/s"
+ }
+}

@@ -1,0 +1,48 @@
+{
+ "name": "Coroa de plasma",
+ "description": "Dino Drag Race — Coroa de plasma (Épico). 81 de dano. 7 tiros. 1.19s. Deixa lerdo. Muito dano e deixa o carro lerdo. Difícil de cravar.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/143.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ray"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 81,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.19,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Slowtime",
+   "value": 2.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ray-Épico-2",
+  "stats": "dmg=81;clip=7;cd=1.19;slow=0.55x/2.4s"
+ }
+}

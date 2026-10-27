@@ -1,0 +1,8 @@
+[
+  { "id": "kit", "nome": "Kit parafuso e junta", "icone": "kit" },
+  { "id": "oleo", "nome": "Óleo fóssil", "icone": "oleo", "rots": false },
+  { "id": "chapa", "nome": "Chapa de ferro", "icone": "chapa" },
+  { "id": "cabo", "nome": "Cabo de nave", "icone": "cabo" },
+  { "id": "osso", "nome": "Osso estrutural", "icone": "osso" },
+  { "id": "bobina", "nome": "Bobina de nitro", "icone": "bobina", "rots": false }
+]

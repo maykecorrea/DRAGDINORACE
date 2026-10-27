@@ -119,7 +119,7 @@ export function paintRaceWorld(
       }
       continue;
     }
-    if (shot.weapon === "mg" || shot.label === "OSSADA") {
+    if (shot.weapon === "mg" || shot.label === "QUEBROU") {
       const ahead = shot.dist - dist;
       if (ahead < -30 || ahead > 90) continue;
       const p = airAt(Math.max(0.6, ahead), shot.lane);
@@ -129,7 +129,7 @@ export function paintRaceWorld(
       ctx.fillStyle = "#d6ff3f";
       ctx.font = "700 12px ui-monospace, monospace";
       ctx.textAlign = "center";
-      ctx.fillText("OSSADA", p.x, p.y - 12);
+      ctx.fillText("QUEBROU", p.x, p.y - 12);
       ctx.restore();
       continue;
     }
@@ -222,7 +222,7 @@ export function paintRaceHud(ctx: CanvasRenderingContext2D, m: Match, race: Race
   if (m.rival) {
     bar(ctx, rivalBox.x, rivalBox.y, rivalBox.w, m.rival.hp, m.rival.hpMax, m.rival.hpGhost);
     ctx.textAlign = "right";
-    ctx.fillText(m.rival.wrecked ? "DNF" : `${Math.round(m.rival.hp)}`, rivalBox.x + rivalBox.w - 8, rivalBox.y + 14);
+    ctx.fillText(m.rival.wrecked ? "QUEBROU" : `${Math.round(m.rival.hp)}`, rivalBox.x + rivalBox.w - 8, rivalBox.y + 14);
     const tag = m.ghost ? "FANTASMA" : m.rival.bot?.level === "dificil" ? "DIFICIL" : m.rival.bot?.level === "medio" ? "MEDIO" : m.rival.bot?.level === "facil" ? "FACIL" : "";
     if (tag) {
       ctx.textAlign = "right";
@@ -299,7 +299,7 @@ export function paintRaceHud(ctx: CanvasRenderingContext2D, m: Match, race: Race
   ctx.fillText(String(Math.round(mph(m.player.speed))), cx, cy + 32);
   ctx.font = "600 11px ui-monospace, monospace";
   ctx.fillStyle = "#9aa18c";
-  ctx.fillText("MPH", cx, cy + 46);
+  ctx.fillText("KM/H", cx, cy + 46);
 
   const lights = 5;
   const span = n < lo ? 0 : n > hi ? 5 : ((n - lo) / Math.max(0.001, hi - lo)) * 5;
@@ -315,7 +315,7 @@ export function paintRaceHud(ctx: CanvasRenderingContext2D, m: Match, race: Race
   if (m.note && m.noteT > 0) {
     const noteBox = HUD.note!;
     ctx.font = "700 22px ui-monospace, monospace";
-    ctx.fillStyle = m.note === "QUEIMOU" || m.note === "ENGASGOU" ? "#ffb020" : "#efe6d2";
+    ctx.fillStyle = m.note === "LARGOU ANTES" || m.note === "ENGASGOU" ? "#ffb020" : "#efe6d2";
     ctx.textAlign = "center";
     ctx.fillText(m.note, noteBox.x + noteBox.w / 2, noteBox.y + 22);
   }
@@ -345,6 +345,25 @@ export function paintRaceHud(ctx: CanvasRenderingContext2D, m: Match, race: Race
   const rearCd = m.player.rear === "mine" ? RACE_CONFIG.mine.cd : Math.max(0.2, m.player.rearLoad.cooldown);
   widget(HUD.front!.x, HUD.front!.y, m.player.ammo, Math.min(8, m.player.ammoMax), m.player.cool, frontCd, m.blockFront > 0);
   widget(HUD.rear!.x, HUD.rear!.y, m.player.rearAmmo, Math.min(8, m.player.rearAmmoMax), m.player.rearCool, rearCd, m.blockRear > 0);
+  if (race.iconeCuspe.width && m.player.cuspeBag > 0) ctx.drawImage(race.iconeCuspe, HUD.front!.x + 8, HUD.front!.y + 8, 48, 48);
+  if (race.iconeEscudo.width && m.player.shield > 0) ctx.drawImage(race.iconeEscudo, HUD.rear!.x + 8, HUD.rear!.y + 8, 48, 48);
+  if (race.escudoSheet.width && m.player.shield > 0) {
+    const frame = sheetFrame(race.escudoSheet, Math.floor(now * 8) % 4, 4);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.drawImage(race.escudoSheet, frame.sx, frame.sy, frame.sw, frame.sh, HUD.rear!.x, HUD.rear!.y - 20, 64, 32);
+    ctx.restore();
+  }
+  if (race.empSheet.width && m.player.empT > 0) {
+    const frame = sheetFrame(race.empSheet, Math.floor(now * 10) % 4, 4);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.drawImage(race.empSheet, frame.sx, frame.sy, frame.sw, frame.sh, HUD.front!.x, HUD.front!.y - 20, 64, 32);
+    ctx.restore();
+  }
+  const rearView = [race.trasComum, race.trasNormal, race.trasRaro, race.trasEpico, race.trasLendario];
+  const rear = rearView[Math.min(4, Math.max(0, Math.floor(m.player.fired / 8)))] ?? race.trasComum;
+  if (rear?.width) ctx.drawImage(rear, HUD.rear!.x - 8, HUD.rear!.y - 36, 80, 50);
 
   const alerts = HUD.alerts!;
   let ax = alerts.x;
@@ -408,7 +427,7 @@ export function paintRadar(ctx: CanvasRenderingContext2D, m: Match) {
       const down = dy < 0;
       const y = down ? b.y + b.h - 18 : b.y + 14;
       ctx.fillStyle = "#d6ff3f";
-      ctx.fillText(down ? "ATRÁS" : "FRENTE", b.x + b.w / 2, y);
+      ctx.fillText(down ? "ATRÁS" : "Frente", b.x + b.w / 2, y);
       ctx.fillText(`${Math.abs(Math.round(dy))}m`, b.x + b.w / 2, y + 12);
     } else {
       ctx.fillStyle = "#ffb020";
@@ -446,10 +465,10 @@ export function paintRadar(ctx: CanvasRenderingContext2D, m: Match) {
 function launchCoach(rpm: number): { say: string; color: string } {
   const [lo, hi] = RACE_CONFIG.launch.green;
   const [pLo, pHi] = RACE_CONFIG.launch.perfect;
-  if (rpm > hi) return { say: "GIRO ALTO — SOLTA", color: "#ff3b1f" };
-  if (rpm >= pLo && rpm <= pHi) return { say: "GIRO CERTO — SOLTA NO VAI", color: "#d6ff3f" };
-  if (rpm >= lo) return { say: "GIRO BOM — SOLTA NO VAI", color: "#e6c15a" };
-  return { say: "SEGURA O ESPAÇO — SOBE O GIRO", color: "#efe6d2" };
+  if (rpm > hi) return { say: "GIRO ALTO: SOLTA", color: "#ff3b1f" };
+  if (rpm >= pLo && rpm <= pHi) return { say: "GIRO CERTO: SOLTA NO VAI", color: "#d6ff3f" };
+  if (rpm >= lo) return { say: "GIRO BOM: SOLTA NO VAI", color: "#e6c15a" };
+  return { say: "SEGURA O ESPAÇO: SOBE O GIRO", color: "#efe6d2" };
 }
 
 function paintVersion(ctx: CanvasRenderingContext2D) {
@@ -460,9 +479,9 @@ function paintVersion(ctx: CanvasRenderingContext2D) {
   ctx.textBaseline = "top";
   const w = ctx.measureText(label).width + 12;
   ctx.fillStyle = "rgba(7,10,8,0.82)";
-  ctx.fillRect(12, 96, w, 20);
+  ctx.fillRect(12, 688, w, 20);
   ctx.fillStyle = "#efe6d2";
-  ctx.fillText(label, 18, 99);
+  ctx.fillText(label, 18, 691);
   ctx.restore();
 }
 
@@ -488,8 +507,8 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     ctx.fillRect(foe.x, foe.y, foe.w * Math.max(0, m.rival.hp / Math.max(1, m.rival.hpMax)), foe.h);
     ctx.textAlign = "right";
     ctx.fillStyle = "#efe6d2";
-    const lvl = m.ghost ? "FANTASMA" : m.pvp ? "PvP" : m.rival.bot?.level === "dificil" ? "DIFÍCIL" : m.rival.bot?.level === "medio" ? "MÉDIO" : "FÁCIL";
-    ctx.fillText(`${m.rival.wrecked ? "DNF" : Math.round(m.rival.hp)} ${lvl}`, foe.x + foe.w - 4, foe.y + 14);
+    const lvl = m.ghost ? "FANTASMA" : m.pvp ? "DUELO" : m.rival.bot?.level === "dificil" ? "DIFÍCIL" : m.rival.bot?.level === "medio" ? "MÉDIO" : "FÁCIL";
+    ctx.fillText(`${m.rival.wrecked ? "QUEBROU" : Math.round(m.rival.hp)} ${lvl}`, foe.x + foe.w - 4, foe.y + 14);
   }
   const prog = HUD_CHASE.progress!;
   ctx.fillStyle = "rgba(7,10,8,0.75)";
@@ -507,11 +526,11 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   ctx.globalAlpha = 1;
   if (m.banner) {
     const slot = HUD_CHASE.banner!;
-    const big = ["3", "2", "1", "VAI", "QUEIMOU", "QUEBRADO"].includes(m.banner);
+    const big = ["3", "2", "1", "VAI", "LARGOU ANTES", "QUEBROU"].includes(m.banner);
     const vai = m.banner === "VAI";
     const hold = m.banner === "1";
     const count = m.banner === "3" || m.banner === "2";
-    const bad = m.banner === "QUEIMOU" || m.banner === "QUEBRADO";
+    const bad = m.banner === "LARGOU ANTES" || m.banner === "QUEBROU";
     const color = bad ? "#ff3b1f" : hold ? "#ffb020" : count ? "#ff5a3a" : "#d6ff3f";
     if (vai) {
       const kick = m.raceTime < 0.4 ? 1 - m.raceTime / 0.4 : 0;
@@ -557,10 +576,10 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     const line =
       m.phase === "race"
         ? m.player.rpm > hiRpm
-          ? "GIRO ALTO — SOLTA"
+          ? "GIRO ALTO: SOLTA"
           : m.player.rpm < loRpm
-            ? "GIRO BAIXO — SEGURA"
-            : "SOLTA O ESPAÇO AGORA"
+            ? "GIRO BAIXO: SEGURA"
+            : "SOLTA O ESPAÇO AGORA!"
         : coach.say;
     ctx.font = "900 22px ui-monospace, monospace";
     ctx.fillStyle = m.phase === "race" && m.player.rpm >= loRpm && m.player.rpm <= hiRpm ? "#d6ff3f" : coach.color;
@@ -578,11 +597,6 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     ctx.fillRect(barX + at(pLo), barY + 3, at(pHi) - at(pLo), 16);
     ctx.fillStyle = n >= pLo / REDLINE && n <= pHi / REDLINE ? "#d6ff3f" : "#efe6d2";
     ctx.fillRect(barX + barW * n - 2, barY - 4, 4, 30);
-    if (m.briefing) {
-      ctx.font = "700 16px ui-monospace, monospace";
-      ctx.fillStyle = "#efe6d2";
-      ctx.fillText(m.briefing, 640, barY + 48);
-    }
   }
   const w = HUD_CHASE.weapons!;
   ctx.textAlign = "left";
@@ -640,7 +654,7 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   ctx.font = "700 42px ui-monospace, monospace";
   ctx.fillText(String(m.player.gear), cx, cy + 8);
   ctx.font = "700 16px ui-monospace, monospace";
-  ctx.fillText(`${Math.round(mph(m.player.speed))} MPH`, cx, cy + 36);
+  ctx.fillText(`${Math.round(mph(m.player.speed) * 1.60934)} KM/H`, cx, cy + 36);
   const meterX = SHIFT_LAMP.x;
   const meterY = SHIFT_LAMP.y + 34;
   const meterW = SHIFT_LAMP.w;
@@ -648,7 +662,8 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
   const coach = !m.player.launched && m.mode === "duel" ? launchCoach(m.player.rpm) : null;
   const liveCall = m.player.launched ? shiftCall(m.player.rpm, m.player.gear) : null;
   const call = m.player.gear < m.player.gears ? liveCall : null;
-  const zone = m.player.wrecked ? "QUEBRADO" : call ? shiftWord(call) : "";
+  const zone = m.player.wrecked ? "QUEBROU" : call ? shiftWord(call) : "";
+  if (!pre) {
   ctx.fillStyle = zone === "PERFEITO" ? "rgba(42,32,8,0.92)" : "rgba(7,10,8,0.88)";
   ctx.fillRect(SHIFT_LAMP.x, SHIFT_LAMP.y, SHIFT_LAMP.w, SHIFT_LAMP.h);
   ctx.fillStyle = "#3f8f3a";
@@ -665,32 +680,33 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     ctx.textAlign = "center";
   } else if (zone) {
     const near = call === "cedo" && m.player.rpm / REDLINE > (RACE_CONFIG.shift[Math.min(RACE_CONFIG.shift.length - 1, Math.max(0, m.player.gear - 1))]?.lo ?? 5400) / REDLINE - 0.08;
-    const shiftNote = !call && m.noteT > 0.12 && ["PERFEITO", "BOM", "CEDO", "TARDE", "CORTE"].includes(m.note);
+    const shiftNote = !call && m.noteT > 0.12 && ["PERFEITO", "BOM", "CEDO", "TARDE", "NO LIMITE"].includes(m.note);
     const say = shiftNote
       ? m.note
-      : zone === "QUEBRADO"
-        ? "QUEBRADO"
+      : zone === "QUEBROU"
+        ? "QUEBROU"
         : zone === "PERFEITO"
-          ? "AGORA — PERFEITO"
+          ? "AGORA! PERFEITO"
           : zone === "BOM"
             ? "BOM"
             : zone === "TARDE"
               ? "TARDE"
-              : zone === "CORTE"
-                ? "CORTE"
+              : zone === "NO LIMITE"
+                ? "NO LIMITE"
                 : near
-                  ? "QUASE — SEGURA"
+                  ? "QUASE: SEGURA"
                   : "SOBE O GIRO";
     ctx.font = zone === "PERFEITO" ? "900 22px ui-monospace, monospace" : "900 18px ui-monospace, monospace";
     ctx.fillStyle =
-      zone === "QUEBRADO" || zone === "CORTE" ? "#ff3b1f" : zone === "PERFEITO" ? "#e6c15a" : zone === "BOM" ? "#d6ff3f" : zone === "TARDE" ? "#ffb020" : near ? "#ffb020" : "#efe6d2";
+      zone === "QUEBROU" || zone === "NO LIMITE" ? "#ff3b1f" : zone === "PERFEITO" ? "#e6c15a" : zone === "BOM" ? "#d6ff3f" : zone === "TARDE" ? "#ffb020" : near ? "#ffb020" : "#efe6d2";
     ctx.textAlign = "left";
     ctx.fillText(say, meterX + 8, SHIFT_LAMP.y + 20);
     ctx.textAlign = "center";
   }
+  }
   const liveWord =
-    call === "perfeito" ? "PERFEITO" : call === "ok" ? "BOM" : call === "cedo" ? "CEDO" : call === "tarde" ? "TARDE" : call === "corte" ? "CORTE" : "";
-  const shiftWordNote = ["PERFEITO", "BOM", "CEDO", "TARDE", "CORTE"].includes(m.note);
+    call === "perfeito" ? "PERFEITO" : call === "ok" ? "BOM" : call === "cedo" ? "CEDO" : call === "tarde" ? "TARDE" : call === "corte" ? "NO LIMITE" : "";
+  const shiftWordNote = ["PERFEITO", "BOM", "CEDO", "TARDE", "NO LIMITE"].includes(m.note);
   if (m.noteT > 0 && m.note && m.note !== m.banner && !(shiftWordNote && liveWord)) {
     const note = HUD_CHASE.note!;
     ctx.font = "700 18px ui-monospace, monospace";
@@ -748,6 +764,29 @@ export function paintChaseHud(ctx: CanvasRenderingContext2D, m: Match, now: numb
     ctx.strokeStyle = "#d4ff3a";
     ctx.lineWidth = 10;
     ctx.strokeRect(18, 18, 1244, 684);
+  }
+  if (m.shotCall && m.shotCallT > 0) {
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const label = m.shotCall;
+    ctx.font = "900 22px ui-monospace, monospace";
+    let size = 22;
+    while (ctx.measureText(label).width > 1080 && size > 14) {
+      size -= 2;
+      ctx.font = `900 ${size}px ui-monospace, monospace`;
+    }
+    const tw = Math.min(ctx.measureText(label).width, 1080);
+    const x = 640;
+    const y = 168;
+    ctx.fillStyle = "rgba(7,10,8,0.9)";
+    ctx.fillRect(x - tw / 2 - 18, y - 20, tw + 36, 40);
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "#070806";
+    ctx.strokeText(label, x, y);
+    ctx.fillStyle = "#ff3b1f";
+    ctx.fillText(label, x, y);
+    ctx.restore();
   }
   ctx.restore();
 }

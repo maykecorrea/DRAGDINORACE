@@ -1,0 +1,33 @@
+{
+ "name": "Íris ácida",
+ "description": "Dino Drag Race — Íris ácida (Raro). +10% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/201.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "lente"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "10%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-lente-Raro-3",
+  "stats": "vmax+10%"
+ }
+}

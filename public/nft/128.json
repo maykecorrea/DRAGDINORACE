@@ -1,0 +1,48 @@
+{
+ "name": "Cristal ciano",
+ "description": "Dino Drag Race — Cristal ciano (Raro). 7 de dano. 6 tiros. 1.78s. Trava 1s. Trava o carro por 1s e zera a velocidade. Quase não acerta.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/128.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ice"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 6,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.78,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Freeze",
+   "value": 1,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ice-Raro-2",
+  "stats": "dmg=7;clip=6;cd=1.78;freeze=1s"
+ }
+}

@@ -1,0 +1,19 @@
+SEED VISUAL
+public/game/rare/car-barril.jpg
+Mesmo padrão dos raros: pixel 2D, visão traseira, fundo preto, sem número, sem borda branca.
+
+PROMPT BASE
+IMAGE_0 is the style, size and framing to copy.
+Redraw the vehicle as a flat 2D pixel sprite, same large size, straight rear view, filling most of the square.
+Solid black background.
+Erase every number, digit and label. Erase the white sticker outline.
+No text, no person, not a 3D render.
+
+POR CARRO
+cinza — escape capsule, round visor, small skull, lime slime, one jet
+viuva — black coffin rear, torn solar sail, gold trim, bone skis, purple jet
+rebite — white riveted brick, hazard chevrons, huge rivet, porthole, four thrust bells
+luz — black needle, dead neon, one cyan light, visor slit, hover rings, bone ski
+queixo — riveted T-rex skull, furnace eye, thrust ring at the neck
+unha — raptor claw, open ribs, purple slime, amber cockpit, lime rings
+friso — three horns, bone frill wing, three yellow slime jets

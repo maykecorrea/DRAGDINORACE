@@ -1,0 +1,1079 @@
+[
+  {
+    "id": "agiota_juca",
+    "kind": "offer",
+    "npc": "juca",
+    "title": "Dinheiro na hora",
+    "week_min": 2,
+    "week_max": 8,
+    "weight": 10,
+    "once": false,
+    "cooldown_weeks": 4,
+    "conditions": [
+      {
+        "stat": "cash",
+        "lt": 800
+      }
+    ],
+    "text": "Opa, {nome}! Te empresto 5.000 hoje, sem papel. Juros de amigo: 10% por semana.",
+    "red_flags": [
+      "por semana"
+    ],
+    "options": [
+      {
+        "id": "aceitar",
+        "label": "Pegar 5.000",
+        "effects": [
+          {
+            "op": "debt_add",
+            "template": "agiota_juca",
+            "principal": 5000
+          },
+          {
+            "op": "cash",
+            "value": 5000
+          },
+          {
+            "op": "flag",
+            "key": "took_agiota",
+            "value": true
+          }
+        ],
+        "scam": true,
+        "decision_impact": -8
+      },
+      {
+        "id": "recusar",
+        "label": "Recusar",
+        "dodged_scam": true,
+        "lesson_unlock": "L06",
+        "decision_impact": 2
+      }
+    ]
+  },
+  {
+    "id": "cartao_platina",
+    "kind": "offer",
+    "npc": "banco",
+    "title": "Pré-aprovado",
+    "week_min": 4,
+    "week_max": 7,
+    "weight": 8,
+    "once": true,
+    "text": "Cartão Platina Jurássico, já aprovado! Limite de 2.000, pague só o mínimo. Na letra miúda: 40 por semana.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "aceitar",
+        "label": "Ativar cartão",
+        "effects": [
+          {
+            "op": "debt_add",
+            "template": "cartao_platina",
+            "principal": 2000
+          },
+          {
+            "op": "cash",
+            "value": 2000
+          }
+        ],
+        "scam": true,
+        "decision_impact": -5
+      },
+      {
+        "id": "recusar",
+        "label": "Rasgar convite",
+        "dodged_scam": true,
+        "lesson_unlock": "L13",
+        "decision_impact": 2
+      }
+    ]
+  },
+  {
+    "id": "pre_aprovado",
+    "kind": "offer",
+    "npc": "banco",
+    "title": "Crédito fácil",
+    "week_min": 5,
+    "week_max": 8,
+    "weight": 6,
+    "once": true,
+    "conditions": [
+      {
+        "stat": "cash",
+        "lt": 1200
+      }
+    ],
+    "text": "Banco Fóssil: só 1,9% ao mês, 6.000 na conta. O seguro é obrigatório e tem multa se pagar antes.",
+    "red_flags": [
+      "1,9% ao mês",
+      "obrigatório"
+    ],
+    "options": [
+      {
+        "id": "aceitar",
+        "label": "Pegar os 6.000",
+        "effects": [
+          {
+            "op": "debt_add",
+            "template": "pre_aprovado",
+            "principal": 6000
+          },
+          {
+            "op": "cash",
+            "value": 6000
+          }
+        ],
+        "scam": true,
+        "decision_impact": -4
+      },
+      {
+        "id": "recusar",
+        "label": "Pedir custo total",
+        "dodged_scam": true,
+        "lesson_unlock": "L07",
+        "decision_impact": 2
+      }
+    ]
+  },
+  {
+    "id": "feirao_limpa",
+    "kind": "offer",
+    "npc": "casco",
+    "title": "Feirão Limpa-Nome",
+    "week_min": 3,
+    "week_max": 6,
+    "weight": 12,
+    "once": true,
+    "conditions": [
+      {
+        "has_debt": "fornecedor_casco"
+      }
+    ],
+    "text": "A Casco-Tech tira 40% do boleto se você pagar o resto hoje. Renegociar sai mais barato que dívida nova.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "quitar",
+        "label": "Pagar com desconto",
+        "effects": [
+          {
+            "op": "cash",
+            "value": "=round(debt(fornecedor_casco)*0.4)"
+          },
+          {
+            "op": "debt_pay",
+            "template": "fornecedor_casco",
+            "value": "=debt(fornecedor_casco)"
+          },
+          {
+            "op": "flag",
+            "key": "feirao",
+            "value": true
+          },
+          {
+            "op": "lesson",
+            "id": "L10"
+          }
+        ],
+        "decision_impact": 4
+      },
+      {
+        "id": "depois",
+        "label": "Deixar o boleto",
+        "decision_impact": -1
+      }
+    ]
+  },
+  {
+    "id": "primo_zeca",
+    "kind": "offer",
+    "npc": "zeca",
+    "title": "É família",
+    "week_min": 3,
+    "week_max": 6,
+    "weight": 7,
+    "once": true,
+    "text": "Primo Zeca: \"Trabalho por 120. Não precisa registrar, é família. Eu cuido das peças.\"",
+    "red_flags": [
+      "Não precisa registrar",
+      "é família"
+    ],
+    "options": [
+      {
+        "id": "aceitar",
+        "label": "Deixar entrar",
+        "effects": [
+          {
+            "op": "employee_hire",
+            "id": "zeca"
+          }
+        ],
+        "scam": true,
+        "decision_impact": -4
+      },
+      {
+        "id": "recusar",
+        "label": "Registrar outro",
+        "dodged_scam": true,
+        "lesson_unlock": "L28",
+        "decision_impact": 2
+      }
+    ]
+  },
+  {
+    "id": "seguro_carapaca",
+    "kind": "offer",
+    "npc": "ambar",
+    "title": "Seguro Carapaça",
+    "week_min": 6,
+    "week_max": 10,
+    "weight": 5,
+    "once": true,
+    "text": "90 fósseis por semana. Se a fiação estourar, o seguro paga 80% do conserto.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "aceitar",
+        "label": "Pagar o seguro",
+        "effects": [
+          {
+            "op": "fixed_cost_add",
+            "id": "seguro",
+            "value": 90
+          },
+          {
+            "op": "flag",
+            "key": "seguro",
+            "value": true
+          },
+          {
+            "op": "lesson",
+            "id": "L26"
+          }
+        ],
+        "decision_impact": 2
+      },
+      {
+        "id": "recusar",
+        "label": "Guardar no cofre",
+        "decision_impact": 0
+      }
+    ]
+  },
+  {
+    "id": "cameras",
+    "kind": "offer",
+    "npc": "vizinho",
+    "title": "Câmeras do beco",
+    "week_min": 4,
+    "week_max": 8,
+    "weight": 4,
+    "once": true,
+    "text": "Um kit de câmeras por 600, à vista. Não é acordo com a gangue. É prova, se um dia precisar.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "comprar",
+        "label": "Instalar (600)",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 600
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -600
+          },
+          {
+            "op": "flag",
+            "key": "cameras",
+            "value": true
+          },
+          {
+            "op": "flag",
+            "key": "proof_camera",
+            "value": true
+          }
+        ],
+        "decision_impact": 3
+      },
+      {
+        "id": "depois",
+        "label": "Deixar no escuro",
+        "decision_impact": -1
+      }
+    ]
+  },
+  {
+    "id": "associacao",
+    "kind": "offer",
+    "npc": "comerciante",
+    "title": "Associação",
+    "week_min": 7,
+    "week_max": 14,
+    "weight": 6,
+    "once": true,
+    "text": "A Associação dos Comerciantes cobra 50 por semana. Juntos, a gangue atrapalha menos e a denúncia anda.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "entrar",
+        "label": "Entrar",
+        "effects": [
+          {
+            "op": "fixed_cost_add",
+            "id": "associacao",
+            "value": 50
+          },
+          {
+            "op": "flag",
+            "key": "associacao",
+            "value": true
+          }
+        ],
+        "decision_impact": 3
+      },
+      {
+        "id": "fora",
+        "label": "Ficar por fora",
+        "decision_impact": 0
+      }
+    ]
+  },
+  {
+    "id": "piramide_ovo",
+    "kind": "offer",
+    "npc": "coach",
+    "title": "Ovo de Ouro",
+    "act_min": 2,
+    "week_min": 9,
+    "week_max": 14,
+    "weight": 8,
+    "once": true,
+    "text": "Clube Ovo de Ouro: rende 30% ao mês, garantido! Traga 2 amigos e ganhe bônus. Sacar está \"em análise\".",
+    "red_flags": [
+      "garantido",
+      "Traga 2 amigos",
+      "em análise"
+    ],
+    "options": [
+      {
+        "id": "entrar",
+        "label": "Pôr 1.000",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 1000
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -1000
+          },
+          {
+            "op": "investment_add",
+            "scam_id": "ovo",
+            "value": 1000
+          }
+        ],
+        "scam": true,
+        "decision_impact": -6
+      },
+      {
+        "id": "recrutar",
+        "label": "Chamar amigos",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 1000
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -1000
+          },
+          {
+            "op": "investment_add",
+            "scam_id": "ovo",
+            "value": 1000
+          },
+          {
+            "op": "flag",
+            "key": "recruited",
+            "value": true
+          }
+        ],
+        "scam": true,
+        "decision_impact": -10
+      },
+      {
+        "id": "recusar",
+        "label": "Não existe ovo mágico",
+        "dodged_scam": true,
+        "lesson_unlock": "L15",
+        "decision_impact": 3
+      }
+    ]
+  },
+  {
+    "id": "bitossauro",
+    "kind": "offer",
+    "npc": "coach",
+    "title": "Bitossauro",
+    "act_min": 2,
+    "week_min": 10,
+    "week_max": 16,
+    "weight": 7,
+    "once": true,
+    "text": "Coach Pterodáctilo: \"O Bitossauro vai dobrar este mês. Garantido! Últimas vagas.\" Para sacar depois, tem taxa.",
+    "red_flags": [
+      "Garantido",
+      "taxa"
+    ],
+    "options": [
+      {
+        "id": "comprar",
+        "label": "Pôr 800",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 800
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -800
+          },
+          {
+            "op": "investment_add",
+            "scam_id": "bito",
+            "value": 800
+          }
+        ],
+        "scam": true,
+        "decision_impact": -6
+      },
+      {
+        "id": "recusar",
+        "label": "Fechar anúncio",
+        "dodged_scam": true,
+        "lesson_unlock": "L16",
+        "decision_impact": 2
+      }
+    ]
+  },
+  {
+    "id": "curso_coach",
+    "kind": "offer",
+    "npc": "coach",
+    "title": "Segredo do Milhão",
+    "act_min": 2,
+    "week_min": 9,
+    "week_max": 12,
+    "weight": 4,
+    "once": true,
+    "text": "Curso O Segredo do Milhão: 1.500. Gente que ficou rica na semana seguinte. \"Garantido para quem tem pressa.\"",
+    "red_flags": [
+      "Garantido",
+      "semana seguinte"
+    ],
+    "options": [
+      {
+        "id": "pagar",
+        "label": "Pagar 1.500",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 1500
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -1500
+          },
+          {
+            "op": "flag",
+            "key": "aluno_coach",
+            "value": true
+          }
+        ],
+        "scam": true,
+        "decision_impact": -3
+      },
+      {
+        "id": "recusar",
+        "label": "Ler o caderno",
+        "dodged_scam": true,
+        "lesson_unlock": "L16",
+        "decision_impact": 1
+      }
+    ]
+  },
+  {
+    "id": "parcelado_megaosso",
+    "kind": "offer",
+    "npc": "megaosso",
+    "title": "Elevador sem juros",
+    "act_min": 2,
+    "week_min": 11,
+    "week_max": 18,
+    "weight": 6,
+    "once": true,
+    "text": "Elevador hidráulico em 12× de 780 SEM JUROS. À vista, escondido no rodapé: 8.000.",
+    "red_flags": [
+      "SEM JUROS",
+      "rodapé"
+    ],
+    "options": [
+      {
+        "id": "parcelar",
+        "label": "Parcelar 12×",
+        "effects": [
+          {
+            "op": "debt_add",
+            "template": "parcelado",
+            "principal": 9360
+          },
+          {
+            "op": "flag",
+            "key": "elevador",
+            "value": true
+          }
+        ],
+        "scam": true,
+        "decision_impact": -4
+      },
+      {
+        "id": "vista",
+        "label": "Pagar 8.000",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 8000
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -8000
+          },
+          {
+            "op": "flag",
+            "key": "elevador",
+            "value": true
+          },
+          {
+            "op": "lesson",
+            "id": "L17"
+          }
+        ],
+        "decision_impact": 3
+      },
+      {
+        "id": "recusar",
+        "label": "Somar parcelas",
+        "dodged_scam": true,
+        "lesson_unlock": "L17",
+        "decision_impact": 1
+      }
+    ]
+  },
+  {
+    "id": "socio_ricardao",
+    "kind": "offer",
+    "npc": "ricardao",
+    "title": "Sócio do caixa",
+    "act_min": 2,
+    "week_min": 12,
+    "week_max": 16,
+    "weight": 8,
+    "once": true,
+    "text": "Ricardão Escama: \"Ponho 10.000 hoje por metade da oficina e cuido do caixa. Assina hoje!\" A ficha dele tem processo.",
+    "red_flags": [
+      "o caixa",
+      "Assina hoje",
+      "processo"
+    ],
+    "options": [
+      {
+        "id": "aceitar",
+        "label": "Assinar já",
+        "effects": [
+          {
+            "op": "cash",
+            "value": 10000
+          },
+          {
+            "op": "fixed_cost_add",
+            "id": "ricardao",
+            "value": 600
+          },
+          {
+            "op": "flag",
+            "key": "ricardao",
+            "value": true
+          },
+          {
+            "op": "schedule",
+            "in_weeks": 6,
+            "hidden": true,
+            "effects": [
+              {
+                "op": "fixed_cost_remove",
+                "id": "ricardao"
+              },
+              {
+                "op": "debt_add",
+                "template": "divida_ricardao",
+                "principal": 8000
+              },
+              {
+                "op": "flag",
+                "key": "ricardao",
+                "value": false
+              },
+              {
+                "op": "rep",
+                "value": -8
+              },
+              {
+                "op": "lesson",
+                "id": "L18"
+              }
+            ]
+          }
+        ],
+        "scam": true,
+        "decision_impact": -8
+      },
+      {
+        "id": "ficha",
+        "label": "Ver ficha e recusar",
+        "dodged_scam": true,
+        "lesson_unlock": "L18",
+        "decision_impact": 3
+      }
+    ]
+  },
+  {
+    "id": "cliente_gigante",
+    "kind": "offer",
+    "npc": "caloteiro",
+    "title": "Contrato da vida",
+    "week_min": 8,
+    "week_max": 16,
+    "weight": 5,
+    "once": true,
+    "text": "Um empresário promete 30.000. Mas você compra as peças antes, sem sinal. \"Pago na entrega\", ele diz.",
+    "red_flags": [
+      "Pago na entrega"
+    ],
+    "options": [
+      {
+        "id": "aceitar",
+        "label": "Comprar peças",
+        "effects": [
+          {
+            "op": "lead_add",
+            "client_type": "caloteiro"
+          },
+          {
+            "op": "cash",
+            "value": -400
+          }
+        ],
+        "scam": true,
+        "decision_impact": -5
+      },
+      {
+        "id": "ficha",
+        "label": "Ver a ficha",
+        "dodged_scam": true,
+        "lesson_unlock": "L11",
+        "decision_impact": 3
+      }
+    ]
+  },
+  {
+    "id": "contrabando_rato",
+    "kind": "offer",
+    "npc": "rato",
+    "title": "Metade do preço",
+    "week_min": 4,
+    "week_max": 9,
+    "weight": 5,
+    "once": true,
+    "text": "O Rato: peça pela metade do preço, sem nota. Se a fiscalização passar, a nota que não existe vira multa.",
+    "red_flags": [
+      "sem nota",
+      "metade do preço"
+    ],
+    "options": [
+      {
+        "id": "aceitar",
+        "label": "Comprar no beco",
+        "effects": [
+          {
+            "op": "flag",
+            "key": "rato_dirty",
+            "value": true
+          },
+          {
+            "op": "stock",
+            "material": "kit",
+            "qty": 4
+          },
+          {
+            "op": "cash",
+            "value": -40
+          }
+        ],
+        "scam": true,
+        "decision_impact": -3
+      },
+      {
+        "id": "recusar",
+        "label": "Pedir nota",
+        "dodged_scam": true,
+        "lesson_unlock": "L27",
+        "decision_impact": 2
+      }
+    ]
+  },
+  {
+    "id": "refin_milagre",
+    "kind": "offer",
+    "npc": "banco",
+    "title": "Parcela pequenininha",
+    "act_min": 2,
+    "week_min": 14,
+    "week_max": 24,
+    "weight": 5,
+    "once": true,
+    "conditions": [
+      {
+        "stat": "total_debt",
+        "gt": 3000
+      }
+    ],
+    "text": "Refinancia Já: junte tudo numa parcela pequenininha, em 104 semanas. O prazo longo esconde o total enorme.",
+    "red_flags": [
+      "pequenininha"
+    ],
+    "options": [
+      {
+        "id": "juntar",
+        "label": "Juntar dívidas",
+        "effects": [
+          {
+            "op": "debt_merge",
+            "template": "refin_milagre",
+            "weeks": 104
+          },
+          {
+            "op": "lesson",
+            "id": "L22"
+          }
+        ],
+        "scam": true,
+        "decision_impact": -3
+      },
+      {
+        "id": "recusar",
+        "label": "Ver o total",
+        "dodged_scam": true,
+        "lesson_unlock": "L22",
+        "decision_impact": 2
+      }
+    ]
+  },
+  {
+    "id": "franquia_turbo",
+    "kind": "offer",
+    "npc": "rex",
+    "title": "Franquia Turbo-Rex",
+    "act_min": 3,
+    "week_min": 22,
+    "week_max": 30,
+    "weight": 5,
+    "once": true,
+    "text": "Vire franquia e triplique os clientes! Taxa de 15.000 e 12% de tudo que vender. Vender não é lucro.",
+    "red_flags": [
+      "triplique"
+    ],
+    "options": [
+      {
+        "id": "assinar",
+        "label": "Pagar a taxa",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 15000
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -15000
+          },
+          {
+            "op": "flag",
+            "key": "franquia",
+            "value": true
+          }
+        ],
+        "scam": true,
+        "decision_impact": -5
+      },
+      {
+        "id": "recusar",
+        "label": "Fazer a conta",
+        "dodged_scam": true,
+        "lesson_unlock": "L02",
+        "decision_impact": 2
+      }
+    ]
+  },
+  {
+    "id": "bet_arrancada",
+    "kind": "offer",
+    "npc": "coach",
+    "title": "Palpite Certo",
+    "act_min": 2,
+    "week_min": 18,
+    "week_max": 44,
+    "weight": 4,
+    "cooldown_weeks": 2,
+    "text": "Dica infalível: ponha 200 no azarão e dobre, garantido. Perdeu? Ponha mais na próxima e recupere.",
+    "red_flags": [
+      "infalível"
+    ],
+    "options": [
+      {
+        "id": "apostar",
+        "label": "Arriscar 200",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 200
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -200
+          },
+          {
+            "op": "chance",
+            "p": 0.5,
+            "effects": [
+              {
+                "op": "cash",
+                "value": 260
+              }
+            ],
+            "otherwise": [
+              {
+                "op": "lesson",
+                "id": "L16"
+              }
+            ]
+          }
+        ],
+        "scam": true,
+        "decision_impact": -2
+      },
+      {
+        "id": "recusar",
+        "label": "Guardar os 200",
+        "dodged_scam": true,
+        "lesson_unlock": "L29",
+        "decision_impact": 1
+      }
+    ]
+  },
+  {
+    "id": "consorcio_milagre",
+    "kind": "offer",
+    "npc": "megaosso",
+    "title": "Consórcio Ossomax",
+    "act_min": 2,
+    "week_min": 15,
+    "week_max": 28,
+    "weight": 4,
+    "once": true,
+    "text": "Prêmio garantido no 1º mês! Taxa de 18%. Se desistir, só recebe no fim. Ninguém garante o prêmio.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "entrar",
+        "label": "Entrar com 500",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 500
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -500
+          },
+          {
+            "op": "flag",
+            "key": "consorcio",
+            "value": true
+          }
+        ],
+        "scam": true,
+        "decision_impact": -3
+      },
+      {
+        "id": "recusar",
+        "label": "Ler as regras",
+        "dodged_scam": true,
+        "lesson_unlock": "L17",
+        "decision_impact": 1
+      }
+    ]
+  },
+  {
+    "id": "coop_ossada",
+    "kind": "offer",
+    "npc": "ambar",
+    "title": "Cooperativa Ossada",
+    "week_min": 8,
+    "week_max": 40,
+    "weight": 3,
+    "cooldown_weeks": 6,
+    "conditions": [
+      {
+        "stat": "rep",
+        "gte": 35
+      }
+    ],
+    "text": "A Cooperativa empresta a 0,35% por semana, com o custo escrito. Precisa de nome limpo e fama.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "ir",
+        "label": "Ver no banco",
+        "effects": [
+          {
+            "op": "unlock",
+            "key": "coop_vista"
+          },
+          {
+            "op": "lesson",
+            "id": "L07"
+          }
+        ],
+        "decision_impact": 2
+      },
+      {
+        "id": "depois",
+        "label": "Agora não",
+        "decision_impact": 0
+      }
+    ]
+  },
+  {
+    "id": "microcredito",
+    "kind": "offer",
+    "npc": "ambar",
+    "title": "Jovem Empreendedor",
+    "week_min": 6,
+    "week_max": 30,
+    "weight": 3,
+    "once": true,
+    "conditions": [
+      {
+        "all": [
+          {
+            "lesson_seen": "L01"
+          },
+          {
+            "lesson_seen": "L21"
+          }
+        ]
+      }
+    ],
+    "text": "Empréstimo de até 4.000 a 0,25% por semana. O juro mais baixo da cidade, porque você leu o caderno.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "ir",
+        "label": "Ver no banco",
+        "effects": [
+          {
+            "op": "unlock",
+            "key": "micro_vista"
+          },
+          {
+            "op": "lesson",
+            "id": "L07"
+          }
+        ],
+        "decision_impact": 2
+      },
+      {
+        "id": "depois",
+        "label": "Seguir sem crédito",
+        "decision_impact": 0
+      }
+    ]
+  },
+  {
+    "id": "brasa_socia",
+    "kind": "offer",
+    "npc": "brasa",
+    "title": "Sócia de verdade",
+    "act_min": 3,
+    "week_min": 21,
+    "week_max": 36,
+    "weight": 6,
+    "once": true,
+    "conditions": [
+      {
+        "hired_weeks": "brasa",
+        "gte": 8
+      }
+    ],
+    "text": "Dona Brasa põe 5.000 por 20% da oficina. Contrato registrado. Ela não mexe no caixa.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "aceitar",
+        "label": "Aceitar Brasa",
+        "effects": [
+          {
+            "op": "cash",
+            "value": 5000
+          },
+          {
+            "op": "flag",
+            "key": "brasa_socia",
+            "value": true
+          },
+          {
+            "op": "lesson",
+            "id": "L18"
+          }
+        ],
+        "decision_impact": 5
+      },
+      {
+        "id": "recusar",
+        "label": "Seguir sozinho",
+        "decision_impact": 0
+      }
+    ]
+  }
+]

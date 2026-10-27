@@ -1,0 +1,48 @@
+{
+ "name": "Vaga-lume ácido",
+ "description": "Dino Drag Race — Vaga-lume ácido (Raro). 15 de dano. 23 tiros. 0.77s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/118.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 15,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 23,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.77,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Raro",
+  "stats": "dmg=15;clip=23;cd=0.77;lock=3.4"
+ }
+}

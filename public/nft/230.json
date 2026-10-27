@@ -1,0 +1,33 @@
+{
+ "name": "Visor estelar",
+ "description": "Dino Drag Race — Visor estelar (Lendário). +14% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/230.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "lente"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "14%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-lente-Lendário-2",
+  "stats": "vmax+14%"
+ }
+}

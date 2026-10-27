@@ -1,0 +1,33 @@
+{
+ "name": "Borracha quente",
+ "description": "Dino Drag Race — Borracha quente (Comum). +5 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/9.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "tires"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 5,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "tires-Comum-3",
+  "stats": "accel+5"
+ }
+}

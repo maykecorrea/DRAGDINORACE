@@ -112,12 +112,12 @@ export function storyOpen(cleared: number, chapter: number): boolean {
 }
 
 export const BOSSES: Record<number, { rear: string; before: string; win: string; loss: string }> = {
-  1: { rear: "arm-mine-Comum", before: "GECK: ele corre do seu lado e joga mina. Desvia com A/D.", win: "Você passou por cima das minas.", loss: "A mina te pegou." },
-  2: { rear: "arm-mine-Comum", before: "CLAW: troca tiro de perto. A seta mostra de onde vem.", win: "O raio não te alcançou.", loss: "Perto demais do raio." },
-  3: { rear: "arm-mine-Normal", before: "NYX: mesma briga da rua, carro mais rápido. Desvia o míssil.", win: "Você quebrou a mira.", loss: "O míssil não errou." },
-  4: { rear: "arm-mine-Raro", before: "LUA: médio. Ele cola e atira mais. A/D tira você da linha.", win: "O gelo não te segurou.", loss: "Você ficou lento." },
-  5: { rear: "arm-mine-Épico", before: "SHELL: difícil. Não deixa ele abrir. Revida quando estiver colado.", win: "O casco aguentou o veneno.", loss: "O veneno te comeu." },
-  6: { rear: "arm-mine-Lendário", before: "VEX: ou chega primeiro, ou eu te derrubo. Mesma briga, sem piedade.", win: "A mandíbula ficou na pista.", loss: "O rex te passou." },
+  1: { rear: "arm-mine-Comum", before: "GECK-404: ele corre do seu lado e solta minas. Desvie com A/D.", win: "Você desviou das minas!", loss: "A mina te acertou." },
+  2: { rear: "arm-mine-Comum", before: "HYPECLAW: troca tiro de perto. A seta mostra de onde vem.", win: "O raio não te alcançou!", loss: "Perto demais do raio." },
+  3: { rear: "arm-mine-Normal", before: "NYXATOPS: carro mais rápido e míssil. Desvie!", win: "Você fugiu da mira!", loss: "O míssil acertou." },
+  4: { rear: "arm-mine-Raro", before: "LUA-PTERO: ele cola e atira mais. Use A/D para sair da linha.", win: "O gelo não te segurou!", loss: "Você ficou lento." },
+  5: { rear: "arm-mine-Épico", before: "SHELLNAKAMOTO: difícil. Não deixe ele abrir vantagem. Revide colado.", win: "O casco aguentou a gosma!", loss: "A gosma te freou." },
+  6: { rear: "arm-mine-Lendário", before: "VEX-REX: \"Ou você chega primeiro, ou a rua é minha.\"", win: "Você venceu o VEX-REX!", loss: "O VEX-REX passou na frente." },
 };
 
 export type StoryKit = {
@@ -228,4 +228,82 @@ export function storyRivalStats(phase: StoryPhase) {
 export function grantStoryPart(up: Upgrades, part: StoryPart): Upgrades {
   const cap = part.grade === "monstro" ? 8 : 4;
   return { ...up, [part.key]: Math.min(cap, up[part.key] + part.levels) };
+}
+
+/** Cada linha rola sozinha. Vitória pode trazer várias. Derrota não rola. */
+export type StoryDrop = { id: string; chance: number };
+
+export const STORY_LOOT: Record<number, StoryDrop[]> = {
+  1: [
+    { id: "tires-Comum", chance: 0.6 },
+    { id: "chassis-Comum", chance: 0.45 },
+    { id: "engine-Comum", chance: 0.3 },
+    { id: "nitro-Comum", chance: 0.22 },
+    { id: "gearbox-Comum", chance: 0.18 },
+  ],
+  2: [
+    { id: "tires-Comum", chance: 0.55 },
+    { id: "chassis-Comum", chance: 0.5 },
+    { id: "engine-Comum", chance: 0.4 },
+    { id: "nitro-Comum", chance: 0.35 },
+    { id: "gearbox-Comum", chance: 0.3 },
+    { id: "tires-Comum-2", chance: 0.25 },
+    { id: "chassis-Comum-2", chance: 0.2 },
+  ],
+  3: [
+    { id: "engine-Comum", chance: 0.5 },
+    { id: "gearbox-Comum", chance: 0.45 },
+    { id: "tires-Comum", chance: 0.4 },
+    { id: "chassis-Comum", chance: 0.4 },
+    { id: "nitro-Comum", chance: 0.35 },
+    { id: "engine-Comum-2", chance: 0.28 },
+    { id: "nitro-Comum-2", chance: 0.22 },
+    { id: "gearbox-Comum-2", chance: 0.18 },
+  ],
+  4: [
+    { id: "chassis-Comum", chance: 0.55 },
+    { id: "engine-Comum", chance: 0.5 },
+    { id: "tires-Comum", chance: 0.45 },
+    { id: "nitro-Comum", chance: 0.4 },
+    { id: "gearbox-Comum", chance: 0.4 },
+    { id: "chassis-Comum-2", chance: 0.32 },
+    { id: "engine-Comum-3", chance: 0.28 },
+    { id: "tires-Comum-3", chance: 0.24 },
+    { id: "nitro-Comum-2", chance: 0.22 },
+  ],
+  5: [
+    { id: "engine-Comum", chance: 0.55 },
+    { id: "gearbox-Comum", chance: 0.5 },
+    { id: "chassis-Comum", chance: 0.45 },
+    { id: "tires-Comum", chance: 0.4 },
+    { id: "nitro-Comum", chance: 0.4 },
+    { id: "engine-Comum-3", chance: 0.34 },
+    { id: "gearbox-Comum-3", chance: 0.3 },
+    { id: "chassis-Comum-3", chance: 0.26 },
+    { id: "tires-Comum-2", chance: 0.24 },
+    { id: "nitro-Comum-3", chance: 0.22 },
+    { id: "gearbox-Comum-2", chance: 0.2 },
+    { id: "engine-Comum-2", chance: 0.18 },
+  ],
+  6: [
+    { id: "engine-Comum", chance: 0.5 },
+    { id: "gearbox-Comum", chance: 0.48 },
+    { id: "chassis-Comum", chance: 0.45 },
+    { id: "tires-Comum", chance: 0.42 },
+    { id: "nitro-Comum", chance: 0.4 },
+    { id: "engine-Comum-2", chance: 0.32 },
+    { id: "engine-Comum-3", chance: 0.28 },
+    { id: "gearbox-Comum-2", chance: 0.3 },
+    { id: "gearbox-Comum-3", chance: 0.26 },
+    { id: "chassis-Comum-2", chance: 0.28 },
+    { id: "chassis-Comum-3", chance: 0.24 },
+    { id: "tires-Comum-2", chance: 0.26 },
+    { id: "tires-Comum-3", chance: 0.22 },
+    { id: "nitro-Comum-2", chance: 0.24 },
+    { id: "nitro-Comum-3", chance: 0.2 },
+  ],
+};
+
+export function rollStoryLoot(chapter: number, rng: () => number = Math.random): string[] {
+  return (STORY_LOOT[chapter] ?? []).filter((row) => rng() < row.chance).map((row) => row.id);
 }

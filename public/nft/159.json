@@ -1,0 +1,48 @@
+{
+ "name": "Beijo de cometa",
+ "description": "Dino Drag Race — Beijo de cometa (Lendário). 34 de dano. 7 tiros. 1.02s. Veneno 22/s. Se acerta, sangra até o fim da corrida.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/159.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "poison"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 34,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.02,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Poison",
+   "value": 22,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-poison-Lendário-3",
+  "stats": "dmg=34;clip=7;cd=1.02;poison=22/s"
+ }
+}

@@ -1,0 +1,29 @@
+SEED VISUAL
+seeds/seed-normal-traseira.png
+Mesmo seed dos normais. Fundo do PNG original é transparente. Na loja o carro fica solto no card escuro.
+
+PROMPT BASE
+IMAGE_0 is a flat 2D pixel sprite, not a 3D model.
+Redraw the vehicle from IMAGE_1 as that same flat sprite.
+Straight rear view, camera behind the car, centered.
+Dense chunky pixels. Solid black background.
+Not a 3D render, not a turntable, no white outline, no sticker border, no text, no person.
+
+NEGATIVO
+side view, profile, white outline, sticker, cutout, 3D render, turntable, podium, driver, person, text, letters, numbers, magenta
+
+POR CARRO
+prato — dish antenna, round porthole, slime pontoon, yellow jet bell at the rear
+vassoura — narrow beam, cracked helmet, bone ski, one purple jet facing camera
+barril — rust barrel, yellow hazard stripe, two yellow pontoons
+gaiola — open rebar cage, bone skis, one purple jet, empty seat
+lanterna — industrial lantern, cyan glass, handle is the tail
+telha — corrugated tile roof, periscope, four thrust candles
+sino — copper church-bell cockpit, bone skis, one jet
+placa — stegosaurus, green dorsal plates, spiked tail, lime rings
+clava — ankylosaurus bunker, tail club and orange jet facing camera
+vela — crocodile hull, torn solar sail, yellow slime under the tail
+pescoco — spotted neck, rusty pod, purple jet, two purple rings
+babado — two purple frill wings, slime jets facing camera
+bico — seen from the tail, purple wings folded, beak points away
+casco — turtle shell, riveted hatch, lime slime, bone skis

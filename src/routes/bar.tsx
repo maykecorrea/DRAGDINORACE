@@ -16,8 +16,8 @@ const RUNNERS = [
 
 const REELS = [
   { id: "rex", name: "REX", pay: 6, icon: "/game/slot-rex.png" },
-  { id: "fossil", name: "FÓSSIL", pay: 4, icon: "/game/fossil-coin.png" },
-  { id: "caveira", name: "CAVEIRA", pay: 3, icon: "/game/slot-caveira.png" },
+  { id: "fossil", name: "Fósseis", pay: 4, icon: "/game/fossil-coin.png" },
+  { id: "caveira", name: "CRÂNIO", pay: 3, icon: "/game/slot-caveira.png" },
   { id: "gosma", name: "GOSMA", pay: 2, icon: "/game/slot-gosma.png" },
   { id: "osso", name: "OSSO", pay: 1.5, icon: "/game/slot-osso.png" },
 ] as const;
@@ -38,6 +38,15 @@ function fmt(n: number) {
   return Math.floor(n).toLocaleString("pt-BR");
 }
 
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function fichas(save: { arcadeDay?: string; arcadeLeft?: number }) {
+  if (save.arcadeDay !== todayKey()) return 3;
+  return save.arcadeLeft ?? 3;
+}
+
 function Bar() {
   const { save, commit } = useSave();
   const [busy, setBusy] = useState(false);
@@ -52,15 +61,10 @@ function Bar() {
   const [raceNote, setRaceNote] = useState("");
   const [party, setParty] = useState(0);
   const [slotBet, setSlotBet] = useState("25");
-  const [faces, setFaces] = useState<string[]>(["OSSO", "GOSMA", "CAVEIRA"]);
+  const [faces, setFaces] = useState<string[]>(["OSSO", "GOSMA", "CRÂNIO"]);
   const [slotNote, setSlotNote] = useState("");
   const [mesa, setMesa] = useState<"moeda" | "pista" | "cova" | null>(null);
-
-  useEffect(() => {
-    const ledger = save.ledger ?? [];
-    if (!ledger.some((line) => line.kind === "bar")) return;
-    commit({ ...save, ledger: ledger.filter((line) => line.kind !== "bar") });
-  }, [save, commit]);
+  const left = fichas(save);
 
   useEffect(() => {
     if (!coinSpin) return;
@@ -70,39 +74,36 @@ function Bar() {
     return () => window.clearInterval(id);
   }, [coinSpin]);
 
-  function take(bet: number) {
-    return Math.floor(bet) >= 1 && Math.floor(bet) <= save.fossil && !busy;
-  }
-
-  function settle(bet: number, payout: number) {
+  function pay(prize: number) {
+    const nextLeft = Math.max(0, left - 1);
     commit({
       ...save,
-      fossil: save.fossil - bet + payout,
+      fossil: save.fossil + prize,
+      arcadeDay: todayKey(),
+      arcadeLeft: nextLeft,
       ledger: (save.ledger ?? []).filter((line) => line.kind !== "bar"),
     });
   }
 
   function jogarMoeda() {
-    const bet = Math.floor(Number(coinBet));
-    if (!take(bet)) return;
+    if (left < 1 || busy) return;
     setBusy(true);
     setCoinNote("");
     setCoinSpin(true);
-    const face: Side = Math.random() < 0.3 ? coinPick : coinPick === "garra" ? "cauda" : "garra";
+    const face: Side = Math.random() < 0.5 ? "garra" : "cauda";
     window.setTimeout(() => {
       setCoinSpin(false);
       setCoinFace(face);
       const won = face === coinPick;
-      const payout = won ? Math.floor(bet * 1.45) : 0;
-      setCoinNote(won ? `Caiu ${face}. +${fmt(payout)}` : `Caiu ${face}. A casa ficou.`);
-      settle(bet, payout);
+      const caiu = face === "garra" ? "GARRA" : "CAUDA";
+      setCoinNote(won ? `Caiu ${caiu}. Você ganhou 10 fósseis.` : `Caiu ${caiu}. Você errou. Não ganhou nada.`);
+      pay(won ? 10 : 0);
       setBusy(false);
     }, 1100);
   }
 
   function jogarPista() {
-    const bet = Math.floor(Number(raceBet));
-    if (!take(bet)) return;
+    if (left < 1 || busy) return;
     setBusy(true);
     setRaceNote("");
     setParty(0);
@@ -116,12 +117,10 @@ function Bar() {
       setLanes(targets.map((target) => target * eased));
       if (t < 1) requestAnimationFrame(tick);
       else {
-        const picked = RUNNERS.find((runner) => runner.id === racePick) ?? RUNNERS[0];
-        const won = winner.id === picked.id;
-        const payout = won ? Math.floor(bet * picked.odds) : 0;
-        setRaceNote(won ? `${winner.name} cruzou. +${fmt(payout)}` : `${winner.name} cruzou. A casa ficou.`);
+        const won = winner.id === racePick;
+        setRaceNote(won ? `${winner.name} chegou primeiro. Você ganhou 15 fósseis.` : `${winner.name} chegou primeiro. Não era o seu palpite. Não ganhou nada.`);
         setParty(Date.now());
-        settle(bet, payout);
+        pay(won ? 15 : 0);
         setBusy(false);
       }
     };
@@ -129,8 +128,7 @@ function Bar() {
   }
 
   function jogarCova() {
-    const bet = Math.floor(Number(slotBet));
-    if (!take(bet)) return;
+    if (left < 1 || busy) return;
     setBusy(true);
     setSlotNote("");
     const landed = [0, 1, 2].map(() => roll(REELS.map((item) => ({ ...item, weight: 10 }))));
@@ -143,10 +141,16 @@ function Bar() {
         const names = landed.map((item) => item.name);
         setFaces(names);
         const best = Math.max(...names.map((name) => names.filter((item) => item === name).length));
-        const pay = best >= 3 ? 5 : best === 2 ? 1.1 : 0;
-        const payout = Math.round(bet * pay);
-        setSlotNote(payout ? `${names.join(" · ")} · +${fmt(payout)}` : `${names.join(" · ")} · a casa ficou`);
-        settle(bet, payout);
+        const same = names.find((name) => names.filter((item) => item === name).length === best) ?? names[0];
+        const prize = best >= 3 ? 30 : best === 2 ? 5 : 0;
+        setSlotNote(
+          best >= 3
+            ? `Três ${same}. Você ganhou 30 fósseis.`
+            : best === 2
+              ? `Dois ${same}. Você ganhou 5 fósseis.`
+              : "Os três são diferentes. Não ganhou nada.",
+        );
+        pay(prize);
         setBusy(false);
       }
     }, 90);
@@ -154,15 +158,15 @@ function Bar() {
 
   if (!streetOpen(save)) {
     return (
-      <PitFrame title="Bar">
-        <p className="max-w-xl text-sm text-muted">O bar abre depois de 4 corridas. A pista paga fóssil. Corre primeiro.</p>
+      <PitFrame title="Fliperama">
+        <p className="max-w-xl text-sm text-muted">O fliperama abre depois de 4 corridas. São 3 fichas grátis por dia.</p>
         <Link to="/pista" className="mt-4 inline-flex min-h-11 items-center bg-primary px-4 font-display text-3xl leading-none text-ink">Pista</Link>
       </PitFrame>
     );
   }
 
   return (
-    <PitFrame title="Bar" bleed hideHeading>
+    <PitFrame title="Fliperama" bleed hideHeading>
       <div className="px-3 pb-10 pt-28 sm:px-4">
         <div className="relative mx-auto aspect-video w-full max-w-7xl overflow-hidden border border-[#3d4a2c]">
           <video
@@ -174,13 +178,13 @@ function Bar() {
             className="absolute inset-0 h-full w-full object-cover"
           />
           <button type="button" className="bar-table" data-on={mesa === "moeda" ? "1" : undefined} style={{ left: "3.5%", top: "62%", width: "29%", height: "32%" }} onClick={() => setMesa("moeda")}>
-            <span>GARRA OU CAUDA</span>
+            <span>Garra ou cauda</span>
           </button>
           <button type="button" className="bar-table" data-on={mesa === "pista" ? "1" : undefined} style={{ left: "35.5%", top: "58%", width: "29%", height: "34%" }} onClick={() => setMesa("pista")}>
-            <span>ARRANCADA</span>
+            <span>Palpite</span>
           </button>
           <button type="button" className="bar-table" data-on={mesa === "cova" ? "1" : undefined} style={{ left: "67.5%", top: "62%", width: "29%", height: "32%" }} onClick={() => setMesa("cova")}>
-            <span>COVA</span>
+            <span>Escavação</span>
           </button>
         </div>
 
@@ -189,10 +193,10 @@ function Bar() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-pixel text-3xl text-primary">
-                  {mesa === "moeda" ? "Garra ou cauda" : mesa === "pista" ? "Arrancada fantasma" : "Cova"}
+                  {mesa === "moeda" ? "Garra ou cauda" : mesa === "pista" ? "Palpite da arrancada" : "Escavação"}
                 </p>
                 <p className="text-sm text-muted">
-                  Na conta <span className="text-primary">{fmt(save.fossil)}</span> <FossilWord />. A casa fica com uma fatia.
+                  Fichas de hoje: <span className="text-primary">{left}</span>. Acertar ganha fóssil. Errar não tira nada.
                 </p>
               </div>
               <button type="button" onClick={() => setMesa(null)} className="min-h-11 border border-border px-3 font-pixel text-2xl text-muted">
@@ -202,7 +206,7 @@ function Bar() {
 
             {mesa === "moeda" && (
               <div className="mt-4">
-                <p className="text-sm text-muted">Cara ou coroa do pátio. Paga 1,45x.</p>
+                <p className="text-sm text-muted">Garra ou cauda? Acertou, ganha 10 fósseis. Errou, não perde nada.</p>
                 <div className={`bar-coin mx-auto mt-4 w-40 text-center ${coinSpin ? "bar-coin-spin" : ""}`}>
                   <img src={coinFace === "garra" ? "/game/slot-garra.png" : "/game/slot-cauda.png"} alt="" className="mx-auto h-36 w-full object-contain" />
                   <p className="mt-1 font-pixel text-2xl tracking-widest text-primary">{coinFace === "garra" ? "GARRA" : "CAUDA"}</p>
@@ -215,22 +219,21 @@ function Bar() {
                     </button>
                   ))}
                 </div>
-                <BetRow value={coinBet} onChange={setCoinBet} disabled={busy} label="Jogar" onPlay={jogarMoeda} />
-                {coinNote && <p className="mt-2 text-sm text-primary">{coinNote}</p>}
+                <button type="button" disabled={busy || left < 1} onClick={jogarMoeda} className="mt-4 min-h-11 bg-primary px-4 font-display text-2xl leading-none text-ink disabled:opacity-40">Jogar a moeda</button>
+                {coinNote && <p className="mt-3 text-base text-primary">{coinNote}</p>}
               </div>
             )}
 
             {mesa === "pista" && (
               <div className="relative mt-4">
-                <p className="text-sm text-muted">Quem cruzar a faixa ganha. O favorito paga pouco. O azarão paga alto.</p>
-                <p className="mt-3 text-right font-pixel text-sm tracking-widest text-primary">CHEGADA</p>
+                <p className="text-sm text-muted">Quem chega primeiro? Acertou, ganha 15 fósseis. Errou, não perde nada.</p>
+                <p className="mt-3 text-right font-pixel text-sm tracking-widest text-primary">Chegada</p>
                 <div className="mt-1 grid gap-2">
                   {RUNNERS.map((runner, index) => (
                     <button key={runner.id} type="button" onClick={() => setRacePick(runner.id)} className={`relative h-20 overflow-hidden border bg-black/50 text-left ${racePick === runner.id ? "border-primary" : "border-border"}`}>
                       <span className="bar-finish absolute top-0 right-0 bottom-0 z-10 w-3" />
                       <img src={runner.image} alt="" className="absolute bottom-1 z-20 h-14 w-24 object-contain" style={{ left: `calc(${lanes[index]} * (100% - 6.5rem))` }} />
                       <span className="absolute top-1 left-2 z-20 font-pixel text-xl tracking-widest">{runner.name}</span>
-                      <span className="absolute top-1 right-6 z-20 font-display text-3xl text-primary">{runner.odds.toFixed(2)}x</span>
                     </button>
                   ))}
                 </div>
@@ -241,14 +244,14 @@ function Bar() {
                     ))}
                   </div>
                 )}
-                <BetRow value={raceBet} onChange={setRaceBet} disabled={busy} label="Apostar" onPlay={jogarPista} />
-                {raceNote && <p className="mt-2 text-sm text-primary">{raceNote}</p>}
+                <button type="button" disabled={busy || left < 1} onClick={jogarPista} className="mt-4 min-h-11 bg-primary px-4 font-display text-2xl leading-none text-ink disabled:opacity-40">Ver quem ganha</button>
+                {raceNote && <p className="mt-3 text-base text-primary">{raceNote}</p>}
               </div>
             )}
 
             {mesa === "cova" && (
               <div className="mt-4">
-                <p className="text-sm text-muted">Dois iguais pagam 1,1x. Três iguais pagam 5x.</p>
+                <p className="text-sm text-muted">Três figuras iguais: 30 fósseis. Duas iguais: 5 fósseis. Tudo diferente: não ganha nada.</p>
                 <div className="mt-4 grid grid-cols-3 gap-3">
                   {faces.map((face, index) => {
                     const reel = REELS.find((item) => item.name === face) ?? REELS[0];
@@ -260,8 +263,8 @@ function Bar() {
                     );
                   })}
                 </div>
-                <BetRow value={slotBet} onChange={setSlotBet} disabled={busy} label="Girar" onPlay={jogarCova} />
-                {slotNote && <p className="mt-2 text-sm text-primary">{slotNote}</p>}
+                <button type="button" disabled={busy || left < 1} onClick={jogarCova} className="mt-4 min-h-11 bg-primary px-4 font-display text-2xl leading-none text-ink disabled:opacity-40">Cavar</button>
+                {slotNote && <p className="mt-3 text-base text-primary">{slotNote}</p>}
               </div>
             )}
           </section>

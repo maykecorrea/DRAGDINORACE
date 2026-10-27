@@ -1,0 +1,33 @@
+{
+ "name": "Singularidade",
+ "description": "Dino Drag Race — Singularidade (Lendário). +62 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/69.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "tires"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 62,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "tires-Lendário-3",
+  "stats": "accel+62"
+ }
+}

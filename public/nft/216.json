@@ -1,0 +1,33 @@
+{
+ "name": "Lente de quartzo",
+ "description": "Dino Drag Race — Lente de quartzo (Épico). +14% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/216.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "lente"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "14%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-lente-Épico-3",
+  "stats": "vmax+14%"
+ }
+}

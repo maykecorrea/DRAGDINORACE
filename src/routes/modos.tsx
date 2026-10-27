@@ -17,7 +17,7 @@ export const Route = createFileRoute("/modos")({
 });
 
 const BLURB: Record<GameMode["id"], string> = {
-  garagem_falida: "Herdou a oficina. Herdou a dívida.",
+  garagem_falida: "Herdou a oficina. Agora é com você.",
   dino_drag: "Marcha no osso, nitro na hora.",
 };
 
@@ -82,9 +82,9 @@ function Modos() {
   return (
     <main className="min-h-dvh bg-bg px-4 py-8 text-fg">
       <div className="mx-auto w-full max-w-5xl">
-        <p className="font-pixel text-xl tracking-widest text-primary">ESCOLHA O MODO</p>
+        <p className="font-pixel text-xl tracking-widest text-primary">Escolha o modo</p>
         <h1 className="font-display text-6xl leading-none sm:text-8xl">Dois caminhos</h1>
-        {failed && <p className="mt-3 text-sm text-danger">Não deu para ler os modos. Atualize a página.</p>}
+        {failed && <p className="mt-3 text-sm text-danger">Não deu para abrir os modos. Atualize a página.</p>}
         <ul className="mt-6 grid gap-4 md:grid-cols-2">
           {(modes ?? []).map((mode) => (
             <li key={mode.id} className="min-h-72">
@@ -145,19 +145,19 @@ function ModeCard({ mode, last, coarse, seals }: { mode: GameMode; last: boolean
             onError={() => setArt(false)}
           />
         )}
-        {rust && (
-          <span className="pointer-events-none absolute left-1/2 top-[52%] z-[1] -translate-x-1/2 bg-black/80 px-2 py-1 font-pixel text-sm tracking-[0.14em] text-[#F7C948] sm:text-base">
-            FERRUGEM & FILHO
-          </span>
-        )}
         <span className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
         <span className="relative">
           {mode.badge && (
             <span className="inline-flex border border-[#F7C948] bg-black/50 px-2 py-1 font-pixel text-xl tracking-widest text-[#F7C948]">
-              NOVO · Plus
+              Novo
             </span>
           )}
           <span className="mt-3 block font-display text-5xl leading-none text-white sm:text-6xl">{mode.title}</span>
+          {rust && (
+            <span className="mt-2 inline-block bg-black/80 px-2 py-1 font-pixel text-sm tracking-[0.14em] text-[#F7C948] sm:text-base">
+              FERRUGEM & FILHO
+            </span>
+          )}
           <span className="mt-2 block max-w-sm text-pretty text-sm text-[#F1E6C8]">{BLURB[mode.id]}</span>
           {mode.progress && (
             <span className="mt-2 block font-pixel text-xl text-[#F7C948]">
@@ -166,7 +166,7 @@ function ModeCard({ mode, last, coarse, seals }: { mode: GameMode; last: boolean
           )}
           {seals.length > 0 && (
             <span className="mt-2 block text-xs text-[#F7C948]">
-              {seals.map((seal) => seal.title).join(" · ")} — em breve nesta corrida
+              {seals.map((seal) => seal.title).join(" · ")}  · em breve
             </span>
           )}
         </span>

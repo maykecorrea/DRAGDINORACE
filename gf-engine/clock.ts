@@ -38,7 +38,7 @@ export function dayIndex(t: number): number {
 
 export function clockLabel(t: number): string {
   const p = partsOf(t);
-  return `${DAY_SHORT[p.day]} ${String(p.hour).padStart(2, "0")}:${String(p.minute).padStart(2, "0")} · Sem ${p.week}`;
+  return `${DAY_SHORT[p.day]} ${String(p.hour).padStart(2, "0")}:${String(p.minute).padStart(2, "0")} · Sem ${p.week + 1}`;
 }
 
 export function whenLabel(t: number): string {
@@ -72,7 +72,7 @@ export function nextOpenLabel(content: Content, place: string, t: number): strin
   for (let step = 1; step <= WEEK; step += 1) {
     if (placeOpen(content, place, t + step)) return whenLabel(t + step);
   }
-  return "sem previsão";
+  return "sem data";
 }
 
 export function tintFor(content: Content, t: number): { color: string; opacity: number } {

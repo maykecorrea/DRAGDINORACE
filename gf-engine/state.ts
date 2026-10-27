@@ -79,7 +79,7 @@ export interface Lead {
   revealed?: boolean;
   ficha?: ClientType;
   contractTemplate?: "frota_raptor";
-  proposal?: { price: number; depositPct: 0 | 30 | 50 | 100; deadline: number; respondedAt?: number; accepted?: boolean };
+  proposal?: { price: number; depositPct: 0 | 30 | 50 | 100; deadline: number; respondedAt?: number; accepted?: boolean; replyAt?: number };
 }
 
 export interface Job {
@@ -91,6 +91,8 @@ export interface Job {
   apNeeded: number;
   apDone: number;
   assignedTo: "teo" | EmployeeId;
+  handId?: string;
+  yieldPct?: number;
   dueWeek: number;
   dueDay: number;
   status: "waiting_materials" | "queued" | "in_progress" | "ready" | "delivered" | "paid" | "defaulted";
@@ -125,8 +127,17 @@ export interface InboundOrder {
   id: string;
   supplier: SupplierId;
   items: { material: MaterialId; qty: number; unitCost: number }[];
+  foods?: { id: string; qty: number; unitCost: number }[];
   atWeek: number;
   atDay: number;
+  /** Minuto do relógio em que o pedido saiu. Sem isso, o ícone estima um dia de viagem. */
+  fromT?: number;
+  /** Minuto em que a entrega do Tiozão chega. Sem isso, vale o dia marcado. */
+  arriveT?: number;
+  carrier?: "dinoturbo" | "dinodrone";
+  /** Sorteado na saída. O pedido some no caminho e o dinheiro não volta. */
+  lost?: boolean;
+  freight?: number;
 }
 
 export interface FleetContract {
@@ -187,6 +198,31 @@ export interface HiredEmployee {
   sickUntilWeek?: number;
 }
 
+export interface HandOffer {
+  id: string;
+  nome: string;
+  yieldPct: number;
+  salary: number;
+  photo?: number;
+}
+
+export interface Hand {
+  id: string;
+  nome: string;
+  yieldPct: number;
+  salary: number;
+  energy: number;
+  energyMax: number;
+  bay: number;
+  out: "" | "doente" | "falta";
+  excuse: string;
+  advance: number;
+  raise: boolean;
+  daysWorked: number;
+  pay: number;
+  photo?: number;
+}
+
 export type RepEntry = { week: number; delta: number; reason: string };
 export type TheftEntry = { week: number; material: MaterialId; qty: number };
 export type FlagValue = boolean | number | string | RepEntry[] | TheftEntry[];
@@ -224,6 +260,8 @@ export interface GameState {
   savings: { cofrinho: number; tesouro: number; fundo: number; pendingWithdraw: { product: string; value: number }[]; autoDepositPct: number };
   scamInvestments: { id: string; scamId: string; principal: number; shownValue: number; week: number; status: "active" | "collapsed" | "locked" }[];
   employees: HiredEmployee[];
+  hands?: Hand[];
+  offers?: HandOffer[];
   leads: Lead[];
   jobs: Job[];
   receivables: Receivable[];

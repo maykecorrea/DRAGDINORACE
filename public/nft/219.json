@@ -1,0 +1,33 @@
+{
+ "name": "Mão de vértebra",
+ "description": "Dino Drag Race — Mão de vértebra (Épico). +34 de potência.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/219.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "garra"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Potência",
+   "value": 34,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-garra-Épico-3",
+  "stats": "power+34"
+ }
+}

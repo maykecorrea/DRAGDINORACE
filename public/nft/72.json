@@ -1,0 +1,33 @@
+{
+ "name": "Gargalo de cometa",
+ "description": "Dino Drag Race — Gargalo de cometa (Lendário). +1.92s de nitro.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/72.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "nitro"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Nitro",
+   "value": "1.92s",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "nitro-Lendário-3",
+  "stats": "nitro+1.92s"
+ }
+}

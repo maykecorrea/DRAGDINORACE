@@ -15,12 +15,12 @@ const KIND_NAME: Record<GunKind, string> = {
   mg: "Metralhadora",
   missile: "Míssil",
   homing: "Teleguiado",
-  poison: "Veneno",
+  poison: "Gosma",
   ray: "Raio",
   ice: "Gelo",
   tail: "Cauda",
   mine: "Mina",
-  leech: "Sanguessuga",
+  leech: "Ventosa",
   bile: "Nuvem",
   spark: "Choque",
   frost: "Gelo de ré",
@@ -41,7 +41,7 @@ const COOL: Record<PartTier, number> = { Comum: 1, Normal: 0.94, Raro: 0.86, Ép
 
 const GUN: Record<WeaponKind, Record<PartTier, [string, string, string]>> = {
   mg: {
-    Comum: ["Prego duplo", "Cuspe de lata", "Boca de prego"],
+    Comum: ["Prego duplo", "Jato de lata", "Boca de prego"],
     Normal: ["Gêmeas de sucata", "Costela automática", "Dente de rua"],
     Raro: ["Presa ciano", "Mandíbula gêmea", "Chuva de rebite"],
     Épico: ["Serra de plasma", "Asa de chumbo", "Boca do ptero"],
@@ -57,16 +57,16 @@ const GUN: Record<WeaponKind, Record<PartTier, [string, string, string]>> = {
   homing: {
     Comum: ["Mosca de cabo", "Olho torto", "Isca de gosma"],
     Normal: ["Cauda que segue", "Nariz de cão", "Pupa teimosa"],
-    Raro: ["Vaga-lume ácido", "Abelha de osso", "Sanguessuga ciano"],
+    Raro: ["Vaga-lume ácido", "Abelha de osso", "Ventosa ciano"],
     Épico: ["Anjo de sucata", "Mariposa de plasma", "Caçador de órbita"],
     Lendário: ["Cometa fiel", "Juramento de rex", "Olho que não erra"],
   },
   poison: {
-    Comum: ["Cuspe verde", "Bolha de lodo", "Fruto podre"],
-    Normal: ["Bile de rua", "Gota de víbora", "Ovo azedo"],
-    Raro: ["Glândula ciano", "Esputo de meteoro", "Ampola viva"],
+    Comum: ["Jato verde", "Bolha de lodo", "Fruta ácida"],
+    Normal: ["Gosma de rua", "Gota de víbora", "Ovo verde"],
+    Raro: ["Bolha ciano", "Chuvisco de meteoro", "Ampola viva"],
     Épico: ["Coração roxo", "Nuvem de ptero", "Seiva de nave"],
-    Lendário: ["Bílis estelar", "Praga fóssil", "Beijo de cometa"],
+    Lendário: ["Gosma estelar", "Neblina fóssil", "Beijo de cometa"],
   },
   ray: {
     Comum: ["Faísca de cabo", "Estalo de osso", "Fio pelado"],
@@ -86,7 +86,7 @@ const GUN: Record<WeaponKind, Record<PartTier, [string, string, string]>> = {
 
 const REAR_GUN: Record<RearKind, Record<PartTier, [string, string, string]>> = {
   tail: {
-    Comum: ["Unha no escape", "Cuspe de cauda", "Prego virado"],
+    Comum: ["Unha no escape", "Jato de cauda", "Prego virado"],
     Normal: ["Costela de ré", "Dente no retrovisor", "Gêmeas de trás"],
     Raro: ["Presa no vácuo", "Mandíbula de cauda", "Chuva invertida"],
     Épico: ["Serra no rastro", "Asa que cospe", "Boca do retrovisor"],
@@ -102,16 +102,16 @@ const REAR_GUN: Record<RearKind, Record<PartTier, [string, string, string]>> = {
   leech: {
     Comum: ["Mosca de ré", "Olho no espelho", "Isca de cauda"],
     Normal: ["Cauda faminta", "Nariz pra trás", "Pupa no rastro"],
-    Raro: ["Vaga-lume de ré", "Abelha do vácuo", "Sanguessuga de cauda"],
+    Raro: ["Vaga-lume de ré", "Abelha do vácuo", "Ventosa de cauda"],
     Épico: ["Anjo invertido", "Mariposa de ré", "Caçador do espelho"],
     Lendário: ["Cometa de cauda", "Juramento de ré", "Olho no retrovisor"],
   },
   bile: {
-    Comum: ["Cuspe no ar", "Bolha de cauda", "Fruto no rastro"],
-    Normal: ["Bile de ré", "Gota no vácuo", "Ovo no escape"],
-    Raro: ["Glândula de cauda", "Esputo de ré", "Ampola no ar"],
+    Comum: ["Jato no ar", "Bolha de cauda", "Fruto no rastro"],
+    Normal: ["Gosma de ré", "Gota no vácuo", "Ovo no escape"],
+    Raro: ["Bolha de cauda", "Chuvisco de ré", "Ampola no ar"],
     Épico: ["Coração no rastro", "Nuvem de cauda", "Seiva de ré"],
-    Lendário: ["Bílis de ré", "Praga no vácuo", "Beijo de cauda"],
+    Lendário: ["Neblina de ré", "Neblina no vácuo", "Beijo de cauda"],
   },
   spark: {
     Comum: ["Faísca de ré", "Estalo no escape", "Fio pra trás"],
@@ -133,7 +133,7 @@ const KIT: Record<PilotSlot, Record<PartTier, [string, string, string]>> = {
   cranio: {
     Comum: ["Testa de lata", "Casca oca", "Osso na testa"],
     Normal: ["Elmo de costela", "Fronte rebitada", "Queixo alto"],
-    Raro: ["Elmo de bile", "Testa de escama", "Crânio ciano"],
+    Raro: ["Elmo de gosma", "Testa de escama", "Crânio ciano"],
     Épico: ["Elmo de órbita", "Fronte de plasma", "Coroa quebrada"],
     Lendário: ["Elmo do jurássico", "Testa solar", "Crânio-rei"],
   },
@@ -145,21 +145,21 @@ const KIT: Record<PilotSlot, Record<PartTier, [string, string, string]>> = {
     Lendário: ["Íris do rex", "Visor estelar", "Olho que vê a reta"],
   },
   garra: {
-    Comum: ["Unha suja", "Dedo de cabo", "Luva rasgada"],
+    Comum: ["Unha de lata", "Dedo de cabo", "Luva rasgada"],
     Normal: ["Punho de sucata", "Garra de costela", "Mão rebitada"],
     Raro: ["Garra de plasma", "Punho de meteoro", "Mão ciano"],
     Épico: ["Garra alada", "Punho de forja", "Mão de vértebra"],
     Lendário: ["Garra-rei", "Punho fóssil", "Mão que arranca a marcha"],
   },
   bota: {
-    Comum: ["Chinelo de lata", "Sola comida", "Pé de osso"],
+    Comum: ["Chinelo de lata", "Sola gasta", "Pé de osso"],
     Normal: ["Bota de esteira", "Salto de rebite", "Sola de dente"],
     Raro: ["Bota de íon", "Sola de lava", "Pé de flutuação"],
     Épico: ["Bota de impulso", "Sola de nave", "Pé que sai na frente"],
     Lendário: ["Bota-cometa", "Sola do rex", "Pé que não espera"],
   },
   ampola: {
-    Comum: ["Pinga no bolso", "Frasco amassado", "Gota morna"],
+    Comum: ["Gota no bolso", "Frasco amassado", "Gota morna"],
     Normal: ["Ampola de gosma", "Frasco no cinto", "Gota verde"],
     Raro: ["Ampola roxa", "Frasco de íon", "Gota que segura"],
     Épico: ["Ampola de órbita", "Frasco violeta", "Gota de ptero"],

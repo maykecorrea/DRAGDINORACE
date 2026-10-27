@@ -1,0 +1,48 @@
+{
+ "name": "Caçador de órbita",
+ "description": "Dino Drag Race — Caçador de órbita (Épico). 26 de dano. 21 tiros. 0.76s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/138.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 26,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 21,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.76,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Épico-3",
+  "stats": "dmg=26;clip=21;cd=0.76;lock=3.4"
+ }
+}

@@ -22,10 +22,10 @@ export function HotkeyGate() {
   return (
     <div className="fixed inset-0 z-[70] overflow-y-auto bg-bg text-fg">
       <div className="mx-auto flex min-h-dvh max-w-lg flex-col px-4 py-8">
-        <p className="text-xs font-semibold tracking-widest text-primary">ANTES DA FAIXA</p>
-        <h1 className="font-display text-6xl leading-none">Escolhe os atalhos</h1>
+        <p className="text-xs font-semibold tracking-widest text-primary">Antes da pista</p>
+        <h1 className="font-display text-6xl leading-none">Escolha os atalhos</h1>
         <p className="mt-3 text-sm text-pretty text-muted">
-          Só aparece nesta primeira vez. A escolha fica salva na sua conta. Dá pra mudar depois em Conta, em Atalhos.
+          Só aparece desta vez. Dá para mudar depois em Conta, na aba Atalhos.
         </p>
         <div className="mt-5">
           <HotkeyPad value={draft} onChange={setDraft} />

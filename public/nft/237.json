@@ -1,0 +1,33 @@
+{
+ "name": "Pé que não espera",
+ "description": "Dino Drag Race — Pé que não espera (Lendário). +48 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/237.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "bota"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 48,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-bota-Lendário-3",
+  "stats": "accel+48"
+ }
+}

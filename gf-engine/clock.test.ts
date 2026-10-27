@@ -49,17 +49,17 @@ describe("relógio de 24h", () => {
     const state = createInitialState(1, "Téo");
     const nap = applyAction(state, { type: "SLEEP", wakeAt: state.clock.t + 120 }, contentV1).state;
     assert.equal(nap.calendar.apLeft, 3);
-    assert.equal(nap.clock.energy, 44);
+    assert.equal(nap.clock.energy, 100);
     assert.equal(nap.calendar.day, 1);
   });
 
-  it("ficar acordado até as 06:00 renova com 2 PA e ânimo −10", () => {
+  it("ficar acordado até as 06:00 renova os 3 PA", () => {
     const state = createInitialState(1, "Téo");
     state.clock.t = 5 * 60;
     state.clock.apRefillDay = -1;
     const woke = applyAction(state, { type: "WAIT", minutes: 90 }, contentV1).state;
-    assert.equal(woke.calendar.apLeft, 2);
-    assert.equal(woke.morale, 50);
+    assert.equal(woke.calendar.apLeft, 3);
+    assert.equal(woke.morale, 60);
   });
 
   it("o banco fechado recusa a ida e o tick não passa do teto", () => {
@@ -69,7 +69,7 @@ describe("relógio de 24h", () => {
       (err: unknown) => err instanceof GameError && err.code === "fechado",
     );
     const tick = applyAction(state, { type: "TICK", elapsedMs: 10 * 60 * 1000 }, contentV1).state;
-    assert.equal(tick.clock.t, state.clock.t + Math.floor((15000 * 2) / 1000));
+    assert.equal(tick.clock.t, state.clock.t + Math.floor(15000 / 1000));
   });
 
   it("save antigo com 1 PA abre às 18:00 e a nota do servidor não sai", () => {

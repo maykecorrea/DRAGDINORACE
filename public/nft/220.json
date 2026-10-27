@@ -1,0 +1,33 @@
+{
+ "name": "Bota de impulso",
+ "description": "Dino Drag Race — Bota de impulso (Épico). +26 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/220.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "bota"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 26,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-bota-Épico",
+  "stats": "accel+26"
+ }
+}

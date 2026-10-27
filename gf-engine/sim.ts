@@ -159,7 +159,7 @@ function manage(state: GameState, content: Content, bot: BotName): GameState {
 
 /** Uma campanha inteira, no máximo 52 semanas, com o bot no volante. */
 export function playSeed(seed: number, bot: BotName, content: Content = contentV1): SimEnd {
-  let state = createInitialState(seed, "Téo");
+  let state = createInitialState(seed, "{nome}");
   let scamsLeft = bot === "golpe" ? 2 : bot === "ingenuo" ? 99 : 0;
   let guard = 0;
   while (!state.ending && state.calendar.week <= 52 && guard < 420) {

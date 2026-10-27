@@ -1,5 +1,6 @@
-import type { Content } from "./content.ts";
-import { serviceOf, supplierPrice } from "./content.ts";
+import { levelOf, xpOf } from "./body.ts";
+import { clientHome, here, placeNome } from "./district.ts";
+import { serviceOf, supplierPrice, type Content } from "./content.ts";
 import { beginDay } from "./cards.ts";
 import { GameError } from "./errors.ts";
 import { bookReceipt } from "./finance.ts";
@@ -14,7 +15,7 @@ import type { GfEvent } from "./finance.ts";
 
 type ClientDef = Content["clients"][number];
 type ServiceDef = Content["services"][number];
-const DEPOSITS = [0, 30, 50, 100] as const;
+export const DEPOSITS = [0, 30, 50, 100] as const;
 type Deposit = (typeof DEPOSITS)[number];
 
 export type QuotePreview = {
@@ -72,7 +73,7 @@ function actOfWeek(content: Content, week: number): 0 | 1 | 2 | 3 | 4 {
 }
 
 function spendAp(state: GameState, content: Content, amount: number, work: boolean): void {
-  if (state.calendar.apLeft < amount) throw new GameError("sem_pa", "Sem ponto de ação.");
+  if (state.calendar.apLeft < amount) throw new GameError("sem_pa", "Sem energia.");
   state.calendar.apLeft -= amount;
   if (!work) return;
   const rule = content.balance;
@@ -83,7 +84,7 @@ function spendAp(state: GameState, content: Content, amount: number, work: boole
 }
 
 function manual(state: GameState, nextCash: number): void {
-  if (nextCash < -state.overdraftLimit) throw new GameError("sem_caixa", "O cheque especial não cobre isso.");
+  if (nextCash < -state.overdraftLimit) throw new GameError("sem_caixa", "O limite do banco não cobre isso.");
 }
 
 function whole(value: unknown): number | null {
@@ -107,6 +108,7 @@ export function leadCount(rep: number, level: number, prospects: number, content
 function serviceReady(state: GameState, service: ServiceDef): boolean {
   if (service.requires.compressor && !state.garage.hasCompressor) return false;
   if ((service.requires.level ?? 0) > state.garage.level) return false;
+  if ((service.requires.patent ?? 0) > levelOf(xpOf(state)).level) return false;
   return true;
 }
 
@@ -401,7 +403,7 @@ function spawnFleetJobs(state: GameState, content: Content, contract: FleetContr
 
 function openJob(state: GameState, content: Content, lead: Lead, price: number, deposit: number, deadline: number, events: GfEvent[]): Job {
   const service = serviceOf(content, lead.service);
-  if (!service) throw new GameError("servico_invalido", "Não tem esse serviço na baia.");
+  if (!service) throw new GameError("servico_invalido", "Esse serviço não está na baia.");
   const client = clientOf(content, realType(lead));
   const due = addWorkDays(state.calendar.week, state.calendar.day, deadline);
   const job: Job = {
@@ -558,6 +560,7 @@ export function closeFleetWeek(state: GameState, content: Content, events: GfEve
 
 function deliverJob(state: GameState, content: Content, job: Job, events: GfEvent[]): void {
   if (job.status !== "ready") throw new GameError("nao_pronto", "O serviço ainda não está pronto.");
+  if (here(state) !== "oficina") throw new GameError("longe", "A entrega é na oficina. Volta pra casa.");
   const rule = content.balance.contracts;
   const late = Math.max(0, workIndex(state.calendar.week, state.calendar.day) - workIndex(job.dueWeek, job.dueDay));
   if (job.contractId) {
@@ -569,7 +572,8 @@ function deliverJob(state: GameState, content: Content, job: Job, events: GfEven
     return;
   }
   const finePct = Math.min(rule.lateMax, late * rule.latePct);
-  const net = Math.max(0, job.price - Math.round(job.price * finePct));
+  let net = Math.max(0, job.price - Math.round(job.price * finePct));
+  if (job.yieldPct != null && job.yieldPct < 100) net = Math.round(net * job.yieldPct / 100);
   const remaining = Math.max(0, net - job.depositPaid);
   if (job.reworks > 0) bumpRep(state, content, content.balance.quality.reworkRep * job.reworks, "retrabalho");
   if (late > 0) bumpRep(state, content, rule.repLate, "atraso");
@@ -632,11 +636,20 @@ export function addScriptedLead(
   events.push({ type: "LEAD", leadId: lead.id, text: real.nome });
 }
 
+export function resolveDueReplies(state: GameState, content: Content, events: GfEvent[]): void {
+  for (const lead of state.leads) {
+    if (lead.status !== "pending" || !lead.proposal) continue;
+    const at = lead.proposal.replyAt;
+    if (typeof at === "number" && state.clock.t < at) continue;
+    resolveLead(state, content, lead, events);
+  }
+}
+
 export function openMorning(state: GameState, content: Content, events: GfEvent[]): void {
   receiveInbound(state, content, events);
+  resolveDueReplies(state, content, events);
   for (const lead of state.leads) {
-    if (lead.status === "pending") resolveLead(state, content, lead, events);
-    else if (leadOpen(lead) && workIndex(state.calendar.week, state.calendar.day) >= lead.expiresDay) lead.status = "expired";
+    if (leadOpen(lead) && workIndex(state.calendar.week, state.calendar.day) >= lead.expiresDay) lead.status = "expired";
   }
   settleDueReceivables(state, content, events);
   beginDay(state, content, events);
@@ -656,26 +669,48 @@ function sendProposal(state: GameState, content: Content, action: Record<string,
   const deadline = whole(action.deadline) ?? lead.deadlineDays;
   const rule = content.balance.contracts;
   if (price == null || depositPct == null || !DEPOSITS.includes(depositPct as Deposit)) {
-    throw new GameError("proposta_invalida", "Preço, sinal e prazo precisam fechar.");
+    throw new GameError("proposta_invalida", "Preço, sinal e prazo precisam bater.");
   }
   if (deadline < 1) throw new GameError("proposta_invalida", "O prazo não fecha.");
   const min = Math.round(lead.refPrice * rule.priceMin);
   const max = Math.round(lead.refPrice * rule.priceMax);
-  if (price < min || price > max) throw new GameError("proposta_invalida", "O preço fica entre 60% e 160% da referência.");
+  if (price < min || price > max) throw new GameError("proposta_invalida", "O preço fica entre 60% e 160% do normal.");
   const real = realType(lead);
   const client = clientOf(content, real);
   const need = client?.requires?.deposit;
   if (real === "corredor" && need != null && depositPct / 100 < need) {
-    throw new GameError("sinal_obrigatorio", "O corredor só deixa o carro com sinal de metade.");
+    throw new GameError("sinal_obrigatorio", "O piloto só deixa o carro com sinal de metade.");
   }
-  lead.proposal = { price, depositPct: depositPct as Deposit, deadline };
+  const wait = content.horarios[real]?.contato.responde_em_min ?? 90;
+  lead.proposal = { price, depositPct: depositPct as Deposit, deadline, replyAt: state.clock.t + wait };
   lead.status = "pending";
-  events.push({ type: "PROPOSAL_SENT", leadId: lead.id, amount: price });
+  events.push({ type: "PROPOSAL_SENT", leadId: lead.id, amount: price, text: String(wait) });
+}
+
+function nudgeCounter(state: GameState, content: Content, action: Record<string, unknown>, events: GfEvent[]): void {
+  const lead = findLead(state, action.leadId);
+  if (lead.status !== "counter" || lead.counterPrice == null) throw new GameError("sem_contra", "Não tem contraproposta aqui.");
+  const dir = action.dir === 3 || action.dir === -2 ? action.dir : null;
+  if (dir == null) throw new GameError("proposta_invalida", "A pechincha é +3% ou −2%.");
+  const home = clientHome(lead.apparentType);
+  if (here(state) !== home) throw new GameError("longe", `Pechincha só na casa do cliente (${placeNome(home)}).`);
+  if (dir === 3) {
+    const next = Math.round(lead.counterPrice * 1.03);
+    const cap = lead.proposal?.price ?? next;
+    if (next > cap || next <= lead.counterPrice) throw new GameError("proposta_invalida", "Ele não sobe mais que isso.");
+    lead.counterPrice = Math.min(cap, next);
+    events.push({ type: "COUNTER_OFFER", leadId: lead.id, amount: lead.counterPrice, text: "subiu" });
+    return;
+  }
+  const next = Math.max(1, Math.round(lead.counterPrice * 0.98));
+  const depositPct = lead.proposal?.depositPct ?? 0;
+  const deadline = lead.proposal?.deadline ?? lead.deadlineDays;
+  acceptTerms(state, content, lead, next, depositPct, deadline, events);
 }
 
 function answerCounter(state: GameState, content: Content, action: Record<string, unknown>, events: GfEvent[]): void {
   const lead = findLead(state, action.leadId);
-  if (lead.status !== "counter" || lead.counterPrice == null) throw new GameError("sem_contra", "Não há contraproposta nessa mesa.");
+  if (lead.status !== "counter" || lead.counterPrice == null) throw new GameError("sem_contra", "Não tem contraproposta aqui.");
   if (action.accept === true) {
     const depositPct = lead.proposal?.depositPct ?? 0;
     const deadline = lead.proposal?.deadline ?? lead.deadlineDays;
@@ -689,7 +724,7 @@ function answerCounter(state: GameState, content: Content, action: Record<string
 function checkRecord(state: GameState, content: Content, action: Record<string, unknown>, events: GfEvent[]): void {
   const rule = content.balance.contracts;
   const lead = findLead(state, action.targetId);
-  if (lead.revealed) throw new GameError("ja_consultou", "A ficha desse cliente já foi aberta.");
+  if (lead.revealed) throw new GameError("ja_consultou", "A ficha desse cliente já foi consultada.");
   spendAp(state, content, rule.checkAp, true);
   manual(state, state.cash - rule.checkCost);
   state.cash -= rule.checkCost;
@@ -703,7 +738,7 @@ function checkRecord(state: GameState, content: Content, action: Record<string, 
 
 function collect(state: GameState, content: Content, action: Record<string, unknown>, events: GfEvent[]): void {
   const rec = state.receivables.find((item) => item.id === action.receivableId);
-  if (!rec || rec.status !== "defaulted") throw new GameError("nada_a_cobrar", "Não há calote para cobrar.");
+  if (!rec || rec.status !== "defaulted") throw new GameError("nada_a_cobrar", "Não tem calote para cobrar.");
   if (rec.collected) throw new GameError("ja_cobrou", "Essa cobrança já foi feita.");
   const rule = content.balance.contracts;
   spendAp(state, content, 1, true);
@@ -720,7 +755,7 @@ function collect(state: GameState, content: Content, action: Record<string, unkn
 
 function protest(state: GameState, content: Content, action: Record<string, unknown>, events: GfEvent[]): void {
   const rec = state.receivables.find((item) => item.id === action.receivableId);
-  if (!rec || rec.status !== "defaulted") throw new GameError("nada_a_cobrar", "Não há calote para protestar.");
+  if (!rec || rec.status !== "defaulted") throw new GameError("nada_a_cobrar", "Não tem calote para protestar.");
   if (rec.protested) throw new GameError("ja_protestou", "Esse título já foi protestado.");
   const rule = content.balance.contracts;
   manual(state, state.cash - rule.protestFee);
@@ -742,12 +777,12 @@ function protest(state: GameState, content: Content, action: Record<string, unkn
 
 export function applyContracts(state: GameState, action: Record<string, unknown>, content: Content, events: GfEvent[]): boolean {
   const kind = String(action.type ?? "");
-  const known = ["PROSPECT", "SEND_PROPOSAL", "ANSWER_COUNTER", "CHECK_RECORD", "DELIVER", "COLLECT", "PROTEST"];
+  const known = ["PROSPECT", "SEND_PROPOSAL", "ANSWER_COUNTER", "NUDGE_COUNTER", "CHECK_RECORD", "DELIVER", "COLLECT", "PROTEST"];
   if (!known.includes(kind)) return false;
   if (kind === "PROSPECT") {
     const rule = content.balance;
     if (flagNum(state, "prospectsUsed") >= rule.leads.prospectMaxWeek) {
-      throw new GameError("prospeccao_esgotada", "A rua desta semana já foi batida duas vezes.");
+      throw new GameError("prospeccao_esgotada", "Você já procurou clientes duas vezes esta semana.");
     }
     spendAp(state, content, content.balance.contracts.prospectAp, true);
     manual(state, state.cash - rule.leads.prospectCost);
@@ -763,6 +798,10 @@ export function applyContracts(state: GameState, action: Record<string, unknown>
   }
   if (kind === "ANSWER_COUNTER") {
     answerCounter(state, content, action, events);
+    return true;
+  }
+  if (kind === "NUDGE_COUNTER") {
+    nudgeCounter(state, content, action, events);
     return true;
   }
   if (kind === "CHECK_RECORD") {

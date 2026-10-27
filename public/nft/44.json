@@ -1,0 +1,33 @@
+{
+ "name": "Queixo de cabo",
+ "description": "Dino Drag Race — Queixo de cabo (Raro). +19 de potência.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/44.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "gearbox"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Potência",
+   "value": 19,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "gearbox-Raro-2",
+  "stats": "power+19"
+ }
+}

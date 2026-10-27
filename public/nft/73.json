@@ -1,0 +1,33 @@
+{
+ "name": "Trono da mandíbula",
+ "description": "Dino Drag Race — Trono da mandíbula (Lendário). +62 de potência.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/73.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "gearbox"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Potência",
+   "value": 62,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "gearbox-Lendário",
+  "stats": "power+62"
+ }
+}

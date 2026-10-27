@@ -1,0 +1,33 @@
+{
+ "name": "Placa de lodo",
+ "description": "Dino Drag Race — Placa de lodo (Raro). +22 de casco.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/32.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "chassis"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Casco",
+   "value": 22,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "chassis-Raro-2",
+  "stats": "casco+22"
+ }
+}

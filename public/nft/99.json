@@ -1,0 +1,43 @@
+{
+ "name": "Dardo de sucata",
+ "description": "Dino Drag Race — Dardo de sucata (Normal). 46 de dano. 5 tiros. 1.17s. Voa reto. Em cheio dói mais. Se passar perto, estoura com menos dano.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/99.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "missile"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 46,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 5,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.17,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-missile-Normal-3",
+  "stats": "dmg=46;clip=5;cd=1.17"
+ }
+}

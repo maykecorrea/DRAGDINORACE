@@ -2,23 +2,26 @@ import type { Content } from "./content.ts";
 import { sealScore } from "./campaign.ts";
 import { applyAuction } from "./auction.ts";
 import { applyCardAction, hasBlockingCard } from "./cards.ts";
-import { applyContracts, openMorning } from "./contracts.ts";
+import { applyContracts, openMorning, resolveDueReplies } from "./contracts.ts";
 import { assertOpen, blankClock, DAY, dayIndex, inNightWindow, nextSundayClose, partsOf, startOfDay, WEEK } from "./clock.ts";
-import { applyDistrict } from "./district.ts";
+import { applyBody, applyWorkLoad, tickBody } from "./body.ts";
+import { applyDistrict, here } from "./district.ts";
 import { GameError } from "./errors.ts";
 import { applyFinance } from "./finance.ts";
 import { actFor } from "./initial.ts";
 import { addMorale, morningAp } from "./morale.ts";
-import { applyProduction, runStaffDay } from "./production.ts";
+import { applyProduction, receiveInbound, runStaffDay } from "./production.ts";
+import { crossDiaF, diaF, applyHands } from "./hands.ts";
 import { applyStaff } from "./staff.ts";
 import type { GameState } from "./state.ts";
 import { weeklyClose, type GfEvent } from "./weeklyClose.ts";
+import { awardTaskXp } from "./xp.ts";
 
 export type Action = { type: string; ap?: number };
 export type { GfEvent };
 
 function spend(state: GameState, content: Content, amount: number, work: boolean): void {
-  if (state.calendar.apLeft < amount) throw new GameError("sem_pa", "Sem ponto de ação.");
+  if (state.calendar.apLeft < amount) throw new GameError("sem_pa", "Sem energia.");
   state.calendar.apLeft -= amount;
   if (!work) return;
   const rule = content.balance;
@@ -60,22 +63,24 @@ function alignClock(state: GameState, content: Content): void {
 
 function drainAwake(state: GameState, content: Content, minutes: number, events: GfEvent[]): boolean {
   const rule = content.time.energy;
-  state.clock.awakeMin += minutes;
-  const hours = Math.floor(state.clock.awakeMin / 60);
-  state.clock.awakeMin -= hours * 60;
-  if (hours > 0) state.clock.energy = Math.max(0, state.clock.energy - hours * rule.awakePerHour);
-  if (state.clock.energy > 0) return false;
+  const ended = tickBody(state, content, minutes, "awake", events);
+  if (ended.minutes < minutes) state.clock.t -= minutes - ended.minutes;
+  if (ended.status === "knockout") {
+    syncAct(state);
+    return false;
+  }
+  if (ended.status !== "faint" && state.clock.energy > 0) return false;
   const closeAt = nextSundayClose(state.clock.t, content.time.closeDay, content.time.closeMinute);
-  let wake = Math.max(state.clock.t + rule.faintHours * 60, startOfDay(state.clock.t) + 8 * 60);
+  let wake = state.clock.t + rule.faintHours * 60;
   if (wake > closeAt) wake = closeAt;
   const fromDay = partsOf(state.clock.t).day;
   const fromIndex = dayIndex(state.clock.t);
   state.clock.t = wake;
-  state.clock.energy = rule.sleepBase;
+  state.clock.energy = 20;
   state.clock.awakeMin = 0;
   state.flags.district = "oficina";
   const hit = addMorale(state, content, rule.faintMorale);
-  events.push({ type: "FAINTED" });
+  events.push({ type: "FAINTED", text: "Téo desmaiou. O relógio andou 8 horas e a saúde caiu 10%." });
   if (hit.collapsed) events.push({ type: "COLLAPSE", week: state.calendar.week });
   syncAct(state);
   if (wake >= closeAt) return true;
@@ -99,9 +104,7 @@ function noteAwakeMorning(state: GameState, content: Content, from: number, to: 
       if (p.day === 7 || Number(state.flags.noApWeek) === p.week) {
         state.calendar.apLeft = 0;
       } else {
-        state.calendar.apLeft = content.time.energy.noSleepAp;
-        const hit = addMorale(state, content, content.time.energy.noSleepMorale);
-        if (hit.collapsed) events.push({ type: "COLLAPSE", week: p.week });
+        state.calendar.apLeft = morningAp(state, content);
       }
       events.push({ type: "NO_SLEEP", week: p.week, day: p.day });
     }
@@ -114,7 +117,7 @@ function runClose(state: GameState, content: Content, events: GfEvent[]): void {
   weeklyClose(state, content, events);
   payOvertime(state, content);
   state.clock.t = state.calendar.week * WEEK + content.time.wakeMinute;
-  state.clock.energy = Math.min(content.time.energy.max, content.time.energy.sleepBase + content.time.energy.sleepPerHour * 8);
+  state.clock.energy = Math.min(content.time.energy.max, state.clock.energy + content.time.energy.sleepPerHour * 8);
   state.clock.awakeMin = 0;
   state.clock.apRefillDay = dayIndex(state.clock.t);
   state.clock.overtime = [];
@@ -137,22 +140,18 @@ function grantMorning(state: GameState, content: Content, sleptHours: number, ev
   const index = dayIndex(state.clock.t);
   if (state.clock.apRefillDay === index) return;
   state.clock.apRefillDay = index;
-  if (partsOf(state.clock.t).day === 7) {
+  if (partsOf(state.clock.t).day === 7 || Number(state.flags.noApWeek) === state.calendar.week) {
     state.calendar.apLeft = 0;
     return;
   }
-  const rule = content.time.energy;
-  if (sleptHours + 1e-9 < rule.shortHours) {
-    state.calendar.apLeft = Number(state.flags.noApWeek) === state.calendar.week ? 0 : rule.shortAp;
-    const hit = addMorale(state, content, rule.shortMorale);
-    if (hit.collapsed) events.push({ type: "COLLAPSE", week: state.calendar.week });
-    return;
-  }
   state.calendar.apLeft = morningAp(state, content);
+  void sleptHours;
+  void events;
 }
 
 export function advanceAwake(state: GameState, content: Content, minutes: number, events: GfEvent[]): void {
   if (minutes <= 0 || state.clock.paused) return;
+  if (partsOf(state.clock.t).hour >= 7) diaF(state, events, dayIndex(state.clock.t));
   let left = minutes;
   while (left > 0 && !state.ending) {
     const closeAt = nextSundayClose(state.clock.t, content.time.closeDay, content.time.closeMinute);
@@ -165,9 +164,11 @@ export function advanceAwake(state: GameState, content: Content, minutes: number
     const from = state.clock.t;
     const before = state.clock.energy;
     state.clock.t += step;
+    const fainted = drainAwake(state, content, step, events);
     syncAct(state);
     noteAwakeMorning(state, content, from, state.clock.t, events);
-    const fainted = drainAwake(state, content, step, events);
+    crossDiaF(state, from, state.clock.t, events);
+    resolveDueReplies(state, content, events);
     if (fainted && state.clock.t >= closeAt && !state.ending) {
       runClose(state, content, events);
       return;
@@ -182,13 +183,14 @@ export function advanceAwake(state: GameState, content: Content, minutes: number
 }
 
 function sleepUntil(state: GameState, content: Content, target: number, events: GfEvent[]): void {
-  if (target <= state.clock.t) throw new GameError("hora_invalida", "O despertador tem que ser depois de agora.");
+  state.flags.district = "oficina";
+  if (target <= state.clock.t) throw new GameError("hora_invalida", "O despertador tem que ser para depois de agora.");
   const closeAt = nextSundayClose(state.clock.t, content.time.closeDay, content.time.closeMinute);
   if (closeAt > state.clock.t && closeAt <= target) {
     const slept = (closeAt - state.clock.t) / 60;
     state.clock.lastSleep = { from: state.clock.t, to: closeAt };
     state.clock.t = closeAt;
-    state.clock.energy = Math.min(content.time.energy.max, content.time.energy.sleepBase + content.time.energy.sleepPerHour * slept);
+    tickBody(state, content, slept * 60, "sleep", events);
     state.clock.awakeMin = 0;
     syncAct(state);
     runClose(state, content, events);
@@ -199,11 +201,13 @@ function sleepUntil(state: GameState, content: Content, target: number, events: 
   const hours = (target - fromT) / 60;
   state.clock.lastSleep = { from: fromT, to: target };
   state.clock.t = target;
-  state.clock.energy = Math.min(content.time.energy.max, content.time.energy.sleepBase + content.time.energy.sleepPerHour * hours);
+  tickBody(state, content, hours * 60, "sleep", events);
   state.clock.awakeMin = 0;
   syncAct(state);
+  resolveDueReplies(state, content, events);
   const landed = partsOf(state.clock.t);
   if (dayIndex(state.clock.t) !== dayIndex(fromT) && fromDay !== 7) runStaffDay(state, content, events);
+  crossDiaF(state, fromT, state.clock.t, events);
   grantMorning(state, content, hours, events);
   if (dayIndex(state.clock.t) !== dayIndex(fromT) && landed.day !== 7) openMorning(state, content, events);
   if (dayIndex(state.clock.t) !== dayIndex(fromT)) {
@@ -222,12 +226,28 @@ function endDay(state: GameState, content: Content, events: GfEvent[]): void {
   sleepUntil(state, content, target, events);
 }
 
+function soakWalk(state: GameState, content: Content, kind: string, events: GfEvent[]): void {
+  if (kind !== "TRAVEL" && kind !== "OSSOBUS") return;
+  const hop = [...events].reverse().find((event) => event.type === "TRAVELED");
+  const minutes = hop?.week ?? 0;
+  if (minutes <= 0) return;
+  const dest = state.flags.district;
+  state.clock.t -= minutes;
+  advanceAwake(state, content, minutes, events);
+  if (events.some((event) => event.type === "FAINTED")) {
+    const index = events.findIndex((event) => event.type === "TRAVELED");
+    if (index >= 0) events.splice(index, 1);
+    return;
+  }
+  state.flags.district = dest;
+}
+
 function passActionTime(state: GameState, content: Content, kind: string, apBefore: number, events: GfEvent[]): void {
   const table = content.time.actions;
   const spent = Math.max(0, apBefore - state.calendar.apLeft);
   if (kind === "WORK_JOB" || kind === "WORK" || kind === "WORK_CARCASS") {
     if (spent <= 0) return;
-    state.clock.energy = Math.max(0, state.clock.energy - content.time.energy.workExtra * spent);
+    applyWorkLoad(state, spent);
     advanceAwake(state, content, (table.WORK ?? 0) * spent, events);
     return;
   }
@@ -237,8 +257,12 @@ function passActionTime(state: GameState, content: Content, kind: string, apBefo
     : kind === "COLLECT" ? table.COLLECT
     : kind === "STUDY" ? table.STUDY
     : kind === "BUY" ? table.BUY
-    : kind === "SEND_PROPOSAL" || kind === "ANSWER_COUNTER" ? table.NEGOTIATE
+    : kind === "SEND_PROPOSAL" || kind === "ANSWER_COUNTER" || kind === "NUDGE_COUNTER" ? table.NEGOTIATE
     : kind === "PAY_DEBT" || kind === "SAVE" || kind === "WITHDRAW" || kind === "TAKE_LOAN" ? table.BANK
+    : kind === "EAT" ? 10
+    : kind === "COOK" ? 25
+    : kind === "BUY_FOOD" || kind === "BUY_MED" ? 5
+    : kind === "TREAT" ? 15
     : 0;
   if (minutes) advanceAwake(state, content, minutes, events);
 }
@@ -255,14 +279,22 @@ export function applyAction(
   const events: GfEvent[] = [];
   ensureClock(next, content);
   alignClock(next, content);
+  next.clock.speed = 1;
+  next.clock.paused = false;
   if (next.ending) throw new GameError("encerrada", "Campanha encerrada.");
   const kind = (action as Action).type;
   const apBefore = next.calendar.apLeft;
-  const raw = action as Action & { minutes?: unknown; wakeAt?: unknown; speed?: unknown; paused?: unknown; elapsedMs?: unknown };
+  const raw = action as Action & { minutes?: unknown; wakeAt?: unknown; hours?: unknown; speed?: unknown; paused?: unknown; elapsedMs?: unknown };
   if (kind === "END_DAY") {
     endDay(next, content, events);
   } else if (kind === "SLEEP") {
-    const wakeAt = raw.wakeAt;
+    const asked = raw.hours;
+    const wakeAt = typeof asked === "number"
+      ? next.clock.t + asked * 60
+      : raw.wakeAt;
+    if (typeof asked === "number" && (!Number.isInteger(asked) || asked < 1 || asked > 12)) {
+      throw new GameError("hora_invalida", "O sono vai de 1 a 12 horas.");
+    }
     if (typeof wakeAt !== "number" || !Number.isInteger(wakeAt)) throw new GameError("hora_invalida", "O despertador precisa de um minuto inteiro.");
     if (hasBlockingCard(next, content)) throw new GameError("carta_obrigatoria", "Tem um recado no telefone que não espera.");
     sleepUntil(next, content, wakeAt, events);
@@ -275,15 +307,14 @@ export function applyAction(
   } else if (kind === "TICK") {
     const cap = content.time.tickCapMs;
     const elapsed = typeof raw.elapsedMs === "number" ? Math.max(0, Math.min(cap, raw.elapsedMs)) : 0;
-    const credited = typeof raw.minutes === "number" ? Math.max(0, Math.min(Math.floor((cap * next.clock.speed) / 1000), Math.floor(raw.minutes))) : 0;
-    const rawMs = next.clock.subMs + (credited > 0 ? credited * 1000 : elapsed * next.clock.speed);
+    const credited = typeof raw.minutes === "number" ? Math.max(0, Math.min(Math.floor(cap / 1000), Math.floor(raw.minutes))) : 0;
+    const rawMs = next.clock.subMs + (credited > 0 ? credited * 1000 : elapsed);
     const minutes = Math.floor(rawMs / 1000);
     next.clock.subMs = rawMs % 1000;
     advanceAwake(next, content, minutes, events);
   } else if (kind === "SET_SPEED") {
-    if (raw.speed === 1 || raw.speed === 2 || raw.speed === 4) next.clock.speed = raw.speed;
-    else throw new GameError("hora_invalida", "A velocidade é 1, 2 ou 4.");
-    if (typeof raw.paused === "boolean") next.clock.paused = raw.paused;
+    next.clock.speed = 1;
+    next.clock.paused = false;
   } else if (kind === "REST") {
     spend(next, content, content.balance.restAp, false);
     const hit = addMorale(next, content, content.balance.restMorale);
@@ -293,7 +324,7 @@ export function applyAction(
     if (hit.collapsed) events.push({ type: "COLLAPSE", week: next.collapses[next.collapses.length - 1] });
   } else if (kind === "NIGHT_SHIFT") {
     if (!inNightWindow(content, next.clock.t)) {
-      throw new GameError("cedo_demais", "Virar a noite só começa entre 20:00 e 03:00.");
+      throw new GameError("cedo_demais", "Só dá para virar a noite entre 20h e 3h.");
     }
     if (next.calendar.extraNightsUsed >= content.balance.nightShiftMaxPerWeek) {
       throw new GameError("noite_esgotada", "Você já virou a noite duas vezes nesta semana.");
@@ -307,9 +338,11 @@ export function applyAction(
     if (hit.collapsed) events.push({ type: "COLLAPSE", week: next.collapses[next.collapses.length - 1] });
   } else if (
     !applyCardAction(next, action as Record<string, unknown>, content, events) &&
+    !applyBody(next, action as Record<string, unknown>, content, events) &&
     !applyDistrict(next, action as Record<string, unknown>, content, events) &&
     !applyAuction(next, action as Record<string, unknown>, content, events) &&
     !applyStaff(next, action as Record<string, unknown>, content, events) &&
+    !applyHands(next, action as Record<string, unknown>, events) &&
     !applyProduction(next, action as Record<string, unknown>, content, events) &&
     !applyContracts(next, action as Record<string, unknown>, content, events) &&
     !applyFinance(next, action as Record<string, unknown>, content, events)
@@ -317,6 +350,15 @@ export function applyAction(
     throw new GameError("acao_invalida", "Ação não reconhecida.");
   } else {
     passActionTime(next, content, kind, apBefore, events);
+    soakWalk(next, content, kind, events);
+    if ((kind === "TRAVEL" || kind === "OSSOBUS") && here(next) === "oficina") receiveInbound(next, content, events);
+  }
+  if (here(next) === "oficina") receiveInbound(next, content, events);
+  awardTaskXp(next, kind, action as Record<string, unknown>, Math.max(0, apBefore - next.calendar.apLeft), events);
+  if (events.some((event) => event.type === "FAINTED") && (kind === "WORK" || kind === "WORK_JOB" || kind === "WORK_CARCASS")) {
+    const spent = Math.max(0, apBefore - next.calendar.apLeft);
+    const job = next.jobs.find((item) => item.id === (action as { jobId?: unknown }).jobId);
+    if (job && job.status === "in_progress" && spent > 0) job.apDone = Math.max(0, job.apDone - spent);
   }
   sealScore(next, content);
   return { state: next, events };

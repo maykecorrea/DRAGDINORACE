@@ -1,0 +1,33 @@
+{
+ "name": "Esteira fantasma",
+ "description": "Dino Drag Race — Esteira fantasma (Lendário). +41 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/68.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "tires"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 41,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "tires-Lendário-2",
+  "stats": "accel+41"
+ }
+}

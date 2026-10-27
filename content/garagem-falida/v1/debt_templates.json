@@ -1,0 +1,15 @@
+{
+  "banco_pai": { "creditor": "Banco Fóssil Central", "group": "banco", "bps": 80, "min": "fixed", "minValue": 300, "secured": true },
+  "cheque_especial": { "creditor": "Banco Fóssil Central", "group": "banco", "bps": 200, "min": "auto", "limit": 500 },
+  "cartao_platina": { "creditor": "Cartão Platina Jurássico", "group": "cartao", "bps": 350, "min": "pct15", "pct": 15, "limit": 5000, "annuity": 40 },
+  "agiota_juca": { "creditor": "Juca Juros", "group": "agiota", "bps": 1000, "min": "interest", "limit": 8000 },
+  "pre_aprovado": { "creditor": "Banco Fóssil Crédito Fácil", "group": "outras", "bps": 120, "min": "price", "weeks": 26, "earlyPenaltyBps": 300, "limit": 8000, "anunciada": "1,9% ao mês" },
+  "coop_ossada": { "creditor": "Cooperativa Ossada", "group": "outras", "bps": 35, "min": "price", "minWeeks": 8, "maxWeeks": 26, "limit": 8000, "requires": { "rep": 35, "clean": true, "weeksClean": 4 } },
+  "microcredito": { "creditor": "Jovem Empreendedor", "group": "outras", "bps": 25, "min": "price", "weeks": 20, "limit": 4000, "requires": { "lessons": ["L01", "L21"] } },
+  "fornecedor_casco": { "creditor": "Casco-Tech", "group": "fornecedor", "bps": 0, "min": "full", "penaltyBps": 200, "lateBps": 50, "dueWeek": 3 },
+  "parcelado": { "creditor": "Megaosso", "group": "outras", "bps": 245, "min": "price", "weeks": 12, "limit": 8000, "anunciada": "sem juros" },
+  "rescisao": { "creditor": "Demissão", "group": "outras", "bps": 0, "min": "price", "weeks": 4 },
+  "refin_milagre": { "creditor": "Refinancia Já", "group": "outras", "bps": 100, "min": "price", "weeks": 104 },
+  "divida_ricardao": { "creditor": "Toca do Ricardão", "group": "outras", "bps": 80, "min": "price", "weeks": 16 },
+  "agente_banco": { "creditor": "Agente do Banco Fóssil", "group": "banco", "bps": 0, "min": "price", "weeks": 4, "limit": 20000 }
+}

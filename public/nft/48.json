@@ -1,0 +1,33 @@
+{
+ "name": "Carapaça de escama",
+ "description": "Dino Drag Race — Carapaça de escama (Épico). +55 de casco.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/48.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "chassis"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Casco",
+   "value": 55,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "chassis-Épico-3",
+  "stats": "casco+55"
+ }
+}

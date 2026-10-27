@@ -1,0 +1,48 @@
+{
+ "name": "Selo de rua",
+ "description": "Dino Drag Race — Selo de rua (Normal). 7 de dano. 4 tiros. 2.33s. Trava 1s. Trava o carro por 1s e zera a velocidade. Quase não acerta.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/111.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ice"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 2.33,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Freeze",
+   "value": 1,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ice-Normal-3",
+  "stats": "dmg=7;clip=4;cd=2.33;freeze=1s"
+ }
+}

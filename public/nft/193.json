@@ -1,0 +1,33 @@
+{
+ "name": "Ampola de gosma",
+ "description": "Dino Drag Race — Ampola de gosma (Normal). +0.20s de nitro.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/193.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ampola"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Nitro",
+   "value": "0.20s",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-ampola-Normal",
+  "stats": "nitro+0.20s"
+ }
+}

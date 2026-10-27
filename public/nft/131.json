@@ -1,0 +1,43 @@
+{
+ "name": "Asa de chumbo",
+ "description": "Dino Drag Race — Asa de chumbo (Épico). 3 de dano. 231 tiros. 0.10s. A de fábrica. Duas bocas, tiro curto, 1 de dano. Pente de 125.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/131.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "mg"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 3,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 231,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.1,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-mg-Épico-2",
+  "stats": "dmg=3;clip=231;cd=0.1"
+ }
+}

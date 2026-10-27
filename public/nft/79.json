@@ -1,0 +1,43 @@
+{
+ "name": "Osso oco",
+ "description": "Dino Drag Race — Osso oco (Comum). 26 de dano. 6 tiros. 1.15s. Voa reto. Em cheio dói mais. Se passar perto, estoura com menos dano.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/79.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "missile"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 26,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 6,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.15,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-missile-Comum",
+  "stats": "dmg=26;clip=6;cd=1.15"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "name": "Sola de nave",
+ "description": "Dino Drag Race — Sola de nave (Épico). +20 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/221.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "bota"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 20,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-bota-Épico-2",
+  "stats": "accel+20"
+ }
+}

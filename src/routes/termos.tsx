@@ -13,26 +13,31 @@ function Termos() {
           DINO DRAG RACE
         </Link>
         <h1 className="font-display text-6xl leading-none">Termos de uso</h1>
-        <p className="text-sm text-muted">Vale para https://dinodragrace.yvion.com.br. Atualizado em 16 de outubro de 2026.</p>
+        <section className="grid gap-2 border border-primary/50 bg-surface p-4 text-sm leading-relaxed">
+          <p>Este jogo é de mentirinha: fósseis não valem dinheiro de verdade.</p>
+          <p>Aqui não tem aposta: os prêmios são fixos e você vê antes de jogar.</p>
+          <p>Menor de 13 anos joga com um adulto cuidando da conta.</p>
+        </section>
+        <p className="text-sm text-muted">Vale para dinodragrace.yvion.com.br. Atualizado em 23 de outubro de 2026.</p>
         <section className="grid gap-2 border border-border bg-surface p-4 text-sm leading-relaxed">
           <h2 className="font-display text-3xl leading-none">O jogo</h2>
-          <p>Dino Drag Race é um jogo de corrida no navegador. Entrar, criar conta ou correr significa que você aceita estes termos e a política de privacidade.</p>
+          <p>Dino Drag Race é um jogo de corrida no navegador. Ao entrar, criar conta ou correr, você aceita estes termos e a política de privacidade.</p>
         </section>
         <section className="grid gap-2 border border-border bg-surface p-4 text-sm leading-relaxed">
           <h2 className="font-display text-3xl leading-none">A conta</h2>
-          <p>A ficha é sua. Não passe a senha. Você pode entrar com e-mail ou com o Google. A gente pode fechar uma conta que trapaceie, ataque o servidor ou use o nome de outra pessoa.</p>
+          <p>A conta é sua. Não conte a senha para ninguém. Você pode entrar com e-mail ou com o Google. Podemos fechar contas que trapaceiam, atacam o servidor ou usam o nome de outra pessoa.</p>
         </section>
         <section className="grid gap-2 border border-border bg-surface p-4 text-sm leading-relaxed">
           <h2 className="font-display text-3xl leading-none">Idade</h2>
-          <p>O jogo não é para menor de 13 anos. Se você tem entre 13 e 18, entra com autorização de quem é responsável por você.</p>
+          <p>Menores de 18 anos jogam com autorização de um responsável. Menores de 13 anos só jogam com um responsável criando e cuidando da conta.</p>
         </section>
         <section className="grid gap-2 border border-border bg-surface p-4 text-sm leading-relaxed">
-          <h2 className="font-display text-3xl leading-none">Fóssil e itens</h2>
-          <p>Fóssil, carros e peças são itens do jogo. Não são dinheiro, não são promessa de lucro e podem mudar de regra quando a pista mudar.</p>
+          <h2 className="font-display text-3xl leading-none">Fósseis e itens</h2>
+          <p>Fósseis, carros e peças são coisas do jogo. Não são dinheiro de verdade, não dão lucro e as regras podem mudar quando o jogo mudar.</p>
         </section>
         <section className="grid gap-2 border border-border bg-surface p-4 text-sm leading-relaxed">
           <h2 className="font-display text-3xl leading-none">O que não prometemos</h2>
-          <p>A pista pode cair, atrasar ou mudar. O jogo é oferecido como está, sem garantia de que uma corrida vai terminar ou de que um item vai continuar igual.</p>
+          <p>O jogo pode sair do ar, atrasar ou mudar. Ele é oferecido como está, sem garantia de que uma corrida vai terminar ou de que um item vai ficar igual.</p>
         </section>
         <p className="text-sm text-muted">
           <Link to="/privacidade" className="text-primary">

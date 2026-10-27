@@ -1,0 +1,33 @@
+{
+ "name": "Olho de nave",
+ "description": "Dino Drag Race — Olho de nave (Épico). +12% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/214.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "lente"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "12%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-lente-Épico",
+  "stats": "vmax+12%"
+ }
+}

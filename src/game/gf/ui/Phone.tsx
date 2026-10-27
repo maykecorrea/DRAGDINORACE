@@ -2,9 +2,17 @@ import { useEffect, useState } from "react";
 import { cardById, fillCardText, flagRanges, optionBlock, shouldMarkFlags } from "../../../../gf-engine/cards.ts";
 import type { Content } from "../../../../gf-engine/content.ts";
 import type { GameState } from "../../../../gf-engine/state.ts";
+import type { PlaceId } from "../../../../gf-engine/district.ts";
 import { Face } from "./Face";
-import { GF } from "./pixel";
 import { dayShort } from "./text";
+
+function zapTourney(week: number): number | null {
+  const shown = week + 1;
+  if (shown === 17) return 18;
+  if (shown === 29) return 30;
+  if (shown === 43) return 44;
+  return null;
+}
 
 function typeDelay(): number {
   try {
@@ -16,16 +24,43 @@ function typeDelay(): number {
   }
 }
 
+function placeIn(text: string): PlaceId | null {
+  const hay = text.toLowerCase();
+  const pairs: [string, PlaceId][] = [
+    ["cais do leilão", "leilao"],
+    ["pátio do leilão", "leilao"],
+    ["leilão", "leilao"],
+    ["coliseu", "coliseu"],
+    ["beco do rato", "rato"],
+    ["ferro-velho", "ferro_velho"],
+    ["casco-tech", "casco_tech"],
+    ["casco tech", "casco_tech"],
+    ["megaosso", "megaosso"],
+    ["banco fóssil", "banco"],
+    ["hospital", "hospital"],
+    ["farmácia", "farmacia"],
+    ["posto cometa", "posto_cometa"],
+    ["posto de saúde", "posto"],
+    ["tenda", "tenda"],
+    ["praça", "praca"],
+    ["galpão", "galpao"],
+    ["oficina", "oficina"],
+  ];
+  return pairs.find(([name]) => hay.includes(name))?.[1] ?? null;
+}
+
 export function PhoneDesk({
   state,
   pack,
   onOpen,
   onBack,
+  onMap,
 }: {
   state: GameState;
   pack: Content;
   onOpen: (cardId: string) => void;
   onBack: () => void;
+  onMap?: (place: PlaceId) => void;
 }) {
   const queue = state.cardQueue;
   return (
@@ -34,14 +69,18 @@ export function PhoneDesk({
         Voltar ao pátio
       </button>
       <h2 className="gf-kicker">ZapDino</h2>
-      <p className="gf-filechip">{GF.phone}</p>
-      {queue.length === 0 && <p>Nenhum recado. O telefone está mudo.</p>}
+      {zapTourney(state.calendar.week) != null && (
+        <p className="gf-panel">Turbão: Semana de torneio no Coliseu! O troféu de osso está esperando. Semana {zapTourney(state.calendar.week)}.</p>
+      )}
+      {queue.length === 0 && <p>Nenhuma mensagem nova por enquanto.</p>}
       {queue.map((item) => {
         const card = cardById(pack, item.cardId);
         if (!card) return null;
-        const preview = fillCardText(state, card.text).slice(0, 72);
+        const preview = fillCardText(state, card.text);
+        const where = placeIn(`${card.title} ${fillCardText(state, card.text)}`);
         return (
-          <button key={item.cardId} type="button" className="gf-panel gf-card gf-thread" onClick={() => onOpen(item.cardId)}>
+          <article key={item.cardId} className={`gf-panel gf-card gf-thread${!item.opened ? " animate-gf-buzz motion-reduce:animate-none" : ""}`}>
+            <img className="gf-bubble" src="/assets/gf/v2/celular/ui_balao_recebido.png?v=9" alt="" />
             <Face id={card.npc ?? "teo"} />
             <span className="gf-thread-copy">
               <strong>
@@ -50,10 +89,16 @@ export function PhoneDesk({
               </strong>
               <span className="gf-preview">{preview}</span>
               <span className="gf-dim">
-                Sem {item.week} · {dayShort(item.day)}
+                Sem {item.week + 1} · {dayShort(item.day)}
+              </span>
+              <span className="gf-actions">
+                <button type="button" onClick={() => onOpen(item.cardId)}>Abrir</button>
+                {where && onMap && (
+                  <button type="button" onClick={() => onMap(where)}>Ver no mapa</button>
+                )}
               </span>
             </span>
-          </button>
+          </article>
         );
       })}
     </section>
@@ -123,9 +168,8 @@ export function CardModal({
   const mark = shouldMarkFlags(state.flags);
   const done = count >= full.length;
   return (
-    <div className="gf-modal">
+    <div className="gf-modal" onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <div className="gf-sheet" role="dialog" aria-modal="true" aria-labelledby="gf-card-title">
-        <p className="gf-filechip">{GF.cardFrame}</p>
         <div className="gf-cardhead">
           <Face id={card.npc ?? "teo"} large />
           <h2 id="gf-card-title">{card.title}</h2>
@@ -134,7 +178,7 @@ export function CardModal({
           <Marked text={shown} flags={card.red_flags} on={mark} />
           {!done && <span className="gf-caret">▌</span>}
         </p>
-        {mark && card.red_flags.length > 0 && done && <p className="gf-amber">⚠ Âmbar: confira isso</p>}
+        {mark && card.red_flags.length > 0 && done && <p className="gf-amber">⚠ Âmbar: confira isso!</p>}
         <div className="gf-actions">
           {card.options.map((option) => {
             const need = optionBlock(state, pack, option);

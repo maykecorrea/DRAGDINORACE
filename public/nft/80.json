@@ -1,0 +1,43 @@
+{
+ "name": "Lata cheia",
+ "description": "Dino Drag Race — Lata cheia (Comum). 21 de dano. 8 tiros. 1.03s. Voa reto. Em cheio dói mais. Se passar perto, estoura com menos dano.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/80.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "missile"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 21,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 8,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.03,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-missile-Comum-2",
+  "stats": "dmg=21;clip=8;cd=1.03"
+ }
+}

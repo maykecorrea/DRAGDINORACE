@@ -1,0 +1,8 @@
+[
+  { "level": 0, "nome": "Ruína", "cost": 0, "repMax": 40, "bays": 1, "unlocks": [] },
+  { "level": 1, "nome": "Remendada", "cost": 2500, "repMax": 55, "bays": 3, "unlocks": ["leilao", "labia"], "moraleWeekly": 3 },
+  { "level": 2, "nome": "Funcional", "cost": 7000, "repMax": 70, "bays": 7, "unlocks": ["motor", "frota", "osso_duro"] },
+  { "level": 3, "nome": "Oficina de verdade", "cost": 15000, "repMax": 85, "bays": 7, "unlocks": ["custom", "corredor", "fundo"], "priceMod": 1.1 },
+  { "level": 4, "nome": "Orgulho do Distrito", "cost": 26000, "repMax": 95, "bays": 7, "unlocks": ["Loja", "licitacao"], "resaleMargin": 0.1 },
+  { "level": 5, "nome": "Oficina Renascida", "cost": 40000, "repMax": 100, "bays": 7, "unlocks": ["finais", "gancho"] }
+]

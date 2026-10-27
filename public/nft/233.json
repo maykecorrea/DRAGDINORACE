@@ -1,0 +1,33 @@
+{
+ "name": "Punho fóssil",
+ "description": "Dino Drag Race — Punho fóssil (Lendário). +34 de potência.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/233.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "garra"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Potência",
+   "value": 34,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-garra-Lendário-2",
+  "stats": "power+34"
+ }
+}

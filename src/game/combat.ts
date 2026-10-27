@@ -51,14 +51,14 @@ export function combatKind(id: WeaponId): CombatKind {
 export function combatName(kind: CombatKind | "pancada" | "mureta" | "ossada"): string {
   if (kind === "missil") return "MÍSSIL";
   if (kind === "mina") return "MINA";
-  if (kind === "cuspe") return "CUSPE";
+  if (kind === "cuspe") return "JATO";
   if (kind === "emp") return "CHOQUE";
   if (kind === "rajada") return "RAJADA";
   if (kind === "rastro") return "RASTRO";
   if (kind === "tiroTras") return "TIRO";
   if (kind === "pancada") return "PANCADA";
   if (kind === "mureta") return "MURETA";
-  return "OSSADA";
+  return "QUEBROU";
 }
 
 export type HudBox = { x: number; y: number; w: number; h: number };

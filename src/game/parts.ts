@@ -62,7 +62,7 @@ const EXTRA: Record<PartTier, Record<PartSlot, [string, string]>> = {
     chassis: ["Rede de escama", "Osso grampeado"],
     engine: ["Rádio rachado", "Vela acesa"],
     tires: ["Pneu careca", "Borracha quente"],
-    nitro: ["Pinga de gosma", "Frasco cheio"],
+    nitro: ["Gota de gosma", "Frasco cheio"],
     gearbox: ["Feixe de cabo", "Engrenagem dupla"],
   },
   Normal: {
@@ -83,14 +83,14 @@ const EXTRA: Record<PartTier, Record<PartSlot, [string, string]>> = {
     chassis: ["Lombo de neon", "Carapaça de escama"],
     engine: ["Pulmão de samambaia", "Caldeira de crânio"],
     tires: ["Hover de osso", "Anel antigrav"],
-    nitro: ["Glândula roxa", "Cálice de íon"],
+    nitro: ["Bolha roxa", "Cálice de íon"],
     gearbox: ["Garra de cabo", "Hélice de osso"],
   },
   Lendário: {
     chassis: ["Escama de vidro", "Manto de quartzo"],
     engine: ["Fôlego de estrela", "Olho de plasma"],
     tires: ["Esteira fantasma", "Singularidade"],
-    nitro: ["Bile de estrela", "Gargalo de cometa"],
+    nitro: ["Brilho de estrela", "Gargalo de cometa"],
     gearbox: ["Tiara de fóssil", "Cetro de vértebra"],
   },
 };
@@ -298,8 +298,9 @@ export function wearReason(car: Pick<NftCar, "rarity" | "xp">, tier: PartTier): 
   return `Exige carro ${tier} ou nível ${RANK_LEVEL[tier]}. Agora: ${car.rarity}, nível ${carLevel(car)}.`;
 }
 
-export function raceXp(win: boolean): number {
-  return win ? 14 : 8;
+export function raceXp(win: boolean, mode: "free" | "duel" = "duel"): number {
+  if (mode === "free") return win ? 10 : 4;
+  return win ? 22 : 8;
 }
 
 export function applyGear(base: StatBlock, gear?: Partial<Record<PartSlot, string>>): StatBlock {

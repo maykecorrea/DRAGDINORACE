@@ -1,0 +1,43 @@
+{
+ "name": "Trono de fogo",
+ "description": "Dino Drag Race — Trono de fogo (Lendário). 6 de dano. 175 tiros. 0.11s. A de fábrica. Duas bocas, tiro curto, 1 de dano. Pente de 125.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/150.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "mg"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 6,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 175,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.11,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-mg-Lendário-3",
+  "stats": "dmg=6;clip=175;cd=0.11"
+ }
+}

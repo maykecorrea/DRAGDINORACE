@@ -1,0 +1,48 @@
+{
+ "name": "Raio do rex",
+ "description": "Dino Drag Race — Raio do rex (Lendário). 121 de dano. 9 tiros. 1.07s. Deixa lerdo. Muito dano e deixa o carro lerdo. Difícil de cravar.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/161.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ray"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 121,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 9,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.07,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Slowtime",
+   "value": 2.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ray-Lendário-2",
+  "stats": "dmg=121;clip=9;cd=1.07;slow=0.55x/2.4s"
+ }
+}

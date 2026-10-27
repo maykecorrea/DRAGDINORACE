@@ -1,0 +1,48 @@
+{
+ "name": "Bolha de lodo",
+ "description": "Dino Drag Race — Bolha de lodo (Comum). 5 de dano. 6 tiros. 1.22s. Veneno 3/s. Se acerta, sangra até o fim da corrida.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/86.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "poison"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 5,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 6,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.22,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Poison",
+   "value": 3,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-poison-Comum-2",
+  "stats": "dmg=5;clip=6;cd=1.22;poison=3/s"
+ }
+}

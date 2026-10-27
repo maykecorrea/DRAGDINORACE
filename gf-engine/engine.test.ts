@@ -61,7 +61,7 @@ describe("motor da garagem", () => {
     assert.equal(state.cash, 0);
     const cheque = state.debts.find((debt) => debt.template === "cheque_especial");
     assert.equal(cheque?.balance, 360);
-    assert.equal(state.morale, 65);
+    assert.equal(state.morale, 98.333);
     assert.equal(state.flags.receivedWeek, 0);
   });
 
@@ -79,7 +79,7 @@ describe("motor da garagem", () => {
     const hit = applyAction(state, { type: "NIGHT_SHIFT" }, contentV1);
     assert.equal(hit.events.some((event) => event.type === "COLLAPSE"), true);
     state = hit.state;
-    assert.equal(state.morale, 40);
+    assert.equal(state.morale, 29.5);
     assert.deepEqual(state.collapses, [0]);
     assert.equal(state.flags.noApWeek, 1);
     for (let i = 0; i < 7; i += 1) state = applyAction(state, { type: "END_DAY" }, contentV1).state;

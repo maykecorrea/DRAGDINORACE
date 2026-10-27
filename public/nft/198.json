@@ -1,0 +1,33 @@
+{
+ "name": "Crânio ciano",
+ "description": "Dino Drag Race — Crânio ciano (Raro). +26 de vida no piloto.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/198.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "cranio"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Vida",
+   "value": 26,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-cranio-Raro-3",
+  "stats": "vida+26"
+ }
+}

@@ -1,0 +1,43 @@
+{
+ "name": "Crânio-foguete",
+ "description": "Dino Drag Race — Crânio-foguete (Raro). 45 de dano. 10 tiros. 0.89s. Voa reto. Em cheio dói mais. Se passar perto, estoura com menos dano.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/116.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "missile"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 45,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 10,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.89,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-missile-Raro-2",
+  "stats": "dmg=45;clip=10;cd=0.89"
+ }
+}

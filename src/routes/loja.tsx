@@ -26,7 +26,7 @@ function bonusLine(value: number, suffix = "") {
 function StatSheet({ stats }: { stats: StatBlock }) {
   const vida = Math.round(stats.durability);
   const rows = [
-    ["Velocidade", `${Math.round(stats.vmax)} mph`],
+    ["Velocidade", `${Math.round(stats.vmax * 1.609)} km/h`],
     ["Aceleração", String(Math.round(stats.accel))],
     ["Nitro", `${stats.nitroTime.toFixed(1)}s`],
     ["Potência", String(Math.round(stats.power))],
@@ -71,7 +71,7 @@ function BarrilPlate({
 }) {
   const specs = [
     ["Vida", String(Math.round(card.stats.durability))],
-    ["Velocidade", `${Math.round(card.stats.vmax)} mph`],
+    ["Velocidade", `${Math.round(card.stats.vmax * 1.609)} km/h`],
     ["Aceleração", String(Math.round(card.stats.accel))],
     ["Nitro", `${card.stats.nitroTime.toFixed(1)}s`],
     ["Potência", String(Math.round(card.stats.power))],
@@ -87,13 +87,13 @@ function BarrilPlate({
       </div>
       <div className="grid bg-[#4d8dff]/40 md:grid-cols-2 md:gap-px">
         <figure className="bg-black">
-          <figcaption className="border-b border-white/10 px-3 py-1.5 font-pixel text-[10px] tracking-[0.28em] text-[#ffb020]">VISÃO TRASEIRA</figcaption>
-          <img src={card.rear} alt="Barril visto de trás, canos e chama" className="aspect-square w-full bg-[#070806] object-contain" style={{ imageRendering: "pixelated" }} />
+          <figcaption className="border-b border-white/10 px-3 py-1.5 font-pixel text-[10px] tracking-[0.28em] text-[#ffb020]">Visão traseira</figcaption>
+          <img src={card.rear} alt="Barril visto de trás, com canos e chama" className="aspect-square w-full bg-[#070806] object-contain" style={{ imageRendering: "pixelated" }} />
         </figure>
         <figure className="border-t border-[#4d8dff]/40 bg-black md:border-t-0">
           <figcaption className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-1.5">
             <span className="font-pixel text-[10px] tracking-[0.28em] text-[#ffb020]">GIRO</span>
-            <button type="button" onClick={onSpin} className="min-h-11 px-1 font-pixel text-[10px] tracking-[0.2em] text-white/80">ABRIR</button>
+            <button type="button" onClick={onSpin} className="min-h-11 px-1 font-pixel text-[10px] tracking-[0.2em] text-white/80">Abrir</button>
           </figcaption>
           <video
             src={card.spin?.video}
@@ -120,11 +120,11 @@ function BarrilPlate({
 }
 
 const TIERS = [
-  { id: "Comum", image: "/game/roulette/comum.png", tone: "#d6ff3f", line: "A rua. O casco que abre a ficha." },
-  { id: "Normal", image: "/game/roulette/normal.png", tone: "#7af0ff", line: "Prateleira. Compra e equipa." },
-  { id: "Raro", image: "/game/roulette/raro.png", tone: "#4d8dff", line: "5%. Não vende. Sai na roleta." },
-  { id: "Épico", image: "/game/roulette/epico.png", tone: "#ff3bd4", line: "1%. O bicho vira o carro." },
-  { id: "Lendário", image: "/game/roulette/lendario.png", tone: "#ffb020", line: "0,1%. Só no mint." },
+  { id: "Comum", image: "/game/roulette/comum.png", tone: "#d6ff3f", line: "Da rua. O carro para começar." },
+  { id: "Normal", image: "/game/roulette/normal.png", tone: "#7af0ff", line: "Na prateleira. Compre e equipe." },
+  { id: "Raro", image: "/game/roulette/raro.png", tone: "#4d8dff", line: "5%. Não se vende. Só no ovo." },
+  { id: "Épico", image: "/game/roulette/epico.png", tone: "#ff3bd4", line: "1%. O dino vira o carro." },
+  { id: "Lendário", image: "/game/roulette/lendario.png", tone: "#ffb020", line: "0,1%. O mais raro de todos." },
 ] as const;
 
 type TierId = (typeof TIERS)[number]["id"];
@@ -177,13 +177,13 @@ function shelfOf(tier: TierId) {
     name: card.name,
     image: card.car,
     tag: "kind" in card ? `${tier} · ${card.kind}` : tier,
-    note: "Só sai na roleta.",
+    note: "Só sai no ovo.",
     stats: shelfStats(card.id, card.driver, tier),
     rear: card.rear,
     buy: undefined as (typeof CATALOG)[number] | undefined,
     spin: {
       name: card.name,
-      car: `${tier} · ${Math.round(shelfStats(card.id, card.driver, tier).vmax)} mph`,
+      car: `${tier} · ${Math.round(shelfStats(card.id, card.driver, tier).vmax * 1.609)} km/h`,
       poster: card.car,
       video: card.spin,
     } as SpinTarget,
@@ -203,8 +203,8 @@ function Loja() {
   const [bought, setBought] = useState<{ tokenId: string; name: string; image: string; pilotId?: PilotId } | null>(null);
   const [hire, setHire] = useState<Pilot | null>(null);
   const [freeSpins, setFreeSpins] = useState(0);
-  const crew: PilotId[] = save.pilots?.length ? save.pilots : ["vex"];
-  const seated = crew.includes(save.pilot ?? "vex") ? (save.pilot ?? "vex") : "vex";
+  const crew: PilotId[] = save.pilots?.length ? save.pilots : ["teo"];
+  const seated = crew.includes(save.pilot ?? "teo") ? (save.pilot ?? "teo") : "teo";
 
   useEffect(() => {
     void questSpins().then((n) => setFreeSpins(Number(n) || 0)).catch(() => undefined);
@@ -311,21 +311,21 @@ function Loja() {
             <li>
               <button type="button" onClick={() => mint("car")} onMouseMove={glitchMove} className="shop-glitch relative w-full overflow-hidden border border-white/20 bg-black/55 p-1 text-left backdrop-blur-sm">
                 <img src="/game/loja-wheel.png" alt="" className="mx-auto h-12 w-full object-contain" />
-                <p className="mt-0.5 font-display text-lg leading-none text-[#ff5a3c]">Roleta carros</p>
+                <p className="mt-0.5 font-display text-lg leading-none text-[#ff5a3c]">Ovo de carros</p>
                 <p className="text-[10px] leading-tight text-white/70">{freeSpins > 0 ? `Giro das missões: ${freeSpins}` : `${MINT_COST} fóssil. Gira o prêmio.`}</p>
               </button>
             </li>
             <li>
               <button type="button" onClick={() => mint("part")} onMouseMove={glitchMove} className="shop-glitch relative w-full overflow-hidden border border-white/20 bg-black/55 p-1 text-left backdrop-blur-sm">
                 <img src="/game/roulette/raro.png" alt="" className="mx-auto h-12 w-full object-contain" />
-                <p className="mt-0.5 font-display text-lg leading-none text-[#7fd7ff]">Roleta itens</p>
+                <p className="mt-0.5 font-display text-lg leading-none text-[#7fd7ff]">Ovo de itens</p>
                 <p className="text-[10px] leading-tight text-white/70">{freeSpins > 0 ? `Giro das missões: ${freeSpins}` : `${MINT_COST} fóssil. Peças e armas.`}</p>
               </button>
             </li>
             <li>
               <button type="button" onClick={() => mint("pilot")} onMouseMove={glitchMove} className="shop-glitch relative w-full overflow-hidden border border-white/20 bg-black/55 p-1 text-left backdrop-blur-sm">
                 <img src="/game/pilot-badge.png" alt="" className="mx-auto h-12 w-full object-contain" />
-                <p className="mt-0.5 font-display text-lg leading-none text-[#ff7ad9]">Roleta pilotos</p>
+                <p className="mt-0.5 font-display text-lg leading-none text-[#ff7ad9]">Ovo de pilotos</p>
                 <p className="text-[10px] leading-tight text-white/70">{freeSpins > 0 ? `Giro das missões: ${freeSpins}` : `${MINT_COST} fóssil. Lendário só aqui.`}</p>
               </button>
             </li>
@@ -367,10 +367,10 @@ function Loja() {
                     <p className="mt-1 flex-1 text-xs text-pretty text-white/60">{card.note}</p>
                     {card.buy ? (
                       <button type="button" disabled={save.fossil < card.buy.cost} onClick={() => setAsk(card.buy ?? null)} className="mt-2 min-h-11 bg-primary px-2 font-display text-2xl leading-none text-ink disabled:opacity-40">
-                        {save.fossil < card.buy.cost ? "Falta fóssil" : <>{card.buy.cost} <FossilWord lime /></>}
+                        {save.fossil < card.buy.cost ? "Faltam fósseis" : <>{card.buy.cost} <FossilWord lime /></>}
                       </button>
                     ) : (
-                      <p className="mt-2 text-xs tracking-widest text-white/50">{tier === "Comum" ? "Base da ficha" : "Roleta"}</p>
+                      <p className="mt-2 text-xs tracking-widest text-white/50">{tier === "Comum" ? "Básico" : "Ovo"}</p>
                     )}
                   </article>
                 </li>
@@ -385,12 +385,12 @@ function Loja() {
             <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
               <div>
                 <p className="font-display text-4xl leading-none text-primary">Pilotos</p>
-                <p className="text-xs text-white/70">Rua se compra, a partir de 120. Piloto lendário só sai na roleta de pilotos.</p>
+                <p className="text-xs text-white/70">Pilotos de rua custam a partir de 120. Piloto lendário só sai no ovo de pilotos.</p>
               </div>
               <button type="button" onClick={() => setCrewOpen(false)} className="min-h-11 border border-white/20 px-3 font-display text-2xl leading-none text-white">Fechar</button>
             </div>
             <ul className="grid max-h-[72dvh] grid-cols-2 gap-3 overflow-y-auto p-3 md:grid-cols-4">
-              {PILOTS.map((pilot, i) => {
+              {PILOTS.filter((pilot) => pilot.id !== "vex").map((pilot, i) => {
                 const ownedPilot = crew.includes(pilot.id);
                 const on = seated === pilot.id;
                 const rouletteOnly = pilot.grade === "Lendário" && !ownedPilot;
@@ -422,7 +422,7 @@ function Loja() {
                         onClick={() => setHire(pilot)}
                         className="mt-3 min-h-11 w-full bg-primary px-2 font-display text-2xl leading-none text-ink disabled:opacity-40"
                       >
-                        {on ? "Equipado" : rouletteOnly ? "Só na roleta" : ownedPilot ? "Equipar" : `${pilot.cost} fóssil`}
+                        {on ? "Equipado" : rouletteOnly ? "Só no ovo" : ownedPilot ? "Equipar" : `${pilot.cost} fósseis`}
                       </button>
                     </article>
                   </li>
@@ -437,7 +437,7 @@ function Loja() {
           <div className="w-full max-w-md border border-border bg-surface p-5">
             <p className="font-display text-4xl leading-none">Confirmar compra</p>
             <img src={ask.image ?? `/game/car-${driverById(ask.driverId).sprite}.png`} alt="" className="mx-auto mt-4 h-28 object-contain" />
-            <p className="mt-3 text-sm text-pretty">Comprar {ask.name ?? driverById(ask.driverId).name} por {ask.cost} fóssil?</p>
+            <p className="mt-3 text-sm text-pretty">Comprar {ask.name ?? driverById(ask.driverId).name} por {ask.cost} fósseis?</p>
             <div className="mt-4 flex gap-2">
               <button type="button" onClick={confirmBuy} className="min-h-11 bg-primary px-4 font-display text-2xl leading-none text-ink">Comprar</button>
               <button type="button" onClick={() => setAsk(null)} className="min-h-11 border border-border px-4 font-display text-2xl leading-none">Cancelar</button>
@@ -451,7 +451,7 @@ function Loja() {
             <p className="font-display text-4xl leading-none">{crew.includes(hire.id) ? "Equipar piloto" : "Contratar piloto"}</p>
             <img src={hire.image} alt="" className="mx-auto mt-4 h-36 object-contain" />
             <p className="mt-3 text-sm text-pretty">
-              {crew.includes(hire.id) ? `${hire.name} já está na sua bancada. Sentar no banco?` : `Comprar ${hire.name} por ${hire.cost} fóssil?`}
+              {crew.includes(hire.id) ? `${hire.id === "teo" ? "Você" : hire.name} já é seu. Colocar no volante?` : `Comprar ${hire.name} por ${hire.cost} fósseis?`}
             </p>
             <div className="mt-4 flex gap-2">
               <button type="button" onClick={confirmHire} className="min-h-11 bg-primary px-4 font-display text-2xl leading-none text-ink">{crew.includes(hire.id) ? "Equipar" : "Comprar"}</button>

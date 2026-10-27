@@ -53,13 +53,13 @@ describe("pacote v1", () => {
   });
 
   it("a margem por energia na Casco-Tech sai da receita menos o custo do material", () => {
-    assert.equal(marginPerAp(contentV1, "oleo"), 82);
-    assert.equal(marginPerAp(contentV1, "reparo"), 134);
-    assert.equal(marginPerAp(contentV1, "funilaria"), 136);
-    assert.equal(marginPerAp(contentV1, "eletrica"), 107);
-    assert.equal(marginPerAp(contentV1, "motor"), 119);
-    // A soma Casco (bobina 320 + osso 65×2 + cabo 90×2 + chapa 45×2) é 720.
-    // (2200 − 720) / 8 = 185. A tabela do GDD cita 180, que pediria custo 760.
-    assert.equal(marginPerAp(contentV1, "custom"), 185);
+    assert.equal(marginPerAp(contentV1, "oleo"), 97);
+    assert.equal(marginPerAp(contentV1, "reparo"), 114);
+    assert.equal(marginPerAp(contentV1, "funilaria"), 129);
+    assert.equal(marginPerAp(contentV1, "eletrica"), 146);
+    assert.equal(marginPerAp(contentV1, "motor"), 168);
+    // Casco: bobina 320 + osso 65×2 + cabo 90×2 + chapa 45×2 = 720.
+    // (2390 − 720) / 8 = 208,75, arredonda para 209.
+    assert.equal(marginPerAp(contentV1, "custom"), 209);
   });
 });

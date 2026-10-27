@@ -1,0 +1,48 @@
+{
+ "name": "Nuvem de ptero",
+ "description": "Dino Drag Race — Nuvem de ptero (Épico). 15 de dano. 9 tiros. 0.95s. Veneno 10/s. Se acerta, sangra até o fim da corrida.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/140.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "poison"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 15,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 9,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.95,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Poison",
+   "value": 10,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-poison-Épico-2",
+  "stats": "dmg=15;clip=9;cd=0.95;poison=10/s"
+ }
+}

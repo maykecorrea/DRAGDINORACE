@@ -6,13 +6,14 @@ import { cheapestSupplierFor, missingMaterials } from "../../../../gf-engine/pro
 import type { GameState, MaterialId, SupplierId } from "../../../../gf-engine/state.ts";
 import { Face } from "./Face";
 import { GF, Interior, PixelFile } from "./pixel";
+import { MenuPick } from "./v2/MenuPick";
 
 type Term = "cash" | "prazo14" | "3x";
 
 const ORDER: SupplierId[] = ["ferro_velho", "casco_tech", "megaosso", "rato"];
 
 const ROOM: Record<SupplierId, { file: string; face: string }> = {
-  ferro_velho: { file: "int_ferrovelho.png", face: "npc_dona_sucata" },
+  ferro_velho: { file: "int_ferrovelho.png", face: "ze_femur" },
   casco_tech: { file: "int_cascotech.png", face: "npc_casco" },
   megaosso: { file: "int_megaosso.png", face: "npc_promo" },
   rato: { file: "int_rato.png", face: "rato" },
@@ -104,7 +105,7 @@ export function StockDesk({
     setCart((prev) => ({ ...prev, [id]: Math.max(0, qty) }));
   }
 
-  const buyDisabled = busy || cost <= 0 || short != null || (activeTerm === "prazo14" && creditBlock != null) || (supplier.id === "rato" && state.calendar.apLeft < 1);
+  const buyDisabled = busy || cost <= 0 || short != null || (activeTerm === "prazo14" && creditBlock != null);
   const gaps = state.jobs.flatMap((job) =>
     missingMaterials(state, pack, job).map((row) => ({
       key: `${job.id}-${row.material}`,
@@ -122,8 +123,8 @@ export function StockDesk({
           {backLabel}
         </button>
         <h2 className="gf-kicker">Prateleira</h2>
-        <p>Cada reparo come peça. Sem peça na prateleira o carro não entra na baia. A loja fica na cidade: a ida e a volta gastam ponto de ação.</p>
-        {state.garage.level >= 4 && <p>A loja da oficina revende sucata com 10% a mais.</p>}
+        <p>Todo conserto usa peças. Sem peça na prateleira, o carro não entra na baia. As lojas ficam na cidade: a caminhada gasta tempo, não PA.</p>
+        {state.garage.level >= 4 && <p>A loja da oficina revende sucata 10% mais cara.</p>}
         {focus && missingName(pack, focus) && (
           <p className="gf-banner">
             Falta {missingName(pack, focus)} ×{focus.qty}
@@ -133,8 +134,8 @@ export function StockDesk({
           <article key={row.material.id} className={`gf-panel gf-line${focus?.material === row.material.id ? " is-hot" : ""}`}>
             <PixelFile file={GF.material(row.material.icone)} />
             <strong>{row.material.nome}</strong>
-            <span>Qtd {row.qty}</span>
-            <span>Custo médio {formatF(row.avg)}</span>
+            <span>Qtd. {row.qty}</span>
+            <span>Preço médio {formatF(row.avg)}</span>
             <span>Valor {formatF(row.total)}</span>
             <span>
               Idade {row.age} sem
@@ -149,7 +150,7 @@ export function StockDesk({
         {stocked.length === 0 && <p>A prateleira está vazia.</p>}
         {gaps.length > 0 && (
           <div className="gf-panel">
-            <h3>Falta para o reparo</h3>
+            <h3>Falta para o conserto</h3>
             <ul>
               {gaps.map((gap) => (
                 <li key={gap.key}>
@@ -168,18 +169,17 @@ export function StockDesk({
           </p>
         )}
         <div className="gf-panel">
-          <h3>Vender sucata ao Ferro-Velho</h3>
+          <h3>Vender sucata</h3>
           {scrap ? (
             <div className="gf-fields">
               <label>
                 Material
-                <select aria-label="Sucata" value={scrap.material.id} onChange={(event) => setScrapId(event.target.value as MaterialId)}>
-                  {stocked.map((row) => (
-                    <option key={row.material.id} value={row.material.id}>
-                      {row.material.nome} ({row.qty})
-                    </option>
-                  ))}
-                </select>
+                <MenuPick
+                  label="Sucata"
+                  value={scrap.material.id}
+                  options={stocked.map((row) => ({ value: row.material.id, label: `${row.material.nome} (${row.qty})` }))}
+                  onChange={(id) => setScrapId(id)}
+                />
               </label>
               <label>
                 Quantidade
@@ -196,13 +196,13 @@ export function StockDesk({
                 disabled={busy || scrapQty > scrap.qty}
                 onClick={() => onAct({ type: "SELL_SCRAP", material: scrap.material.id, qty: Math.min(scrapQty, scrap.qty) })}
               >
-                Vender sucata ao Ferro-Velho
+                Vender sucata
               </button>
             </div>
           ) : (
-            <p className="gf-dim">Não há sucata na prateleira.</p>
+            <p className="gf-dim">Não tem sucata na prateleira.</p>
           )}
-          <p className="gf-dim">O Ferro-Velho paga 40% do custo médio{scrap ? `: ${formatF(scrapPay)}` : ""}.</p>
+          <p className="gf-dim">O Ferro-Velho paga 40% do que você pagou{scrap ? `: ${formatF(scrapPay)}` : ""}.</p>
         </div>
         {onMap && (
           <button type="button" className="gf-go" onClick={onMap}>
@@ -251,6 +251,8 @@ export function StockDesk({
       )}
       <div className="gf-panel">
         <p>{supplier.pagamento}</p>
+        {supplier.id === "megaosso" && <p>Atacado do Megaosso. Cada peça tem um mínimo. Dá para pagar em 3 vezes.</p>}
+        {supplier.id === "ferro_velho" && <p>Balcão do Zé. Peça avulsa, só à vista. Sem bobina.</p>}
         <p>{qualityLine(supplier.qualityMod)}{supplier.defect ? ` · ${Math.round(supplier.defect * 100)}% defeituoso` : ""}</p>
         {supplier.minOrder && (
           <p>
@@ -261,7 +263,7 @@ export function StockDesk({
           </p>
         )}
         {priced.map((row) => (
-          <label key={row.material.id} className="gf-line">
+          <label key={row.material.id} className="gf-buyline">
             <PixelFile file={GF.material(row.material.icone)} />
             {row.material.nome} · {formatF(row.price)}
             <input
@@ -273,7 +275,7 @@ export function StockDesk({
             />
           </label>
         ))}
-        <div className="gf-row" role="group" aria-label="Condição de pagamento">
+        <div className="gf-row" role="group" aria-label="Como pagar">
           {terms.map((item) => (
             <button key={item} type="button" aria-pressed={activeTerm === item} className={activeTerm === item ? "gf-go" : undefined} onClick={() => setTerm(item)}>
               {item === "cash" ? "À vista" : item === "prazo14" ? "14 dias" : "3×"}
@@ -294,7 +296,7 @@ export function StockDesk({
           </p>
         )}
         {activeTerm === "prazo14" && creditBlock && <p className="gf-danger">{creditBlock}</p>}
-        {supplier.id === "rato" && <p>O Rato cobra 1 PA para retirar no beco.</p>}
+        {supplier.id === "rato" && <p>Peça do Beco do Rato, sem garantia. A gangue pode cobrar 10% a mais.</p>}
         <button
           type="button"
           className="gf-go"
@@ -308,7 +310,7 @@ export function StockDesk({
             })
           }
         >
-          Fazer pedido
+          {busy ? "Enviando…" : "Fazer pedido"}
         </button>
       </div>
     </section>
@@ -327,7 +329,7 @@ function qualityLine(mod: number): string {
 
 function creditReason(state: GameState, supplier: Content["suppliers"][number], cost: number): string | null {
   if (supplier.creditDays == null) return null;
-  if (state.rep < (supplier.creditRep ?? 0)) return `O prazo pede reputação ${supplier.creditRep}. Você tem ${state.rep}.`;
+  if (state.rep < (supplier.creditRep ?? 0)) return `Pagar depois pede fama ${supplier.creditRep}. Você tem ${state.rep}.`;
   if (state.flags.negativado === true) return "O nome está sujo. A Casco-Tech recusou.";
   const open = state.debts.filter((debt) => debt.template === "fornecedor_casco" && debt.balance > 0).reduce((sum, debt) => sum + debt.balance, 0);
   if (open + cost > (supplier.creditLimit ?? 0)) return "O limite da Casco-Tech não cobre esse pedido.";

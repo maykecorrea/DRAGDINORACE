@@ -32,20 +32,20 @@ export function AuctionDesk({
         <h2 className="gf-kicker">Leilão</h2>
       </div>
       {!open ? (
-        <p>O pátio de carcaça abre quando a oficina estiver remendada.</p>
+        <p>O pátio de carros velhos abre quando a oficina estiver remendada.</p>
       ) : (
         <>
-          {lots.length === 0 && <p>Sem lote nesta semana. O domingo traz dois.</p>}
+          {lots.length === 0 && <p>Nada no leilão esta semana. O domingo traz dois.</p>}
           {lots.map((lot) => {
             const def = pack.carcasses.find((item) => item.id === lot.type);
             return (
               <article key={lot.id} className="gf-panel">
                 <h3>{def?.nome ?? lot.type}</h3>
                 <p>Pedido {formatF(lot.price)}</p>
-                <p>{lot.revealed ? (lot.defect ? "Vício à vista. O conserto fica mais caro." : "Inspeção limpa.") : "Por fora, parece inteira."}</p>
+                <p>{lot.revealed ? (lot.defect ? "Defeito escondido. O conserto fica mais caro." : "Tudo certo por dentro.") : "Por fora, parece inteiro."}</p>
                 <div className="gf-fields">
                   <button type="button" disabled={busy || lot.revealed || state.calendar.apLeft < 1} onClick={() => onAct({ type: "INSPECT_LOT", id: lot.id })}>
-                    Inspecionar (1 PA)
+                    Inspecionar ⚡1
                   </button>
                   <button type="button" className="gf-go" disabled={busy} onClick={() => onAct({ type: "BUY_LOT", id: lot.id })}>
                     Comprar
@@ -61,12 +61,12 @@ export function AuctionDesk({
               <article key={carcass.id} className="gf-panel">
                 <h3>{def?.nome ?? carcass.type}</h3>
                 <p>
-                  Falta {carcass.apLeft} PA · paga {formatF(carcass.boughtFor)}
-                  {carcass.hiddenDefect ? " · tem coisa escondida" : ""}
+                  Falta {carcass.apLeft} de energia · paga {formatF(carcass.boughtFor)}
+                  {carcass.hiddenDefect ? " · tem defeito escondido" : ""}
                 </p>
                 {carcass.apLeft > 0 ? (
                   <button type="button" disabled={busy || state.calendar.apLeft < 1} onClick={() => onAct({ type: "WORK_CARCASS", id: carcass.id })}>
-                    Mão na carcaça (1 PA)
+                    Trabalhar ⚡1
                   </button>
                 ) : (
                   <div className="gf-fields">

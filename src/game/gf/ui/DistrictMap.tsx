@@ -24,6 +24,14 @@ const PIN: Record<PlaceId, { x: number; y: number }> = {
   leilao: { x: 214, y: 112 },
   oficina: { x: 64, y: 108 },
   megaosso: { x: 412, y: 70 },
+  coliseu: { x: 40, y: 150 },
+  hospital: { x: 80, y: 40 },
+  farmacia: { x: 20, y: 140 },
+  posto: { x: 440, y: 140 },
+  tenda: { x: 400, y: 120 },
+  praca: { x: 240, y: 90 },
+  posto_cometa: { x: 30, y: 100 },
+  galpao: { x: 240, y: 170 },
 };
 
 export function DistrictMap({
@@ -43,7 +51,7 @@ export function DistrictMap({
   onAct: (action: Record<string, unknown>) => void;
   onBack: () => void;
   onCounter: () => void;
-  onEnter: (screen: "auction" | "bank" | "stock") => void;
+  onEnter: (screen: "auction" | "bank" | "stock" | "coliseu") => void;
 }) {
   const spot = here(state);
   const [picked, setPicked] = useState<PlaceId>(spot);
@@ -91,7 +99,7 @@ export function DistrictMap({
             {!placeOpen(pack, item.id, t) && (
               <>
                 <img className="gf-placa" src="/assets/gf/map/ui/ui_placa_fechado.png?v=1" alt="" width={32} height={32} />
-                <small className="gf-fechado" title="FECHADO">FECHADO</small>
+                <small className="gf-fechado" title="Fechado">Fechado</small>
               </>
             )}
             {item.cost > 0 && placeOpen(pack, item.id, t) && <small>{item.cost} PA</small>}
@@ -148,12 +156,20 @@ function MapArt({ spot, level, tint, hour, closed }: { spot: PlaceId; level: num
   const lv = Math.max(0, Math.min(5, Math.floor(level)));
   const art: Record<PlaceId, { src: string; w: number; h: number }> = {
     rato: { src: "/assets/gf/map/predios/b_toca_rato.png?v=1", w: 52, h: 52 },
-    banco: { src: "/assets/gf/map/predios/b_banco.png?v=1", w: 78, h: 62 },
+    banco: { src: "/assets/gf/v2/mapa/mapa_predio_banco.png?v=8", w: 78, h: 78 },
     ferro_velho: { src: "/assets/gf/map/predios/b_ferrovelho.png?v=1", w: 78, h: 62 },
     casco_tech: { src: "/assets/gf/map/predios/b_cascotech.png?v=1", w: 64, h: 56 },
     leilao: { src: "/assets/gf/map/predios/b_leilao.png?v=1", w: 64, h: 56 },
     oficina: { src: `/assets/gf/map/predios/b_garagem_l${lv}.png?v=1`, w: 78, h: 62 },
     megaosso: { src: "/assets/gf/map/predios/b_megaosso.png?v=1", w: 78, h: 62 },
+    coliseu: { src: "/assets/gf/v2/mapa/mapa_predio_coliseu.png?v=10", w: 70, h: 70 },
+    hospital: { src: "/assets/gf/v2/mapa/mapa_predio_hospital.png?v=1", w: 70, h: 70 },
+    farmacia: { src: "/assets/gf/v2/mapa/mapa_predio_farmacia.png?v=10", w: 60, h: 60 },
+    posto: { src: "/assets/gf/v2/mapa/mapa_predio_posto_saude.png?v=10", w: 60, h: 60 },
+    tenda: { src: "/assets/gf/v2/mapa/mapa_predio_tenda_raizao.png?v=10", w: 50, h: 50 },
+    praca: { src: "/assets/gf/v2/mapa/mapa_icone_evento.png?v=10", w: 32, h: 32 },
+    posto_cometa: { src: "/assets/gf/v2/mapa/mapa_predio_posto_cometa.png?v=10", w: 60, h: 60 },
+    galpao: { src: "/assets/gf/v2/mapa/mapa_predio_galpao_mandibula.png?v=10", w: 70, h: 70 },
   };
   const props = [
     { src: "/assets/gf/map/props/p_lixeira.png?v=1", x: 118, y: 128, w: 16, h: 16 },

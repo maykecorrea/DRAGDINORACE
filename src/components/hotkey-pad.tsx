@@ -33,7 +33,7 @@ export function HotkeyPad({ value, onChange }: { value: Hotkeys; onChange: (next
               onClick={() => setListen(action)}
               className={`min-h-11 min-w-28 px-3 font-display text-xl leading-none sm:text-2xl ${armed ? "bg-primary text-ink" : "border border-border text-fg"}`}
             >
-              {armed ? "Aperta a tecla" : keyLabel(value[action])}
+              {armed ? "Aperte a tecla" : keyLabel(value[action])}
             </button>
           </li>
         );

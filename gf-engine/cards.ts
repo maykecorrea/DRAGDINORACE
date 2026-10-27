@@ -76,13 +76,13 @@ export function flagRanges(text: string, flags: string[]): { start: number; end:
 
 const STAT_LABEL: Record<string, string> = {
   cash: "caixa",
-  rep: "reputação",
-  morale: "ânimo",
-  level: "nível",
+  rep: "fama",
+  morale: "Ânimo",
+  level: "Nível",
   week: "semana",
   act: "ato",
   net_worth: "patrimônio",
-  total_debt: "dívida",
+  total_debt: "Dívida",
   bays: "baias",
 };
 
@@ -194,11 +194,11 @@ export function applyEffect(state: GameState, effect: CardEffect, ctx: { content
     return;
   }
   if (effect.op === "rep") {
-    addRep(state, content, amount(state, effect.value, "reputação"), source);
+    addRep(state, content, amount(state, effect.value, "fama"), source);
     return;
   }
   if (effect.op === "morale") {
-    const hit = addMorale(state, content, amount(state, effect.value, "ânimo"));
+    const hit = addMorale(state, content, amount(state, effect.value, "Ânimo"));
     if (hit.collapsed) events.push({ type: "COLLAPSE", week: state.calendar.week });
     return;
   }
@@ -206,7 +206,7 @@ export function applyEffect(state: GameState, effect: CardEffect, ctx: { content
     const template = effect.template ?? "";
     if (!content.debtTemplates[template]) throw new GameError("divida_desconhecida", "Essa dívida não existe.");
     const principal = amount(state, effect.principal, "principal");
-    if (principal <= 0) throw new GameError("efeito_invalido", "O principal não fecha.");
+    if (principal <= 0) throw new GameError("efeito_invalido", "O valor principal não fecha.");
     const debt = makeDebt(content, template, principal, state.calendar.week, { weeks: effect.weeks });
     if (state.debts.some((item) => item.id === debt.id)) debt.id = `${template}-${state.debts.length + 1}`;
     state.debts.push(debt);
@@ -218,7 +218,7 @@ export function applyEffect(state: GameState, effect: CardEffect, ctx: { content
     const debt = state.debts.find((item) => item.id === effect.debt_id || item.template === (effect.debt_id ?? effect.template));
     if (!debt || debt.balance <= 0) throw new GameError("divida_desconhecida", "Essa dívida não está aberta.");
     const pay = Math.min(debt.balance, Math.max(0, value));
-    if (state.cash - pay < -state.overdraftLimit) throw new GameError("sem_caixa", "O cheque especial não cobre esse pagamento.");
+    if (state.cash - pay < -state.overdraftLimit) throw new GameError("sem_caixa", "O limite do banco não cobre esse pagamento.");
     state.cash -= pay;
     debt.balance -= pay;
     debt.totalPaid += pay;
@@ -256,7 +256,7 @@ export function applyEffect(state: GameState, effect: CardEffect, ctx: { content
     const key = keyOf(effect.key, "marca");
     const value = effect.value;
     if (typeof value !== "boolean" && typeof value !== "number" && typeof value !== "string") {
-      throw new GameError("efeito_invalido", "A marca não fecha.");
+      throw new GameError("efeito_invalido", "A meta não fecha.");
     }
     state.flags[key] = value;
     return;
@@ -274,8 +274,8 @@ export function applyEffect(state: GameState, effect: CardEffect, ctx: { content
     return;
   }
   if (effect.op === "investment_add") {
-    const value = amount(state, effect.value, "aplicação");
-    if (value <= 0) throw new GameError("efeito_invalido", "A aplicação não fecha.");
+    const value = amount(state, effect.value, "depósito");
+    if (value <= 0) throw new GameError("efeito_invalido", "O depósito não fecha.");
     if (effect.scam_id) {
       state.scamInvestments.push({
         id: `scam-${state.scamInvestments.length + 1}`,
@@ -295,12 +295,12 @@ export function applyEffect(state: GameState, effect: CardEffect, ctx: { content
     return;
   }
   if (effect.op === "employee_hire") {
-    const id = keyOf(effect.id, "funcionário") as EmployeeId;
+    const id = keyOf(effect.id, "ajudante") as EmployeeId;
     const def = content.employees.find((item) => item.id === id);
     if (!def) throw new GameError("sem_funcionario", "Essa pessoa não existe.");
     if (state.employees.some((item) => item.id === id)) throw new GameError("sem_funcionario", "Essa pessoa já está na oficina.");
     const producers = state.employees.filter((item) => item.apPerDay > 0).length;
-    if (produces(def) && producers >= state.garage.bays) throw new GameError("sem_baia", "Não há baia para mais um braço.");
+    if (produces(def) && producers >= state.garage.bays) throw new GameError("sem_baia", "Não tem baia para mais um ajudante.");
     state.employees.push({
       id,
       hiredWeek: state.calendar.week,
@@ -315,7 +315,7 @@ export function applyEffect(state: GameState, effect: CardEffect, ctx: { content
     return;
   }
   if (effect.op === "employee_fire") {
-    const id = keyOf(effect.id, "funcionário") as EmployeeId;
+    const id = keyOf(effect.id, "ajudante") as EmployeeId;
     if (!state.employees.some((item) => item.id === id)) throw new GameError("sem_funcionario", "Essa pessoa não está na oficina.");
     state.employees = state.employees.filter((item) => item.id !== id);
     for (const job of state.jobs) {
@@ -344,7 +344,7 @@ export function applyEffect(state: GameState, effect: CardEffect, ctx: { content
     const template = effect.template ?? "";
     if (!content.debtTemplates[template]) throw new GameError("divida_desconhecida", "Essa dívida não existe.");
     const total = state.debts.reduce((sum, debt) => sum + debt.balance, 0);
-    if (total <= 0) throw new GameError("efeito_invalido", "Não há dívida para juntar.");
+    if (total <= 0) throw new GameError("efeito_invalido", "Não tem dívida para juntar.");
     state.debts = [];
     const debt = makeDebt(content, template, total, state.calendar.week, { weeks: effect.weeks });
     state.debts.push(debt);
@@ -415,7 +415,7 @@ function grantDodge(state: GameState, content: Content, option: CardOption, even
   if (!state.lessonsTriggered.includes(option.lesson_unlock)) state.lessonsTriggered.push(option.lesson_unlock);
   state.flags.lessonPop = option.lesson_unlock;
   const hit = addMorale(state, content, 2);
-  events.push({ type: "SCAM_DODGED", text: "Você farejou o golpe" });
+  events.push({ type: "SCAM_DODGED", text: "Você descobriu o golpe!" });
   if (hit.collapsed) events.push({ type: "COLLAPSE", week: state.calendar.week });
 }
 

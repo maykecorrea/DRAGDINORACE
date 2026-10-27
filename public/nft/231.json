@@ -1,0 +1,33 @@
+{
+ "name": "Olho que vê a reta",
+ "description": "Dino Drag Race — Olho que vê a reta (Lendário). +22% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/231.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "lente"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "22%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-lente-Lendário-3",
+  "stats": "vmax+22%"
+ }
+}

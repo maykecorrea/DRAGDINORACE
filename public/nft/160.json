@@ -1,0 +1,48 @@
+{
+ "name": "Sol partido",
+ "description": "Dino Drag Race — Sol partido (Lendário). 147 de dano. 7 tiros. 1.19s. Deixa lerdo. Muito dano e deixa o carro lerdo. Difícil de cravar.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/160.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ray"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 147,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.19,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Slowtime",
+   "value": 2.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ray-Lendário",
+  "stats": "dmg=147;clip=7;cd=1.19;slow=0.55x/2.4s"
+ }
+}

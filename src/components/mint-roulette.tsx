@@ -14,7 +14,7 @@ const ICONS: Record<string, string> = {
   Fóssil: "/game/fossil-coin.png",
 };
 
-const RANK = ["Lendário", "Épico", "Raro", "Normal", "Comum", "Fóssil"];
+const RANK = ["Lendário", "Épico", "Raro", "Normal", "Comum", "Prêmio"];
 
 export type SpinHaul = {
   spins: number;
@@ -43,7 +43,7 @@ function lootClass(rarity: string): string {
   if (rarity === "Épico") return "loot-epico";
   if (rarity === "Raro") return "loot-raro";
   if (rarity === "Normal") return "loot-normal";
-  if (rarity === "Fóssil") return "loot-fossil";
+  if (rarity === "Prêmio") return "loot-fossil";
   return "loot-comum";
 }
 
@@ -146,7 +146,7 @@ export function MintRoulette({
         const hit = rollGear(mode, owned);
         if (hit.kind === "fossil") {
           fossilGain += hit.amount;
-          rows.push({ name: "Fóssil", image: ICONS.Fóssil, rarity: "Fóssil", kind: "fossil", fossil: hit.amount });
+          rows.push({ name: "Prêmio", image: ICONS.Fóssil, rarity: "Prêmio", kind: "fossil", fossil: hit.amount });
           continue;
         }
         if (hit.drop.kind === "pilot") owned.add(hit.drop.id);
@@ -158,7 +158,7 @@ export function MintRoulette({
       const hit = rollMint(blockedNow);
       if (hit.kind === "fossil") {
         fossilGain += hit.amount;
-        rows.push({ name: "Fóssil", image: ICONS.Fóssil, rarity: "Fóssil", kind: "fossil", fossil: hit.amount });
+        rows.push({ name: "Prêmio", image: ICONS.Fóssil, rarity: "Prêmio", kind: "fossil", fossil: hit.amount });
         continue;
       }
       const spec = hit.spec;
@@ -184,7 +184,7 @@ export function MintRoulette({
       const claimed = await claimForgeBatch({ data: { items: claims } }).catch(() => ({ ok: false as const, saved: 0 }));
       if (!claimed.ok) {
         setBusy(false);
-        setFault("O banco não gravou o lote. Nada foi cobrado.");
+        setFault("Não deu para salvar a compra. Nenhum fóssil foi gasto.");
         return;
       }
     }
@@ -195,14 +195,14 @@ export function MintRoulette({
     setPayout(fossilGain);
     setPrize(times === 1 ? lastSpec : null);
     setGear(times === 1 ? lastGear : null);
-    setUnder(times === 1 ? (lastGear?.rarity ?? lastSpec?.rarity ?? (fossilGain > 0 ? "Fóssil" : "Comum")) : "Fóssil");
+    setUnder(times === 1 ? (lastGear?.rarity ?? lastSpec?.rarity ?? (fossilGain > 0 ? "Prêmio" : "Comum")) : "Prêmio");
     setBusy(false);
     if (times > 1 || skip) setPhase(times > 1 ? "haul" : "won");
     else setPhase("spin");
   }
 
   const liveSlice = RARITY_WHEEL.find((slice) => slice.rarity === under) ?? RARITY_WHEEL[0]!;
-  const title = mode === "part" ? "Roleta de itens" : mode === "pilot" ? "Roleta de pilotos" : "Roleta de carros";
+  const title = mode === "part" ? "Ovo de itens" : mode === "pilot" ? "Ovo de pilotos" : "Ovo de carros";
   const tally = RANK.map((rarity) => ({ rarity, n: tickets.filter((row) => row.rarity === rarity).reduce((sum, row) => sum + row.count, 0) })).filter((row) => row.n > 0);
 
   return (
@@ -210,12 +210,12 @@ export function MintRoulette({
       <div className={`hatch-bay w-full max-w-3xl ${prize?.rarity === "Lendário" && phase === "won" ? "shadow-[0_0_48px_rgba(255,210,74,0.25)]" : ""}`}>
         <div className="flex items-end justify-between gap-3 px-1">
           <div>
-            <p className="font-pixel text-sm tracking-[0.35em] text-primary">{phase === "reveal" ? "INCUBADORA" : mode === "part" ? "ITENS" : mode === "pilot" ? "PILOTOS" : "LINHAGEM"}</p>
+            <p className="font-pixel text-sm tracking-[0.35em] text-primary">{phase === "reveal" ? "Incubadora" : mode === "part" ? "Itens" : mode === "pilot" ? "Pilotos" : "Carros"}</p>
             <h2 className="font-display text-5xl leading-none sm:text-6xl">{title}</h2>
-            <p className="text-[10px] tracking-widest text-[#d6ff3f]">10% fóssil · 100 a 10.000 · igual nas três</p>
+            <p className="text-[10px] tracking-widest text-[#d6ff3f]">Custa 260 fósseis ou 1 giro de missão.</p>
           </div>
           <p className="font-display text-4xl leading-none sm:text-5xl" style={{ color: liveSlice.color }}>
-            {phase === "idle" ? "Pronto" : phase === "haul" ? `${spun}x` : under}
+            {phase === "idle" ? "Pronto!" : phase === "haul" ? `${spun}x` : under}
           </p>
         </div>
         {showClip && (
@@ -243,7 +243,7 @@ export function MintRoulette({
                 <img src={ICONS[slice.rarity]} alt="" className="mx-auto size-12 object-contain" />
                 <p className="mt-1 font-pixel text-sm leading-none tracking-wide" style={{ color: slice.color }}>{slice.rarity}</p>
                 <p className="font-display text-2xl leading-none">{slice.pct}%</p>
-                {slice.rarity === "Fóssil" && <p className="text-[10px] leading-tight text-muted">100 a 10.000</p>}
+                {slice.rarity === "Prêmio" && <p className="text-[10px] leading-tight text-muted">100 a 10.000</p>}
               </li>
             );
           })}
@@ -253,7 +253,7 @@ export function MintRoulette({
             <div className="loot-scan" />
             <div className="relative flex flex-wrap items-end justify-between gap-2">
               <div>
-                <p className="font-pixel text-[10px] tracking-[0.35em] text-[#d6ff3f]">LOOT</p>
+                <p className="font-pixel text-[10px] tracking-[0.35em] text-[#d6ff3f]">Baú</p>
                 <p className="font-display text-4xl leading-none text-white">{spun} giros</p>
               </div>
               <p className="font-display text-3xl leading-none text-[#d6ff3f]">+{payout.toLocaleString("pt-BR")} fóssil</p>
@@ -284,10 +284,10 @@ export function MintRoulette({
         )}
         {phase === "won" && payout > 0 && !prize && !gear && (
           <div className="hatch-card mt-3 p-3 text-center" style={{ borderColor: liveSlice.color }}>
-            <p className="font-pixel text-sm tracking-[0.3em]" style={{ color: liveSlice.color }}>FÓSSIL</p>
+            <p className="font-pixel text-sm tracking-[0.3em]" style={{ color: liveSlice.color }}>Fósseis</p>
             <img src={ICONS.Fóssil} alt="" className="mx-auto mt-2 size-16 object-contain" />
             <p className="mt-2 font-display text-5xl leading-none text-primary">+{payout.toLocaleString("pt-BR")}</p>
-            <p className="text-sm text-muted">Caiu na conta. O giro custou {MINT_COST}.</p>
+            <p className="text-sm text-muted">Caiu na conta! O ovo custou  {MINT_COST}.</p>
           </div>
         )}
         {phase === "won" && (prize || gear) && (
@@ -295,8 +295,8 @@ export function MintRoulette({
             <p className="font-pixel text-sm tracking-[0.3em]" style={{ color: liveSlice.color }}>{(gear ?? prize)!.rarity}</p>
             <img src={gear ? gear.image : prizeImage(prize!)} alt="" className="mx-auto mt-2 h-28 object-contain" />
             <p className="mt-2 font-display text-4xl leading-none">{gear ? gear.name : prize!.name}</p>
-            <p className="text-sm text-muted">{gear?.kind === "pilot" ? "Entrou na bancada." : gear ? "Caiu na caixa." : "Entrou na garagem. O carro atual continua equipado."}</p>
-            <p className="mt-1 text-sm">Gostaria de equipar?</p>
+            <p className="text-sm text-muted">{gear?.kind === "pilot" ? "Foi para o banco de pilotos." : gear ? "Foi para a caixa de peças." : "Foi para a garagem. O carro atual continua equipado."}</p>
+            <p className="mt-1 text-sm">Quer equipar agora?</p>
             <div className="mt-3 flex flex-wrap justify-center gap-2">
               <button type="button" onClick={() => (gear ? onEquipGear?.(gear) : prize && onEquip(prize.id))} className="min-h-11 bg-primary px-4 font-display text-2xl leading-none text-ink">
                 Equipar
@@ -316,7 +316,7 @@ export function MintRoulette({
               onClick={() => void spin(times)}
               className={`min-h-11 px-3 font-display text-2xl leading-none disabled:opacity-40 ${times === 1 ? "bg-danger text-fg" : "border border-[#d6ff3f]/50 bg-black text-[#d6ff3f] shadow-[0_0_16px_rgba(214,255,63,0.15)]"}`}
             >
-              {times === 1 ? "Girar" : `${times}×`}
+              {times === 1 ? "Chocar" : `${times}×`}
               {covered > 0 && bill === 0 ? " · missão" : covered > 0 ? ` · ${covered} missão + ${bill}` : ` · ${bill}`}
               {bill > 0 && <> <FossilWord /></>}
             </button>
@@ -331,7 +331,7 @@ export function MintRoulette({
           onClick={() => toggleSkip(!skip)}
           className={`mt-3 min-h-11 w-full border px-3 font-display text-2xl leading-none ${skip ? "border-[#d6ff3f] bg-[#d6ff3f] text-black shadow-[0_0_22px_rgba(214,255,63,0.45)]" : "border-white/20 text-white"}`}
         >
-          {skip ? "Prêmio direto · ligado" : "Pular animação do prêmio"}
+          {skip ? "Prêmio direto: ligado" : "Pular animação do prêmio"}
         </button>
       </div>
     </div>

@@ -1,0 +1,48 @@
+{
+ "name": "Bile de rua",
+ "description": "Dino Drag Race — Bile de rua (Normal). 9 de dano. 6 tiros. 1.27s. Veneno 6/s. Se acerta, sangra até o fim da corrida.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/103.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "poison"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 9,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 6,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.27,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Poison",
+   "value": 6,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-poison-Normal",
+  "stats": "dmg=9;clip=6;cd=1.27;poison=6/s"
+ }
+}

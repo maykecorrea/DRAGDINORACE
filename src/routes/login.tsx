@@ -72,13 +72,46 @@ function LoginPage() {
           <Link to="/" className="font-display text-4xl leading-none text-primary">
             DINO DRAG RACE
           </Link>
-          <button
-            type="button"
-            onClick={() => choose(lang === "pt" ? "en" : "pt")}
-            className="min-h-11 border border-border px-2 font-pixel text-sm tracking-widest text-primary"
-          >
-            {lang === "pt" ? "EN" : "PT"}
-          </button>
+          <div className="flex items-center" style={{ gap: "8px" }}>
+            <button
+              type="button"
+              onClick={() => choose("pt")}
+              className="inline-flex items-center font-pixel text-xs tracking-wider"
+              style={{
+                gap: "6px",
+                padding: "5px 9px",
+                borderRadius: "6px",
+                border: "none",
+                background: lang === "pt" ? "radial-gradient(circle, rgba(214,255,63,0.28) 0%, rgba(214,255,63,0.08) 70%, transparent 100%)" : "transparent",
+                boxShadow: lang === "pt" ? "0 0 14px rgba(214,255,63,0.55), 0 0 4px rgba(214,255,63,0.35)" : "none",
+                color: lang === "pt" ? "#d6ff3f" : "#9aa18c",
+                textShadow: lang === "pt" ? "0 0 8px rgba(214,255,63,0.85)" : "none",
+                opacity: lang === "pt" ? 1 : 0.55,
+              }}
+            >
+              <img src="/flags/br.svg" alt="BR" style={{ width: "20px", height: "14px", objectFit: "cover", borderRadius: "2px", filter: lang === "pt" ? "drop-shadow(0 0 6px rgba(214,255,63,0.75))" : "none" }} />
+              PT
+            </button>
+            <button
+              type="button"
+              onClick={() => choose("en")}
+              className="inline-flex items-center font-pixel text-xs tracking-wider"
+              style={{
+                gap: "6px",
+                padding: "5px 9px",
+                borderRadius: "6px",
+                border: "none",
+                background: lang === "en" ? "radial-gradient(circle, rgba(214,255,63,0.28) 0%, rgba(214,255,63,0.08) 70%, transparent 100%)" : "transparent",
+                boxShadow: lang === "en" ? "0 0 14px rgba(214,255,63,0.55), 0 0 4px rgba(214,255,63,0.35)" : "none",
+                color: lang === "en" ? "#d6ff3f" : "#9aa18c",
+                textShadow: lang === "en" ? "0 0 8px rgba(214,255,63,0.85)" : "none",
+                opacity: lang === "en" ? 1 : 0.55,
+              }}
+            >
+              <img src="/flags/us.svg" alt="US" style={{ width: "20px", height: "14px", objectFit: "cover", borderRadius: "2px", filter: lang === "en" ? "drop-shadow(0 0 6px rgba(214,255,63,0.75))" : "none" }} />
+              EN
+            </button>
+          </div>
         </div>
         <h1 className="mt-3 font-display text-6xl leading-none">{criar ? t("login.create") : t("login.enter")}</h1>
         <p className="mt-2 text-sm text-muted">

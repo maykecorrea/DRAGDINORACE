@@ -1,0 +1,33 @@
+{
+ "name": "Visor ptero",
+ "description": "Dino Drag Race — Visor ptero (Épico). +9% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/215.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "lente"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "9%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-lente-Épico-2",
+  "stats": "vmax+9%"
+ }
+}

@@ -1,0 +1,43 @@
+{
+ "name": "Gêmeas de sucata",
+ "description": "Dino Drag Race — Gêmeas de sucata (Normal). 1 de dano. 140 tiros. 0.13s. A de fábrica. Duas bocas, tiro curto, 1 de dano. Pente de 125.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/94.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "mg"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 1,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 140,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.13,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-mg-Normal",
+  "stats": "dmg=1;clip=140;cd=0.13"
+ }
+}

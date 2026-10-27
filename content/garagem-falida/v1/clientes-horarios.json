@@ -1,0 +1,2259 @@
+{
+ "versao": "1.0",
+ "nota": "Horários dos 50 clientes. Dias: 1=segunda ... 7=domingo. Horários 'HH:MM'; uma janela com 'de' > 'ate' atravessa a meia-noite (ex.: 22:00-02:00). 'lugar' aceita os ids de places.json ou zonas de rua rua_b1/rua_b2/rua_b3. O campo 'nota_servidor' NUNCA vai para o navegador (redactState). Ver tempo-24h-parte.md, seção 6.",
+ "clientes": {
+  "dona_cotinha_casco": {
+   "lugar": "Garagem",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "08:00",
+     "ate": "11:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "15:00",
+     "ate": "17:00",
+     "lugar": "praca"
+    }
+   ],
+   "contato": {
+    "de": "07:00",
+    "ate": "20:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "08:00",
+    "ate": "11:00"
+   },
+   "prazo_hora": "16:00",
+   "madrugada": false,
+   "nota": "Idosa que dorme cedo; a quermesse começa às 17h, então o triciclo tem que estar pronto às 16h."
+  },
+  "seu_pacheco_cabecudo": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "09:00",
+     "ate": "12:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "16:00",
+     "ate": "18:00"
+    }
+   ],
+   "contato": {
+    "de": "08:00",
+    "ate": "21:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "09:00",
+    "ate": "12:00"
+   },
+   "prazo_hora": "18:00",
+   "madrugada": false,
+   "bloqueio": [
+    {
+     "dias": [
+      3
+     ],
+     "de": "20:00",
+     "ate": "23:00"
+    }
+   ],
+   "nota": "Aposentado, papo na praça de manhã. Quarta à noite tem jogo na TV: não responde de 20h a 23h."
+  },
+  "lia_fibra": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "12:30",
+     "ate": "17:00"
+    },
+    {
+     "dias": [
+      6
+     ],
+     "de": "09:00",
+     "ate": "13:00"
+    }
+   ],
+   "contato": {
+    "de": "12:00",
+    "ate": "22:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "de": "13:00",
+    "ate": "18:00"
+   },
+   "prazo_hora": "07:00",
+   "madrugada": false,
+   "nota": "Estudante: tem aula de manhã. A feira de ciências abre às 7h, então na prática ela precisa buscar na véspera, à tarde."
+  },
+  "professor_gastao": {
+   "lugar": "Garagem",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "17:30",
+     "ate": "19:00"
+    },
+    {
+     "dias": [
+      6
+     ],
+     "de": "08:00",
+     "ate": "11:00"
+    }
+   ],
+   "contato": {
+    "de": "18:00",
+    "ate": "21:00",
+    "responde_em_min": 720
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "de": "17:30",
+    "ate": "19:00"
+   },
+   "prazo_hora": "06:30",
+   "madrugada": false,
+   "nota": "Dá aula o dia todo; pede orçamento por escrito e responde só no dia seguinte. A excursão sai às 7h."
+  },
+  "vovo_brontilde": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "07:00",
+     "ate": "10:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "15:00",
+     "ate": "17:00"
+    }
+   ],
+   "contato": {
+    "de": "08:00",
+    "ate": "19:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "08:00",
+    "ate": "10:00"
+   },
+   "prazo_hora": "17:00",
+   "madrugada": false,
+   "mod_periodo": {
+    "noite": -0.03
+   },
+   "nota": "Idosa, acorda cedo, não atende depois das 19h. Não gosta de pressa: negociar com ela à noite custa 1 de paciência."
+  },
+  "ze_trilo": {
+   "lugar": "ponto_motoboy",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "01:00",
+     "ate": "05:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "01:00",
+     "ate": "04:00",
+     "lugar": "Garagem"
+    }
+   ],
+   "contato": {
+    "de": "23:00",
+    "ate": "07:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "00:00",
+    "ate": "02:30"
+   },
+   "prazo_hora": "02:30",
+   "madrugada": true,
+   "mod_periodo": {
+    "madrugada": 0.05
+   },
+   "bloqueio": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "08:00",
+     "ate": "15:00"
+    }
+   ],
+   "nota": "Faxineiro noturno do metrô: dorme de 8h às 15h. Atravessa o túnel às 3h, então o farol tem que estar pronto às 2h30."
+  },
+  "mestra_ondina": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "14:00",
+     "ate": "19:00"
+    },
+    {
+     "dias": [
+      4,
+      5,
+      6
+     ],
+     "de": "20:00",
+     "ate": "23:00",
+     "lugar": "bar"
+    }
+   ],
+   "contato": {
+    "de": "11:00",
+    "ate": "02:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "14:00",
+    "ate": "19:00"
+   },
+   "prazo_hora": "18:00",
+   "madrugada": false,
+   "nota": "Cantora: acorda tarde, vive à noite. O show é sexta às 20h; o prazo vence às 18h para dar tempo de montar o som."
+  },
+  "raio_velox": {
+   "lugar": "ponto_motoboy",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "10:00",
+     "ate": "14:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "18:00",
+     "ate": "23:00"
+    }
+   ],
+   "contato": {
+    "de": "08:00",
+    "ate": "00:00",
+    "responde_em_min": 5
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "08:00",
+    "ate": "10:00"
+   },
+   "prazo_hora": "10:00",
+   "madrugada": false,
+   "nota": "Motoboy de app nos picos do almoço e do jantar. O turno de bônus começa às 10h; prazo de 1 dia."
+  },
+  "compsinha": {
+   "lugar": "ponto_motoboy",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "07:00",
+     "ate": "10:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "17:00",
+     "ate": "20:00"
+    }
+   ],
+   "contato": {
+    "de": "06:00",
+    "ate": "22:00",
+    "responde_em_min": 15
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "07:00",
+    "ate": "10:00"
+   },
+   "prazo_hora": "18:00",
+   "madrugada": false,
+   "nota": "Mototaxista: pico de passageiro de manhã cedo e no fim da tarde."
+  },
+  "jacira_ptera": {
+   "lugar": "ponto_motoboy",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "06:00",
+     "ate": "08:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "15:00",
+     "ate": "18:00"
+    }
+   ],
+   "contato": {
+    "de": "06:00",
+    "ate": "20:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "15:00",
+    "ate": "18:00"
+   },
+   "prazo_hora": "06:00",
+   "madrugada": false,
+   "mod_periodo": {
+    "manha": -0.05,
+    "tarde": 0.05
+   },
+   "nota": "Carteira pontual: a rota começa às 6h. Mal-humorada de manhã, generosa à tarde."
+  },
+  "kiko_gali": {
+   "lugar": "ponto_motoboy",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "11:00",
+     "ate": "15:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "19:00",
+     "ate": "23:00"
+    }
+   ],
+   "contato": {
+    "de": "09:00",
+    "ate": "01:00",
+    "responde_em_min": 10
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "11:00",
+    "ate": "15:00"
+   },
+   "prazo_hora": "20:00",
+   "madrugada": false,
+   "nota": "Entregador de mercado ansioso: vive nos horários de pico."
+  },
+  "brisa_dilo": {
+   "lugar": "ponto_motoboy",
+   "aparece": [
+    {
+     "dias": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "17:00",
+     "ate": "23:00"
+    }
+   ],
+   "contato": {
+    "de": "15:00",
+    "ate": "01:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "15:00",
+    "ate": "17:00"
+   },
+   "prazo_hora": "17:00",
+   "madrugada": false,
+   "nota": "Motogirl de pizzaria: folga na segunda, a pizzaria abre às 18h. Odeia atraso: atrasar 1 minuto já conta."
+  },
+  "seu_tiburcio": {
+   "lugar": "ponto_motoboy",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "06:00",
+     "ate": "09:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "15:00",
+     "ate": "17:00",
+     "lugar": "praca"
+    }
+   ],
+   "contato": {
+    "de": "06:00",
+    "ate": "21:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "06:00",
+    "ate": "09:00"
+   },
+   "prazo_hora": "18:00",
+   "madrugada": false,
+   "nota": "Veterano: madruga por hábito e conta histórias do pai na praça à tarde."
+  },
+  "dona_estegolina": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "04:00",
+     "ate": "06:30"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "13:00",
+     "ate": "15:00"
+    }
+   ],
+   "contato": {
+    "de": "04:00",
+    "ate": "20:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "13:00",
+    "ate": "15:00"
+   },
+   "prazo_hora": "04:00",
+   "madrugada": true,
+   "mod_periodo": {
+    "madrugada": 0.05
+   },
+   "nota": "Padeira: acorda 4h, pico às 5h, dorme às 21h. A vitrine precisa funcionar às 4h, então o conserto tem que estar pronto até lá."
+  },
+  "seu_galvao_mamute": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "11:00",
+     "ate": "18:00"
+    }
+   ],
+   "contato": {
+    "de": "10:00",
+    "ate": "22:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "11:00",
+    "ate": "13:00"
+   },
+   "prazo_hora": "10:00",
+   "madrugada": false,
+   "nota": "Sorveteria abre na hora do calor, inclusive domingo. A onda de calor começa de manhã."
+  },
+  "tia_quetza": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "06:00",
+     "ate": "12:00"
+    }
+   ],
+   "contato": {
+    "de": "06:00",
+    "ate": "19:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "06:00",
+    "ate": "08:00"
+   },
+   "prazo_hora": "06:00",
+   "madrugada": false,
+   "nota": "Florista do Mercado Velho: chega antes do sol, fecha ao meio-dia."
+  },
+  "estiraco_chaveiro": {
+   "lugar": "rua_b2",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "08:00",
+     "ate": "18:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "22:00",
+     "ate": "02:00",
+     "lugar": "rua_b1"
+    }
+   ],
+   "contato": {
+    "de": "00:00",
+    "ate": "24:00",
+    "responde_em_min": 10
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "08:00",
+    "ate": "20:00"
+   },
+   "prazo_hora": "20:00",
+   "madrugada": true,
+   "nota": "Chaveiro 24h: atende chamados de madrugada e conhece quem anda na rua à noite (dica sobre a gangue)."
+  },
+  "madame_amonita": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "10:00",
+     "ate": "18:00"
+    }
+   ],
+   "contato": {
+    "de": "10:00",
+    "ate": "23:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "10:00",
+    "ate": "18:00"
+   },
+   "prazo_hora": "18:00",
+   "madrugada": false,
+   "nota": "Brechó: fechado na segunda. Teatral e noturna ao telefone."
+  },
+  "seu_dimas_dimetro": {
+   "lugar": "rua_b2",
+   "aparece": [
+    {
+     "dias": [
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "17:00",
+     "ate": "23:00"
+    }
+   ],
+   "contato": {
+    "de": "10:00",
+    "ate": "00:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "14:00",
+    "ate": "16:00"
+   },
+   "prazo_hora": "16:00",
+   "madrugada": false,
+   "nota": "Food truck noturno. A final é às 21h e ele monta às 17h, então o gerador vence às 16h."
+  },
+  "ictio_nakamura": {
+   "lugar": "rua_b2",
+   "aparece": [
+    {
+     "dias": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "15:00",
+     "ate": "17:00"
+    }
+   ],
+   "contato": {
+    "de": "10:00",
+    "ate": "15:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "09:00",
+    "ate": "11:00"
+   },
+   "prazo_hora": "11:00",
+   "madrugada": false,
+   "nota": "Sushiman: só tem folga entre o almoço e o jantar e não atende durante o serviço. A inauguração é ao meio-dia."
+  },
+  "dra_teriza": {
+   "lugar": "rua_b2",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "12:00",
+     "ate": "14:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "19:00",
+     "ate": "20:00"
+    }
+   ],
+   "contato": {
+    "de": "08:00",
+    "ate": "21:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "07:00",
+    "ate": "08:30"
+   },
+   "prazo_hora": "08:00",
+   "madrugada": false,
+   "nota": "Dona de salão: só sai no almoço e depois de fechar. Precisa do carro antes de abrir, às 9h."
+  },
+  "raimundo_cascudo": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "06:00",
+     "ate": "10:00"
+    }
+   ],
+   "contato": {
+    "de": "06:00",
+    "ate": "18:00",
+    "responde_em_min": 180
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "06:00",
+    "ate": "10:00"
+   },
+   "prazo_hora": "17:00",
+   "madrugada": false,
+   "mod_periodo": {
+    "manha": 0.03
+   },
+   "nota": "Carroceiro ranzinza: só liga do orelhão e demora a responder. De manhã cedo está menos azedo."
+  },
+  "dona_regateia": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      3,
+      6
+     ],
+     "de": "05:00",
+     "ate": "12:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      4,
+      5
+     ],
+     "de": "14:00",
+     "ate": "16:00",
+     "lugar": "Garagem"
+    }
+   ],
+   "contato": {
+    "de": "05:00",
+    "ate": "19:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     4,
+     5
+    ],
+    "de": "14:00",
+    "ate": "16:00"
+   },
+   "prazo_hora": "05:00",
+   "madrugada": false,
+   "nota": "Feirante: feira de rua quarta e sábado das 5h às 12h. O toldo tem que estar pronto antes da feira começar."
+  },
+  "barganho_arqueu": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "14:00",
+     "ate": "20:00"
+    }
+   ],
+   "contato": {
+    "de": "11:00",
+    "ate": "03:00",
+    "responde_em_min": 5
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "14:00",
+    "ate": "19:00"
+   },
+   "prazo_hora": "19:00",
+   "madrugada": false,
+   "nota": "Influencer: acorda tarde e faz live às 20h. Responde de madrugada."
+  },
+  "coronel_tricerato": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "06:00",
+     "ate": "09:00"
+    }
+   ],
+   "contato": {
+    "de": "06:00",
+    "ate": "21:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "06:00",
+    "ate": "07:00"
+   },
+   "prazo_hora": "06:00",
+   "madrugada": false,
+   "nota": "Militar: chega às 6h em ponto e se recolhe às 21h. Prazo militar: atrasar 1 minuto já é atraso. O desfile é às 8h."
+  },
+  "dona_meganeura": {
+   "lugar": "Garagem",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "10:00",
+     "ate": "12:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "14:00",
+     "ate": "17:00"
+    }
+   ],
+   "contato": {
+    "de": "08:00",
+    "ate": "20:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "10:00",
+    "ate": "17:00"
+   },
+   "prazo_hora": "18:00",
+   "madrugada": false,
+   "nota": "Costureira autônoma, horário de comércio. Pede para 'só olhar'."
+  },
+  "tchuca_carnota": {
+   "lugar": "Garagem",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "08:30",
+     "ate": "11:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "14:00",
+     "ate": "16:00"
+    }
+   ],
+   "contato": {
+    "de": "09:00",
+    "ate": "22:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "de": "08:30",
+    "ate": "11:00"
+   },
+   "prazo_hora": "06:30",
+   "madrugada": false,
+   "bloqueio": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "06:00",
+     "ate": "08:30"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "11:00",
+     "ate": "14:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "16:00",
+     "ate": "20:00"
+    }
+   ],
+   "nota": "Motorista de van escolar: livre só entre as rotas. A volta às aulas é às 6h45. Atende o telefone entre as rotas e depois que os filhotes dormem."
+  },
+  "mestre_pleura": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "10:00",
+     "ate": "21:00"
+    }
+   ],
+   "contato": {
+    "de": "08:00",
+    "ate": "00:00",
+    "responde_em_min": 10
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "10:00",
+    "ate": "17:00"
+   },
+   "prazo_hora": "17:00",
+   "madrugada": false,
+   "nota": "Camelô que quer vender à noite: as luzes precisam funcionar às 18h."
+  },
+  "silvana_raptorlog": {
+   "lugar": "raptorlog",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "08:00",
+     "ate": "11:00"
+    }
+   ],
+   "contato": {
+    "de": "08:00",
+    "ate": "18:00",
+    "responde_em_min": 120
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "de": "08:00",
+    "ate": "17:00"
+   },
+   "prazo_hora": "12:00",
+   "madrugada": false,
+   "prazo_semanal": {
+    "entrada": "1 07:00",
+    "saida": "6 12:00"
+   },
+   "bloqueio": [
+    {
+     "dias": [
+      6,
+      7
+     ],
+     "de": "00:00",
+     "ate": "24:00"
+    }
+   ],
+   "nota": "Gerente fria e de planilha. Recebe só com hora marcada, não atende no fim de semana. As vans chegam segunda às 7h e precisam sair até sábado ao meio-dia: o prazo é semanal, com hora."
+  },
+  "brontes_ossobus": {
+   "lugar": "raptorlog",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "22:00",
+     "ate": "02:00",
+     "lugar": "ponto_motoboy"
+    }
+   ],
+   "contato": {
+    "de": "20:00",
+    "ate": "04:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "00:30",
+    "ate": "05:00"
+   },
+   "prazo_hora": "05:00",
+   "madrugada": true,
+   "janela_servico": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "00:30",
+    "ate": "05:00"
+   },
+   "nota": "Os ônibus da linha noturna só ficam livres de 0h30 às 5h, e a 1ª saída é às 5h15. Serviço de frota feito de madrugada."
+  },
+  "spina_taxi": {
+   "lugar": "rua_b2",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "09:00",
+     "ate": "17:00",
+     "lugar": "raptorlog"
+    }
+   ],
+   "contato": {
+    "de": "08:00",
+    "ate": "20:00",
+    "responde_em_min": 1440
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "de": "09:00",
+    "ate": "17:00"
+   },
+   "prazo_hora": "18:00",
+   "madrugada": false,
+   "nota": "Empresária: compara 3 orçamentos e só responde 24h depois."
+  },
+  "dra_mosa": {
+   "lugar": "rua_b2",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "07:00",
+     "ate": "09:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "19:00",
+     "ate": "21:00"
+    }
+   ],
+   "contato": {
+    "de": "00:00",
+    "ate": "24:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "00:00",
+    "ate": "24:00"
+   },
+   "prazo_hora": "07:00",
+   "madrugada": true,
+   "limite_parada_h": 4,
+   "nota": "Hospital 24h: aparece na troca de plantão. Só 1 ambulância pode ficar parada por vez, e por no máximo 4h."
+  },
+  "capitao_detrito": {
+   "lugar": "rua_b3",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "05:00",
+     "ate": "07:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "13:00",
+     "ate": "15:00"
+    }
+   ],
+   "contato": {
+    "de": "05:00",
+    "ate": "19:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "14:00",
+    "ate": "05:00"
+   },
+   "prazo_hora": "05:00",
+   "madrugada": false,
+   "nota": "Chefe dos garis: o turno começa às 5h. Os caminhões ficam livres das 14h às 5h."
+  },
+  "nina_nitro": {
+   "lugar": "faixa",
+   "aparece": [
+    {
+     "dias": [
+      4,
+      5,
+      6
+     ],
+     "de": "20:00",
+     "ate": "01:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "15:00",
+     "ate": "18:00",
+     "lugar": "Garagem"
+    }
+   ],
+   "contato": {
+    "de": "12:00",
+    "ate": "02:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "de": "15:00",
+    "ate": "18:00"
+   },
+   "prazo_hora": "18:00",
+   "madrugada": false,
+   "nota": "Piloto novata: treina à noite. A eliminatória é às 20h."
+  },
+  "tutu_turbo": {
+   "lugar": "bar",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "19:00",
+     "ate": "00:00"
+    },
+    {
+     "dias": [
+      4,
+      5,
+      6
+     ],
+     "de": "21:00",
+     "ate": "02:00",
+     "lugar": "faixa"
+    }
+   ],
+   "contato": {
+    "de": "14:00",
+    "ate": "02:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "16:00",
+    "ate": "19:00"
+   },
+   "prazo_hora": "19:00",
+   "madrugada": false,
+   "nota": "Piloto engraçado: vive no bar e na Faixa. Acorda depois do almoço."
+  },
+  "velma_asa_negra": {
+   "lugar": "faixa",
+   "aparece": [
+    {
+     "dias": [
+      4,
+      5,
+      6
+     ],
+     "de": "23:00",
+     "ate": "03:00"
+    }
+   ],
+   "contato": {
+    "de": "22:00",
+    "ate": "04:00",
+    "responde_em_min": 60
+   },
+   "retirada": {
+    "dias": [
+     4,
+     5,
+     6
+    ],
+    "de": "23:00",
+    "ate": "03:00"
+   },
+   "prazo_hora": "22:00",
+   "madrugada": true,
+   "mod_periodo": {
+    "madrugada": 0.05
+   },
+   "nota": "Misteriosa: só existe à noite e não responde mensagem de dia. Paga muito."
+  },
+  "baronesa_vitoria": {
+   "lugar": "Garagem",
+   "aparece": [
+    {
+     "dias": [
+      2,
+      4,
+      6
+     ],
+     "de": "15:00",
+     "ate": "17:00"
+    }
+   ],
+   "contato": {
+    "de": "10:00",
+    "ate": "20:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     2,
+     4,
+     6
+    ],
+    "de": "15:00",
+    "ate": "17:00"
+   },
+   "prazo_hora": "16:00",
+   "madrugada": false,
+   "nota": "Ex-campeã elegante: visita na hora do chá (16h), terça, quinta e sábado. Paga adiantado."
+  },
+  "alonso_live": {
+   "lugar": "bar",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "20:00",
+     "ate": "23:00"
+    },
+    {
+     "dias": [
+      4,
+      5,
+      6
+     ],
+     "de": "21:00",
+     "ate": "02:00",
+     "lugar": "faixa"
+    }
+   ],
+   "contato": {
+    "de": "13:00",
+    "ate": "04:00",
+    "responde_em_min": 5
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "16:00",
+    "ate": "20:00"
+   },
+   "prazo_hora": "20:00",
+   "madrugada": false,
+   "nota": "Streamer: a live é às 21h e a peça tem que chegar antes. Manda mensagem de madrugada."
+  },
+  "monge_cerato": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "05:30",
+     "ate": "07:00"
+    },
+    {
+     "dias": [
+      5,
+      6
+     ],
+     "de": "21:00",
+     "ate": "23:00",
+     "lugar": "faixa"
+    }
+   ],
+   "contato": {
+    "de": "06:00",
+    "ate": "20:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "05:30",
+    "ate": "07:00"
+   },
+   "prazo_hora": "06:00",
+   "madrugada": false,
+   "mod_periodo": {
+    "manha": 0.03
+   },
+   "nota": "Monge zen: medita ao nascer do sol e fica em silêncio depois das 20h. De manhã negocia com mais calma."
+  },
+  "empresario_varano": {
+   "lugar": "rua_b2",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "12:00",
+     "ate": "14:00"
+    },
+    {
+     "dias": [
+      4,
+      5
+     ],
+     "de": "20:00",
+     "ate": "23:00",
+     "lugar": "bar"
+    }
+   ],
+   "contato": {
+    "de": "21:00",
+    "ate": "01:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "de": "21:00",
+    "ate": "23:00"
+   },
+   "prazo_hora": "18:00",
+   "madrugada": false,
+   "nota": "Aparece no 'almoço de negócios' e no bar. Nunca atende em horário comercial; o escritório nunca está aberto quando Téo vai lá.",
+   "nota_servidor": "Sinal pelo horário: só fala por ZapDino à noite e manda o 'motorista' buscar às 22h, quando o banco já fechou."
+  },
+  "seu_prometeu": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "10:00",
+     "ate": "12:00"
+    }
+   ],
+   "contato": {
+    "de": "09:00",
+    "ate": "22:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     5
+    ],
+    "de": "17:30",
+    "ate": "19:00"
+   },
+   "prazo_hora": "17:00",
+   "madrugada": false,
+   "nota": "Cordial demais. A 'loja de importados' está sempre fechada quando Téo passa. Quer buscar sexta depois das 17h30.",
+   "nota_servidor": "Sinal pelo horário: retirada na sexta à noite, quando não dá mais para conferir pagamento até segunda. Sempre 'no trânsito' no telefone."
+  },
+  "johnny_rajada": {
+   "lugar": "bar",
+   "aparece": [
+    {
+     "dias": [
+      4,
+      5,
+      6
+     ],
+     "de": "22:00",
+     "ate": "02:00"
+    }
+   ],
+   "contato": {
+    "de": "23:00",
+    "ate": "03:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     4,
+     5,
+     6
+    ],
+    "de": "00:30",
+    "ate": "01:30"
+   },
+   "prazo_hora": "22:00",
+   "madrugada": true,
+   "nota": "'Piloto' que só aparece no bar tarde da noite e quer buscar a peça de madrugada.",
+   "nota_servidor": "Sinal pelo horário: retirada de madrugada e some depois. É o 'cliente especial da madrugada' que não paga (1 em cada 5 da madrugada)."
+  },
+  "dona_mel_docura": {
+   "lugar": "Garagem",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "14:00",
+     "ate": "16:00"
+    }
+   ],
+   "contato": {
+    "de": "10:00",
+    "ate": "19:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     6
+    ],
+    "de": "18:00",
+    "ate": "20:00"
+   },
+   "prazo_hora": "17:00",
+   "madrugada": false,
+   "nota": "Superdoce, chega com bolo à tarde. Quer buscar sábado às 18h.",
+   "nota_servidor": "Sinal pelo horário: busca no sábado à noite, banco fechado até segunda; o endereço muda."
+  },
+  "comendador_cheque": {
+   "lugar": "rua_b2",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "15:00",
+     "ate": "17:00"
+    }
+   ],
+   "contato": {
+    "de": "10:00",
+    "ate": "18:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     5
+    ],
+    "de": "16:30",
+    "ate": "17:30"
+   },
+   "prazo_hora": "16:30",
+   "madrugada": false,
+   "nota": "Pomposo. Faz questão de buscar sexta às 16h30 e pagar com cheque.",
+   "nota_servidor": "Sinal pelo horário: sexta 16h30 é depois do corte do banco (16h). O cheque só é apresentado na segunda e volta."
+  },
+  "mc_parcela": {
+   "lugar": "bar",
+   "aparece": [
+    {
+     "dias": [
+      4,
+      5,
+      6
+     ],
+     "de": "21:00",
+     "ate": "02:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "16:00",
+     "ate": "18:00",
+     "lugar": "praca"
+    }
+   ],
+   "contato": {
+    "de": "14:00",
+    "ate": "04:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "22:00",
+    "ate": "23:59"
+   },
+   "prazo_hora": "20:00",
+   "madrugada": false,
+   "nota": "MC: grava o clipe à noite. Quer buscar às 23h.",
+   "nota_servidor": "Sinal pelo horário: retirada noturna sem pagamento, 'paga quando o clipe estourar'."
+  },
+  "guru_paleofit": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "05:30",
+     "ate": "07:30"
+    }
+   ],
+   "contato": {
+    "de": "05:00",
+    "ate": "23:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "05:30",
+    "ate": "07:30"
+   },
+   "prazo_hora": "07:00",
+   "madrugada": false,
+   "nota": "Faz o 'treino do milhão' ao amanhecer e manda áudio motivacional às 5h. A inauguração da academia é às 7h (e nunca acontece).",
+   "nota_servidor": "Sinal pelo horário: a 'academia' nunca está aberta em nenhum horário do mapa."
+  },
+  "lambe_startup": {
+   "lugar": "rua_b2",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+     ],
+     "de": "10:00",
+     "ate": "19:00"
+    }
+   ],
+   "contato": {
+    "de": "00:00",
+    "ate": "24:00",
+    "responde_em_min": 2
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "de": "10:00",
+    "ate": "19:00"
+   },
+   "prazo_hora": "09:00",
+   "madrugada": false,
+   "nota": "'CEO' sempre online: manda mensagem às 3h. O pitch é às 9h.",
+   "nota_servidor": "Sinal: disponível 24h, mas nunca tem um horário de banco para pagar; quer pagar em 'equity'."
+  },
+  "tio_eustaquio": {
+   "lugar": "praca",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "09:00",
+     "ate": "11:00"
+    },
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "de": "16:00",
+     "ate": "18:00",
+     "lugar": "Garagem"
+    }
+   ],
+   "contato": {
+    "de": "07:00",
+    "ate": "20:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     6
+    ],
+    "de": "11:00",
+    "ate": "12:00"
+   },
+   "prazo_hora": "12:00",
+   "madrugada": false,
+   "nota": "Diz ter sido amigo do pai; aparece emocionado no fim da tarde. Quer buscar sábado ao meio-dia, 'fiado'.",
+   "nota_servidor": "Sinal: busca no sábado, com o banco fechado, e pede fiado."
+  },
+  "secretario_burocracio": {
+   "lugar": "paco",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "09:00",
+     "ate": "12:00"
+    }
+   ],
+   "contato": {
+    "de": "09:00",
+    "ate": "12:00",
+    "responde_em_min": 1440
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "de": "09:00",
+    "ate": "11:30"
+   },
+   "prazo_hora": "12:00",
+   "madrugada": false,
+   "nota": "Secretário lento: só existe no expediente do Paço. Protocolo até 11h30; entrega depois das 12h só é recebida no dia útil seguinte."
+  },
+  "eng_herrera": {
+   "lugar": "paco",
+   "aparece": [
+    {
+     "dias": [
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     "de": "08:00",
+     "ate": "13:00"
+    }
+   ],
+   "contato": {
+    "de": "08:00",
+    "ate": "17:00",
+    "responde_em_min": 30
+   },
+   "retirada": {
+    "dias": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "de": "08:00",
+    "ate": "13:00"
+   },
+   "prazo_hora": "13:00",
+   "madrugada": false,
+   "vistoria": {
+    "dias": [
+     2,
+     4
+    ],
+    "de": "14:00",
+    "ate": "16:00",
+    "lugar": "Garagem"
+   },
+   "nota": "Fiscal rigorosa: atende no Paço de manhã e faz vistoria surpresa na garagem terça e quinta, das 14h às 16h."
+  }
+ }
+}

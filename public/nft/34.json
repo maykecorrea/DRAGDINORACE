@@ -1,0 +1,33 @@
+{
+ "name": "Vértebra de plasma",
+ "description": "Dino Drag Race — Vértebra de plasma (Raro). +16% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/34.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "engine"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "16%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "engine-Raro",
+  "stats": "vmax+16%"
+ }
+}

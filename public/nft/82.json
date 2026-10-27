@@ -1,0 +1,48 @@
+{
+ "name": "Mosca de cabo",
+ "description": "Dino Drag Race — Mosca de cabo (Comum). 7 de dano. 18 tiros. 0.90s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/82.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 18,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.9,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Comum",
+  "stats": "dmg=7;clip=18;cd=0.9;lock=3.4"
+ }
+}

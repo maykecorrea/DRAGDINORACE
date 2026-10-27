@@ -579,7 +579,7 @@ export class Race20 {
       p.sprite.material.opacity = u;
       if (p.life <= 0) p.sprite.visible = false;
     }
-    if (this.mphNode) this.mphNode.textContent = String(Math.round((this.speed / MAX_SPEED) * VMAX_MPH));
+    if (this.mphNode) this.mphNode.textContent = String(Math.round((this.speed / MAX_SPEED) * VMAX_MPH * 1.60934));
     if (this.stateNode) this.stateNode.textContent = this.done ? "FAIXA 1 · CHEGADA" : "GECK-404";
   }
 }

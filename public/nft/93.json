@@ -1,0 +1,48 @@
+{
+ "name": "Gota branca",
+ "description": "Dino Drag Race — Gota branca (Comum). 5 de dano. 3 tiros. 2.48s. Trava 1s. Trava o carro por 1s e zera a velocidade. Quase não acerta.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/93.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ice"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 5,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 3,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 2.48,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Freeze",
+   "value": 1,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ice-Comum-3",
+  "stats": "dmg=5;clip=3;cd=2.48;freeze=1s"
+ }
+}

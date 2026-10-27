@@ -1,0 +1,48 @@
+{
+ "name": "Abelha de osso",
+ "description": "Dino Drag Race — Abelha de osso (Raro). 12 de dano. 29 tiros. 0.70s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/119.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 12,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 29,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Raro-2",
+  "stats": "dmg=12;clip=29;cd=0.7;lock=3.4"
+ }
+}

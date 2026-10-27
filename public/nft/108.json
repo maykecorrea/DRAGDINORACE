@@ -1,0 +1,48 @@
+{
+ "name": "Língua azul",
+ "description": "Dino Drag Race — Língua azul (Normal). 57 de dano. 4 tiros. 1.73s. Deixa lerdo. Muito dano e deixa o carro lerdo. Difícil de cravar.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/108.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ray"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 57,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.73,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Slowtime",
+   "value": 2.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ray-Normal-3",
+  "stats": "dmg=57;clip=4;cd=1.73;slow=0.55x/2.4s"
+ }
+}

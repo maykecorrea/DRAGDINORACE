@@ -1,0 +1,33 @@
+{
+ "name": "Coração de cometa",
+ "description": "Dino Drag Race — Coração de cometa (Raro). +19% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/36.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "engine"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "19%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "engine-Raro-3",
+  "stats": "vmax+19%"
+ }
+}

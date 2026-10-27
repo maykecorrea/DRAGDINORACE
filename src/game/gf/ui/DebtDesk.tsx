@@ -1,17 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Content, DebtTemplate } from "../../../../gf-engine/content.ts";
+import { here } from "../../../../gf-engine/district.ts";
 import { bps, formatF } from "../../../../gf-engine/format.ts";
 import { debtRateLabel, seesCet } from "../../../../gf-engine/ledger.ts";
 import type { Debt, GameState } from "../../../../gf-engine/state.ts";
 import { InterestSim } from "./InterestSim";
-import { Face } from "./Face";
-import { GF, Interior, PixelFile } from "./pixel";
 
 const GROUPS = ["agiota", "cartao", "banco", "fornecedor", "outras"] as const;
 const LABEL: Record<string, string> = {
   agiota: "Agiota",
   cartao: "Cartão",
-  banco: "Banco",
+  banco: "Banco Fóssil",
   fornecedor: "Fornecedor",
   outras: "Outras",
 };
@@ -23,7 +22,6 @@ export function DebtDesk({
   busy,
   phone,
   onAct,
-  onReserve,
   onBack,
 }: {
   state: GameState;
@@ -31,13 +29,15 @@ export function DebtDesk({
   busy: boolean;
   phone: boolean;
   onAct: (action: Record<string, unknown>) => void;
-  onReserve: () => void;
   onBack: () => void;
 }) {
   const cet = seesCet(state.flags, state.lessonsTriggered);
   const [pay, setPay] = useState<Record<string, string>>({});
   const [drag, setDrag] = useState<number | null>(null);
   const [seed, setSeed] = useState({ principal: 18000, rate: 0.8, payment: 300, weeks: 104, n: 0 });
+  const [advanced, setAdvanced] = useState(false);
+  const [jump, setJump] = useState<string | null>(null);
+  const lesson = state.lessonsTriggered.includes("L06");
   const order = state.paymentPriority.filter((group) => GROUPS.includes(group as (typeof GROUPS)[number]));
   const full = [...order, ...GROUPS.filter((group) => !order.includes(group))];
 
@@ -56,53 +56,56 @@ export function DebtDesk({
     setSeed({ principal: debt.balance, rate: real / 100, payment: dueGuess(debt), weeks: Math.max(12, debt.installmentsLeft ?? 104), n: seed.n + 1 });
   }
 
+  const atBank = here(state) === "banco";
+  const already = state.flags.renegWeek === state.calendar.week;
+  const noDebt = state.debts.every((debt) => debt.balance <= 0);
+  const renegWhy = !atBank ? "Venha ao banco." : already ? "Você já renegociou esta semana." : noDebt ? "Não há dívida para renegociar." : null;
   return (
-    <section className="gf-screen">
-      <button type="button" onClick={onBack}>
-        Voltar ao pátio
-      </button>
-      <Interior file="int_banco.png" />
-      <div className="gf-row">
-        <Face id="npc_gerente_banco" />
-        <h2 className="gf-kicker">Mesa · Banco e dívidas</h2>
-        <button type="button" onClick={onReserve}>
-          Reserva
-        </button>
+    <section className="gf-screen gf-bank-screen">
+      <button type="button" className="gf-back" onClick={onBack}>Voltar</button>
+      <div className="gf-bank">
+        <img className="gf-bank-bg" src="/assets/gf/v2/interiores/int_banco.png?v=8" alt="" />
+        <div className="gf-bank-poster">
+          <b>Crédito fácil</b>
+          <span>Só 1,9% ao mês!</span>
+          <small>Seguro obrigatório. Multa se quitar antes.</small>
+        </div>
+        <div className="gf-bank-sign">Banco Fóssil</div>
+        <img className="gf-bank-boss" src="/assets/gf/npcs/npc_gerente_banco.png?v=8" alt="Sr. Juros-Baixo" />
+        <div className="gf-reneg">
+          <button
+            type="button"
+            disabled={busy || !!renegWhy}
+            title={renegWhy ?? "Uma vez por semana, em pessoa. Corta 5% da maior dívida e soma uma semana."}
+            onClick={() => onAct({ type: "RENEGOCIAR" })}
+          >
+            Renegociar
+          </button>
+          {renegWhy && <small>{renegWhy}</small>}
+        </div>
+        <div className="gf-bank-floor">
+          {state.debts.length === 0 && <p className="gf-bank-empty">Nenhuma dívida. O banco ainda lembra do seu pai.</p>}
+          {state.debts.map((debt) => (
+            <DebtCard
+              key={debt.id}
+              debt={debt}
+              template={pack.debtTemplates[debt.template]}
+              cet={cet}
+              busy={busy}
+              cash={state.cash}
+              jump={jump === debt.id}
+              raw={pay[debt.id] ?? ""}
+              onRaw={(text) => setPay((prev) => ({ ...prev, [debt.id]: text }))}
+              onPay={(value) => {
+                setJump(debt.id);
+                onAct({ type: "PAY_DEBT", debtId: debt.id, value });
+              }}
+            />
+          ))}
+        </div>
       </div>
-      {state.debts.length === 0 && <p>Nenhuma dívida na mesa. O banco ainda lembra o nome do seu pai.</p>}
-      {state.debts.map((debt) => {
-        const template = pack.debtTemplates[debt.template];
-        const raw = pay[debt.id] ?? "";
-        const value = Number(raw);
-        const penalty = debt.earlyPenaltyBps && Number.isFinite(value) ? bps(value, debt.earlyPenaltyBps) : 0;
-        const valid = Number.isInteger(value) && value > 0 && value <= debt.balance;
-        return (
-          <article key={debt.id} className="gf-panel">
-            <h3>
-              <PixelFile file={GF.debt} /> {debt.creditor}
-            </h3>
-            <p>Saldo {formatF(debt.balance)}</p>
-            <p data-cet={cet ? "real" : "anunciada"}>{debtRateLabel(debt, template, cet)}</p>
-            <p>Parcela {parcelLabel(debt)}</p>
-            <p className={debt.missed > 0 ? "gf-danger" : undefined}>Atraso {debt.missed} sem · já pago {formatF(debt.totalPaid)}</p>
-            {debt.earlyPenaltyBps ? <p className="gf-dim">Quitar antes cobra {debt.earlyPenaltyBps / 100}% em cima.</p> : null}
-            <div className="gf-fields">
-              <label>
-                Pagar extra
-                <input inputMode="numeric" aria-label={`Pagar extra para ${debt.creditor}`} value={raw} onChange={(event) => setPay((prev) => ({ ...prev, [debt.id]: event.target.value }))} />
-              </label>
-              <button type="button" className="gf-go" disabled={busy || !valid} onClick={() => onAct({ type: "PAY_DEBT", debtId: debt.id, value })}>
-                Pagar extra{penalty > 0 ? ` · sai ${formatF(value + penalty)}` : ""}
-              </button>
-              <button type="button" disabled={busy} onClick={() => simulate(debt)}>
-                Simular esta dívida
-              </button>
-            </div>
-          </article>
-        );
-      })}
       <div className="gf-panel">
-        <h3>Prioridade de débito</h3>
+        <h3>Ordem de pagamento</h3>
         <p>Pague primeiro a dívida mais cara.</p>
         <ol className="gf-priority">
           {full.map((group, index) => (
@@ -125,25 +128,97 @@ export function DebtDesk({
                 <span className="gf-dim">{cet ? ` · ${groupRate(state, pack, group)}` : ""}</span>
               </span>
               <span className="gf-actions">
-                <button type="button" aria-label={`Subir ${LABEL[group] ?? group}`} disabled={busy || index === 0} onClick={() => move(index, -1)}>
-                  ↑
-                </button>
-                <button type="button" aria-label={`Descer ${LABEL[group] ?? group}`} disabled={busy || index === full.length - 1} onClick={() => move(index, 1)}>
-                  ↓
-                </button>
+                <button type="button" aria-label={`Subir ${LABEL[group] ?? group}`} disabled={busy || index === 0} onClick={() => move(index, -1)}>↑</button>
+                <button type="button" aria-label={`Descer ${LABEL[group] ?? group}`} disabled={busy || index === full.length - 1} onClick={() => move(index, 1)}>↓</button>
               </span>
             </li>
           ))}
         </ol>
       </div>
-      <InterestSim key={seed.n} mode="debt" principal={seed.principal} rate={seed.rate} payment={seed.payment} weeks={seed.weeks} />
+      {lesson && (
+        <button type="button" onClick={() => { const debt = state.debts[0]; if (debt) simulate(debt); setAdvanced((on) => !on); }}>{advanced ? "Fechar avançado" : "Avançado"}</button>
+      )}
+      {lesson && advanced && (
+        <InterestSim key={seed.n} mode="debt" principal={seed.principal} rate={seed.rate} payment={seed.payment} weeks={seed.weeks} />
+      )}
       <div className="gf-panel">
-        <h3>Crédito na mesa</h3>
+        <h3>Empréstimos</h3>
         {OFFERS.map((id) => (
           <Offer key={id} id={id} template={pack.debtTemplates[id]} state={state} pack={pack} busy={busy} onAct={onAct} />
         ))}
       </div>
     </section>
+  );
+}
+
+function fossil(n: number): string {
+  return `₣ ${formatF(n).replace(" ₣", "")}`;
+}
+
+function DebtCard({
+  debt,
+  template,
+  cet,
+  busy,
+  cash,
+  jump,
+  raw,
+  onRaw,
+  onPay,
+}: {
+  debt: Debt;
+  template: DebtTemplate | undefined;
+  cet: boolean;
+  busy: boolean;
+  cash: number;
+  jump: boolean;
+  raw: string;
+  onRaw: (text: string) => void;
+  onPay: (value: number) => void;
+}) {
+  const due = Math.min(debt.balance, dueGuess(debt));
+  const extra = Number(raw);
+  const ratio = debt.principal > 0 ? Math.max(0, Math.min(1, (debt.principal - debt.balance) / debt.principal)) : 0;
+  const [pop, setPop] = useState(false);
+  useEffect(() => {
+    if (!jump) return;
+    setPop(true);
+    const timer = window.setTimeout(() => setPop(false), 600);
+    return () => window.clearTimeout(timer);
+  }, [jump, debt.balance]);
+  return (
+    <article className="gf-debtcard">
+      <div className="gf-debtcard-face">
+        <b className="gf-debt-name">{debt.creditor}</b>
+        <p className="gf-debt-main">
+          Falta pagar {fossil(debt.balance)}
+          <span>Parcela {fossil(due)}</span>
+        </p>
+        <p className={`gf-debt-when${debt.missed > 0 ? " is-late" : ""}`}>{debt.missed > 0 ? `Atrasado ${debt.missed}×` : "Vence domingo"}</p>
+        <div className={`gf-lack${pop ? " is-jump" : ""}`} aria-label={`Falta ${fossil(debt.balance)} de ${fossil(debt.principal)}`}>
+          <span className="gf-lack-slot">
+            <span className="gf-lack-fill" style={{ width: `${Math.round(ratio * 100)}%` }}>
+              <img src="/assets/gf/v2/banco/banco_barra_falta_preenchimento.png" alt="" />
+            </span>
+          </span>
+          <i className={`gf-lack-lock${pop ? " is-jump" : ""}`} />
+        </div>
+        <p className="gf-lack-label">Falta {fossil(debt.balance)} de {fossil(Math.max(debt.principal, debt.balance))}</p>
+        <p className="gf-debt-rate">{debtRateLabel(debt, template, cet)}</p>
+      </div>
+      <div className="gf-debt-actions">
+        <button type="button" className="is-go" disabled={busy || due <= 0 || cash < due} onClick={() => onPay(due)}>Pagar {due}</button>
+        <button type="button" onClick={() => onRaw(raw ? "" : String(Math.min(debt.balance, due * 2)))}>Pagar mais</button>
+      </div>
+      {raw !== "" && (
+        <div className="gf-fields">
+          <input inputMode="numeric" aria-label={`Pagar mais para ${debt.creditor}`} value={raw} onChange={(event) => onRaw(event.target.value)} />
+          <button type="button" className="is-go" disabled={busy || !Number.isInteger(extra) || extra <= 0 || extra > debt.balance || cash < extra} onClick={() => onPay(extra)}>
+            Pagar {Number.isFinite(extra) ? extra : ""}
+          </button>
+        </div>
+      )}
+    </article>
   );
 }
 
@@ -205,7 +280,7 @@ function Offer({
             disabled={busy || !amountOk || !weekOk}
             onClick={() => onAct({ type: "TAKE_LOAN", template: id, value: amount, weeks: template.weeks ?? span })}
           >
-            Pegar crédito
+            Pegar empréstimo
           </button>
         </div>
       )}

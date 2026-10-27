@@ -1,0 +1,48 @@
+{
+ "name": "Olho torto",
+ "description": "Dino Drag Race — Olho torto (Comum). 6 de dano. 23 tiros. 0.81s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/83.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 6,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 23,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.81,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Comum-2",
+  "stats": "dmg=6;clip=23;cd=0.81;lock=3.4"
+ }
+}

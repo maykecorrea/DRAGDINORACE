@@ -1,0 +1,33 @@
+{
+ "name": "Unha suja",
+ "description": "Dino Drag Race — Unha suja (Comum). +3 de potência.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/172.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "garra"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Potência",
+   "value": 3,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-garra-Comum",
+  "stats": "power+3"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "name": "Lombo de neon",
+ "description": "Dino Drag Race — Lombo de neon (Épico). +36 de casco.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/47.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "chassis"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Casco",
+   "value": 36,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "chassis-Épico-2",
+  "stats": "casco+36"
+ }
+}

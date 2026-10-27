@@ -1,0 +1,33 @@
+{
+ "name": "Frasco no cinto",
+ "description": "Dino Drag Race — Frasco no cinto (Normal). +0.16s de nitro.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/194.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ampola"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Nitro",
+   "value": "0.16s",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-ampola-Normal-2",
+  "stats": "nitro+0.16s"
+ }
+}

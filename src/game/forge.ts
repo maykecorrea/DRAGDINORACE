@@ -109,7 +109,7 @@ const EXTRA: Opt[] = [
 
 const RARITY_BAG = ["Comum", "Normal", "Raro", "Épico", "Lendário"] as const;
 type CarTier = (typeof RARITY_BAG)[number];
-type WheelSlice = CarTier | "Fóssil";
+type WheelSlice = CarTier | "Prêmio";
 
 const CAR_ODDS: { rarity: CarTier; pct: number }[] = [
   { rarity: "Comum", pct: 70 },
@@ -125,7 +125,7 @@ export const RARITY_WHEEL: { rarity: WheelSlice; pct: number; color: string }[] 
   { rarity: "Raro", pct: 5, color: "#7fd7ff" },
   { rarity: "Épico", pct: 1, color: "#ff4bd8" },
   { rarity: "Lendário", pct: 0.1, color: "#ffd24a" },
-  { rarity: "Fóssil", pct: 10, color: "#d6ff3f" },
+  { rarity: "Prêmio", pct: 10, color: "#d6ff3f" },
 ];
 
 export function wheelAngle(rarity: string): number {
@@ -531,7 +531,7 @@ const WHEEL_BP: { rarity: WheelSlice; bp: number }[] = [
   { rarity: "Raro", bp: 500 },
   { rarity: "Épico", bp: 100 },
   { rarity: "Lendário", bp: 10 },
-  { rarity: "Fóssil", bp: 1000 },
+  { rarity: "Prêmio", bp: 1000 },
 ];
 
 export function rollSlice(): WheelSlice {
@@ -542,7 +542,7 @@ export function rollSlice(): WheelSlice {
     if (roll < band.bp) return band.rarity;
     roll -= band.bp;
   }
-  return "Fóssil";
+  return "Prêmio";
 }
 
 /** 10% of the wheel. Inside it: 5% of spins pay 100, 0.1% pay 10000, the rest climbs on a log curve. */
@@ -560,7 +560,7 @@ export type MintHit = { kind: "car"; spec: ForgeSpec } | { kind: "fossil"; amoun
 /** Same wheel for cars, items and pilots. Fóssil is exactly 10%. */
 export function rollWheel(): { kind: "fossil"; amount: number } | { kind: "tier"; tier: CarTier } {
   const slice = rollSlice();
-  if (slice === "Fóssil") return { kind: "fossil", amount: rollFossilPayout() };
+  if (slice === "Prêmio") return { kind: "fossil", amount: rollFossilPayout() };
   return { kind: "tier", tier: slice };
 }
 
@@ -1003,7 +1003,7 @@ export function recordTurntable(spec: ForgeSpec): Promise<string> {
       canvas.height = 540;
       const ctx = canvas.getContext("2d");
       if (!ctx || typeof canvas.captureStream !== "function" || typeof MediaRecorder === "undefined") {
-        reject(new Error("giro"));
+        reject(new Error("Giro"));
         return;
       }
       const stream = canvas.captureStream(24);

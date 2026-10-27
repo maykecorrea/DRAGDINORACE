@@ -2,10 +2,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { CarShow, spinForNft } from "@/components/car-show";
 import { FossilWord } from "@/components/fossil-word";
-import { PILOTS, liveStats, pilotById, resolveStats, type NftCar } from "./data";
+import { PILOTS, liveStats, pilotById, rarityLabel, resolveStats, type NftCar } from "./data";
 import { carArt, carLabel } from "./forge";
-import { driveMph, type AiLevel } from "./raceConfig";
-import { bandStats, streetBuild, streetNear, STREET_PRIZE } from "./street";
+import { driveMph, kmh, type AiLevel } from "./raceConfig";
+import { levelBand, streetBuild, streetNear, STREET_PRIZE } from "./street";
 import { armArt, ARMS, type ArmPiece } from "./armory";
 import { canWear, wearReason } from "./parts";
 import { FRONTAL, REAR, weaponRole, type WeaponId } from "./weapons";
@@ -35,13 +35,19 @@ function Shelf({
   return (
     <div className={`border ${open ? "border-primary" : "border-border"}`}>
       <button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-3 p-3 text-left">
-        {thumb ? <img src={thumb} alt="" className="h-14 w-16 shrink-0 object-contain" /> : <span className="grid h-14 w-16 shrink-0 place-items-center border border-border text-xs text-muted">—</span>}
+        {thumb ? <img src={thumb} alt="" className="h-16 w-16 shrink-0 object-contain opacity-80" /> : (
+          <span className="grid h-16 w-16 shrink-0 place-items-center border border-dashed border-primary/60 text-primary/50" aria-hidden="true">
+            <svg viewBox="0 0 32 32" className="h-10 w-10" fill="currentColor">
+              <path d="M6 14h12l2-3h6v4h-4l-1 2h-3v6h-4v-6H6z" opacity=".85" />
+            </svg>
+          </span>
+        )}
         <span className="min-w-0 flex-1">
           <span className="block text-xs tracking-widest text-muted">{label}</span>
           <span className="block truncate font-display text-3xl leading-none">{title}</span>
           <span className="mt-1 block truncate text-xs text-muted">{detail}</span>
         </span>
-        <span className="shrink-0 font-pixel text-xs tracking-widest text-primary">{open ? "FECHAR" : "ABRIR"}</span>
+        <span className="shrink-0 border border-primary px-2 py-1 font-pixel text-xs tracking-widest text-primary">{open ? "Fechar" : thumb ? "Abrir" : "Equipar"}</span>
       </button>
       {open && <div className="max-h-[46vh] overflow-y-auto border-t border-border p-3">{children}</div>}
     </div>
@@ -62,7 +68,6 @@ export function Prep({
   onRun,
   onStory,
   onPvp,
-  onBet,
 }: {
   save: Save;
   ready: boolean;
@@ -71,7 +76,6 @@ export function Prep({
   onRun: () => void;
   onStory: () => void;
   onPvp: () => void;
-  onBet: () => void;
 }) {
   const [open, setOpen] = useState<ShelfId | null>(null);
   const [popped, setPopped] = useState<MissionId[]>([]);
@@ -156,7 +160,7 @@ export function Prep({
         {list.map((piece) => {
           const has = ownedPiece(save, piece);
           const locked = !has || !canWear(car, piece.tier);
-          const why = !has ? "Não está na caixa. Compra em Peças." : wearReason(car, piece.tier);
+          const why = !has ? "Ainda não é sua. Compre em Peças." : wearReason(car, piece.tier);
           return (
             <button key={piece.id} type="button" disabled={locked} onClick={() => wear(piece, slot)} className={`border p-2 text-left disabled:opacity-40 ${chosen === piece.id ? "border-primary" : "border-border"}`}>
               {armArt(piece.id) && <img src={armArt(piece.id)} alt="" className="mb-1 h-16 w-full object-contain" />}
@@ -210,17 +214,17 @@ export function Prep({
   return (
     <section className="absolute inset-0 z-30 overflow-y-auto bg-black/55 p-3 sm:p-6">
       <div className="mx-auto w-full max-w-4xl border border-border bg-bg/95 p-4">
-        <p className="font-pixel text-sm tracking-widest text-primary">{treino ? "TREINO" : "PREPARAÇÃO"}</p>
-        {treino && <p className="mt-1 text-sm text-muted">Escolhe o set. START começa a pista.</p>}
+        <p className="font-pixel text-sm tracking-widest text-primary">{treino ? "Treino" : "Preparação"}</p>
+        {treino && <p className="mt-1 text-sm text-muted">Escolha o carro e o piloto. Aperte VAI para correr.</p>}
         {!treino && (() => {
           const foe = streetNear(car.rarity, save.races ?? 0);
-          const foeStats = bandStats(carStats, resolveStats(foe.driver, foe.rarity, streetBuild(foe.rarity), foe.id));
           const level: AiLevel = save.ai === "medio" || save.ai === "dificil" ? save.ai : "facil";
+          const foeStats = levelBand(carStats, resolveStats(foe.driver, foe.rarity, streetBuild(foe.rarity), foe.id), level);
           const label = level === "dificil" ? "DIFÍCIL" : level === "medio" ? "MÉDIO" : "FÁCIL";
           return (
             <div className="mt-1">
               <p className="text-sm text-fg">
-                Rival {foe.name} · {foe.rarity} · {Math.round(driveMph(foeStats.vmax))} mph · vida {Math.round(foeStats.durability)} · fóssil {STREET_PRIZE[foe.rarity]} · IA {label}
+                Rival {foe.name} · {rarityLabel(foe.rarity)} · {kmh(driveMph(foeStats.vmax))} km/h · vida {Math.round(foeStats.durability)} · fósseis {STREET_PRIZE[foe.rarity]} · nível {label}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {(["facil", "medio", "dificil"] as const).map((id) => {
@@ -243,9 +247,9 @@ export function Prep({
         })()}
         <div className="mt-3 grid gap-2">
           <Shelf
-            label="CARRO"
+            label="Carro"
             title={carLabel(car)}
-            detail={`${car.rarity} · ${Math.round(carStats.vmax)} mph · vida ${Math.round(carStats.durability)} · nitro ${carStats.nitroTime.toFixed(1)}s`}
+            detail={`${rarityLabel(car.rarity)} · ${kmh(carStats.vmax)} km/h · vida ${Math.round(carStats.durability)} · nitro ${carStats.nitroTime.toFixed(1)}s`}
             thumb={carArt(car)}
             open={open === "car"}
             onToggle={() => toggle("car")}
@@ -264,16 +268,16 @@ export function Prep({
                       <button
                         type="button"
                         onClick={() => setSpin(spinForNft(item))}
-                        aria-label={`Ver 3D de ${label}`}
+                        aria-label={`Ver ${label} em 3D`}
                         className="mt-2 min-h-11 w-full border border-primary bg-primary/15 font-pixel text-base tracking-[0.2em] text-primary shadow-[0_0_12px_rgb(214_255_63/0.35)] transition hover:bg-primary hover:text-ink"
                       >
-                        Ver 3D
+                        Ver em 3D
                       </button>
                     </div>
                     <button type="button" onClick={() => pickCar(item)} className="min-w-0 flex-1 text-left">
                       <span className="block font-display text-3xl leading-none">{label}</span>
-                      <span className="mt-1 block text-sm text-primary">{item.rarity}</span>
-                      <span className="block text-xs text-muted">{Math.round(stats.vmax)} mph · vida {Math.round(stats.durability)} · nitro {stats.nitroTime.toFixed(1)}s</span>
+                      <span className="mt-1 block text-sm text-primary">{rarityLabel(item.rarity)}</span>
+                      <span className="block text-xs text-muted">{kmh(stats.vmax)} km/h · vida {Math.round(stats.durability)} · nitro {stats.nitroTime.toFixed(1)}s</span>
                     </button>
                   </article>
                 );
@@ -281,7 +285,7 @@ export function Prep({
             </div>
           </Shelf>
           <Shelf
-            label="FRENTE · F"
+            label="Frente · F"
             title={frontName}
             detail={weaponRole(frontPiece?.weapon ?? FRONTAL[0]!)}
             thumb={frontPiece ? armArt(frontPiece.id) : undefined}
@@ -291,7 +295,7 @@ export function Prep({
             {weaponList("frontal")}
           </Shelf>
           <Shelf
-            label="TRASEIRA · G"
+            label="Traseira · G"
             title={rearName}
             detail={weaponRole(rearPiece?.weapon ?? REAR[0]!)}
             thumb={rearPiece ? armArt(rearPiece.id) : undefined}
@@ -301,8 +305,8 @@ export function Prep({
             {weaponList("traseira")}
           </Shelf>
           <Shelf
-            label="PILOTO"
-            title={pilot ? pilot.name : "Sem piloto"}
+            label="Piloto"
+            title={pilot ? (pilot.id === "teo" ? save.callsign?.trim() || "Téo" : pilot.name) : "Sem piloto"}
             detail={pilot ? pilot.line : "Opcional. O carro corre do mesmo jeito."}
             thumb={pilot?.image}
             open={open === "pilot"}
@@ -313,16 +317,17 @@ export function Prep({
                 <span className="font-display text-3xl leading-none">Sem piloto</span>
                 <span className="mt-1 block text-xs text-muted">Opcional. O carro corre do mesmo jeito.</span>
               </button>
-              {PILOTS.map((crewPilot) => {
+              {PILOTS.filter((crewPilot) => crewPilot.id !== "vex").map((crewPilot) => {
                 const crew = save.pilots ?? [];
                 const has = crewPilot.cost === 0 || crew.includes(crewPilot.id) || save.pilot === crewPilot.id;
                 const on = save.pilot === crewPilot.id;
+                const shown = crewPilot.id === "teo" ? save.callsign?.trim() || "Téo" : crewPilot.name;
                 return (
                   <button key={crewPilot.id} type="button" disabled={!has} onClick={() => { onCommit({ ...save, pilot: crewPilot.id }); setOpen(null); }} className={`flex items-center gap-3 border p-3 text-left disabled:opacity-40 ${on ? "border-primary" : "border-border"}`}>
                     <img src={crewPilot.image} alt="" className="h-16 w-16 object-contain" />
                     <span>
-                      <span className="block font-display text-3xl leading-none">{crewPilot.name}</span>
-                      <span className="block text-xs text-muted">{has ? crewPilot.line : "Contrata na Loja."}</span>
+                      <span className="block font-display text-3xl leading-none">{shown}</span>
+                      <span className="block text-xs text-muted">{has ? crewPilot.line : "Contrate na Loja."}</span>
                     </span>
                   </button>
                 );
@@ -344,16 +349,16 @@ export function Prep({
 
         {treino && (
           <button type="button" disabled={!ready} onClick={onRun} className="mt-4 w-full min-h-14 bg-primary px-6 font-display text-4xl leading-none text-ink disabled:opacity-40">
-            {ready ? "START" : "Carregando"}
+            {ready ? "VAI" : "Carregando…"}
           </button>
         )}
 
         {(save.races ?? 0) === 0 && (
-          <p className="mt-3 text-sm text-muted">Primeira corrida: segura o gás e troca a marcha quando aparecer AGORA. O rival fica marcado com seta, FRENTE ou ATRÁS.</p>
+          <p className="mt-3 text-sm text-muted">Primeira corrida: segure o gás e troque a marcha quando aparecer AGORA!. A seta mostra se o rival está na FRENTE ou ATRÁS.</p>
         )}
 
         <div className="mt-4 border border-border p-3">
-          <p className="text-xs tracking-widest text-muted">MISSÕES DE HOJE</p>
+          <p className="text-xs tracking-widest text-muted">Missões de hoje</p>
           <ul className="mt-2 grid gap-2">
             {MISSIONS.map((mission) => {
               const have = daily.done[mission.id] ?? 0;
@@ -369,9 +374,9 @@ export function Prep({
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-sm">
                       {mission.title}
-                      <span className="text-muted"> · {Math.min(have, mission.target)}/{mission.target} · {mission.reward} fóssil</span>
+                      <span className="text-muted"> · {Math.min(have, mission.target)}/{mission.target} · {mission.reward} fósseis</span>
                     </span>
-                    {pop && <span className="mission-burst">FEITA</span>}
+                    {pop && <span className="mission-burst">Feita</span>}
                     {cash === mission.id && <span className="mission-pay">+{mission.reward}</span>}
                     <button
                       type="button"
@@ -379,7 +384,7 @@ export function Prep({
                       onClick={() => claim(mission.id)}
                       className={`min-h-11 border px-3 text-sm disabled:opacity-40 ${done && !taken ? "border-primary bg-primary text-ink" : "border-border"}`}
                     >
-                      {taken ? "Recolhida" : done ? "Recolher" : "Em curso"}
+                      {taken ? "Recebida" : done ? "Receber" : "Fazendo"}
                     </button>
                   </div>
                   <span className="mission-meter" aria-hidden>
@@ -394,16 +399,15 @@ export function Prep({
         <div className="mt-4 flex flex-wrap items-center gap-2">
           {!treino && (
             <button type="button" disabled={!ready} onClick={onRun} className="min-h-14 bg-primary px-6 font-display text-4xl leading-none text-ink disabled:opacity-40">
-              {ready ? "Correr" : "Carregando"}
+              {ready ? "Correr" : "Carregando…"}
             </button>
           )}
           <button type="button" className="min-h-11 border border-border px-3 font-display text-2xl leading-none" onClick={onStory}>História</button>
-          <button type="button" className="min-h-11 border border-border px-3 font-display text-2xl leading-none" onClick={onPvp}>PvP</button>
-          <button type="button" className="min-h-11 border border-border px-3 font-display text-2xl leading-none" onClick={onBet}>PvP aposta</button>
+          <button type="button" className="min-h-11 border border-border px-3 font-display text-2xl leading-none" onClick={onPvp}>Duelo</button>
           <Link to="/dashboard" className="inline-flex min-h-11 items-center border border-border px-3 font-display text-2xl leading-none">Painel</Link>
           <span className="font-display text-2xl text-primary">{Math.floor(save.fossil).toLocaleString("pt-BR")} <FossilWord /></span>
         </div>
-        <p className="mt-2 text-xs text-muted">No banco: {pilotById(save.pilot).name}. F atira na frente. G atira atrás.</p>
+        <p className="mt-2 text-xs text-muted">No banco: {(pilotById(save.pilot).id === "teo" ? save.callsign?.trim() || "Téo" : pilotById(save.pilot).name)}. F atira na frente. G atira atrás.</p>
       </div>
       {spin && <CarShow target={spin} onClose={() => setSpin(null)} />}
     </section>

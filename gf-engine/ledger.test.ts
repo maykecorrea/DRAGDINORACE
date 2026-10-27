@@ -37,7 +37,7 @@ describe("simulador e fechamento", () => {
   it("5.000 a 10% pagando 400 nunca termina", () => {
     const sim = simulateDebt(5000, 10, 400, 12);
     assert.equal(sim.never, true);
-    assert.equal(sim.phrase, "Nunca termina: você só paga juros");
+    assert.equal(sim.phrase, "Não acaba nunca: você só paga juros");
     assert.equal(sim.points.length, 12);
     assert.ok(sim.points[11]!.balance > 5000);
   });
@@ -67,10 +67,10 @@ describe("simulador e fechamento", () => {
 
   it("o CET fica escondido sem contadora e sem L07", () => {
     const debt = { weeklyBps: 120 };
-    const template = { creditor: "Banco", group: "outras" as const, bps: 120, min: "price" as const, anunciada: "1,9% ao mês" };
+    const template = { creditor: "Banco do piloto", group: "outras" as const, bps: 120, min: "price" as const, anunciada: "1,9% ao mês" };
     assert.equal(seesCet({}, []), false);
     assert.equal(debtRateLabel(debt, template, false), "1,9% ao mês");
-    assert.equal(debtRateLabel(debt, template, false).includes("CET"), false);
+    assert.equal(debtRateLabel(debt, template, false).includes("Custo total"), false);
     assert.equal(seesCet({ accountant: true }, []), true);
     assert.equal(seesCet({}, ["L07"]), true);
     assert.match(debtRateLabel(debt, template, true), /CET/);

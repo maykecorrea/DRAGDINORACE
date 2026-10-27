@@ -39,7 +39,7 @@ export function SundayClose({
   }, [accountant, pack, state]);
 
   return (
-    <div className="gf-modal gf-sunday" role="dialog" aria-modal="true" aria-label="Fechamento semanal">
+    <div className="gf-modal gf-sunday" role="dialog" aria-modal="true" aria-label="Fechamento da semana" onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <p className="gf-kicker">DOMINGO</p>
       <Interior file="int_fechamento.png" />
       <h2>Fechamento da semana {summary.week}</h2>
@@ -49,7 +49,7 @@ export function SundayClose({
             Fechamento
           </button>
           <button type="button" role="tab" aria-selected={tab === "forecast"} className={tab === "forecast" ? "gf-go" : undefined} onClick={() => setTab("forecast")}>
-            Projeção 8 semanas
+            Próximas 8 semanas
           </button>
         </div>
       )}
@@ -57,8 +57,8 @@ export function SundayClose({
         <Forecast rows={forecast} />
       ) : (
         <>
-          <section className="gf-panel" aria-label="Fluxo de caixa">
-            <h3>Fluxo de caixa</h3>
+          <section className="gf-panel" aria-label="Entra e sai">
+            <h3>Entra e sai</h3>
             {cascade.lines.map((line) => {
               const outflow = line.key !== "open" && line.signed < 0;
               const inflow = line.key !== "open" && line.signed > 0;
@@ -79,31 +79,31 @@ export function SundayClose({
               <strong>= Caixa final {formatF(summary.cashEnd)}</strong>
             </p>
           </section>
-          <section className="gf-panel" aria-label="DRE">
-            <h3>DRE</h3>
-            <p>Faturamento {formatF(summary.revenue)}</p>
-            <p>CMV {formatF(summary.materials)}</p>
+          <section className="gf-panel" aria-label="Resultado da semana">
+            <h3>Resultado da semana</h3>
+            <p>Vendas {formatF(summary.revenue)}</p>
+            <p>Custo das peças {formatF(summary.materials)}</p>
             <p>
-              <strong>Margem bruta {formatF(gross)}</strong>
+              <strong>Sobra das vendas {formatF(gross)}</strong>
             </p>
-            <p>Despesas fixas {formatF(summary.fixed + summary.salaries)}</p>
+            <p>Contas fixas  {formatF(summary.fixed + summary.salaries)}</p>
             <p>Juros {formatF(summary.interest)}</p>
             <p>
-              <strong>Lucro líquido {formatF(net)}</strong>
+              <strong>Lucro  {formatF(net)}</strong>
             </p>
-            <p>Perdas de estoque {formatF(summary.stockLoss)}</p>
+            <p>Peças perdidas  {formatF(summary.stockLoss)}</p>
             {cashDiff && (
               <p className="gf-banner">
-                Lucro ≠ Caixa. Vendeu {formatF(summary.revenue)} e entrou {formatF(summary.received)}.
+                Lucro não é caixa. Vendeu  {formatF(summary.revenue)} e entrou {formatF(summary.received)}.
               </p>
             )}
           </section>
-          <p>Você precisa faturar {formatF(breakEvenRevenue(summary, pack.balance.taxBps))} por semana só para empatar</p>
+          <p>Você precisa vender  {formatF(breakEvenRevenue(summary, pack.balance.taxBps))} por semana só para empatar</p>
           <section className="gf-panel" aria-label="Alertas">
             <h3>
               <PixelFile file={GF.alert} /> Alertas
             </h3>
-            {alerts.length === 0 && <p>Nenhum alarme neste domingo.</p>}
+            {alerts.length === 0 && <p>Nenhum alerta neste domingo.</p>}
             {alerts.map((item) => (
               <p key={item} className="gf-danger">
                 {item}
@@ -113,7 +113,7 @@ export function SundayClose({
           <section className="gf-panel" aria-label="Gráfico de 8 semanas">
             <h3>Gráfico de 8 semanas</h3>
             {history.length === 0 ? (
-              <p>Ainda não há domingo no caderno.</p>
+              <p>Ainda não tem domingo no caderno.</p>
             ) : (
               <>
                 <p>Caixa</p>
@@ -146,11 +146,11 @@ function Series({ values, tone }: { values: number[]; tone: string }) {
 }
 
 function Forecast({ rows }: { rows: { week: number; cash: number; ended?: string }[] | null }) {
-  if (!rows || rows.length === 0) return <p>A projeção não fechou.</p>;
+  if (!rows || rows.length === 0) return <p>A previsão não fechou.</p>;
   return (
     <section className="gf-panel">
-      <h3>Projeção 8 semanas</h3>
-      <p className="gf-dim">Só o que já está no papel: fixo, salário, parcela e o que falta receber. Sem cliente novo.</p>
+      <h3>Próximas 8 semanas</h3>
+      <p className="gf-dim">Só o que já está certo: contas fixas, salários, parcelas e o que falta receber. Sem cliente novo.</p>
       <Series values={rows.map((row) => row.cash)} tone="yield" />
       {rows.map((row) => (
         <p key={`${row.week}-${row.cash}`}>
@@ -164,10 +164,10 @@ function Forecast({ rows }: { rows: { week: number; cash: number; ended?: string
 
 function alarm(state: GameState, pack: Content, worth: number): string[] {
   const notes: string[] = [];
-  if (state.failure.redAlertWeeks > 0 || state.ending === "F1_caixa") notes.push("Alerta Vermelho (F1)");
+  if (state.failure.redAlertWeeks > 0 || state.ending === "F1_caixa") notes.push("Alerta vermelho (F1)");
   if (state.debts.some((debt) => debt.missed > 0)) notes.push("Parcelas atrasadas");
-  if (worth < pack.balance.failures.insolvencyWarn) notes.push("PL perto do limite");
-  if (state.employees.some((person) => person.owedWeeks > 0)) notes.push("Salário devido");
+  if (worth < pack.balance.failures.insolvencyWarn) notes.push("Patrimônio perto do limite");
+  if (state.employees.some((person) => person.owedWeeks > 0)) notes.push("Salário atrasado");
   if (state.flags.negativado === true) notes.push("Nome sujo");
   return notes;
 }

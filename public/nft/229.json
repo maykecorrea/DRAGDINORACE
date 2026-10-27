@@ -1,0 +1,33 @@
+{
+ "name": "Íris do rex",
+ "description": "Dino Drag Race — Íris do rex (Lendário). +18% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/229.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "lente"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "18%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-lente-Lendário",
+  "stats": "vmax+18%"
+ }
+}

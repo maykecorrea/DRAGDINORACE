@@ -1,0 +1,43 @@
+{
+ "name": "Coração de nave",
+ "description": "Dino Drag Race — Coração de nave (Épico). 98 de dano. 7 tiros. 0.97s. Voa reto. Em cheio dói mais. Se passar perto, estoura com menos dano.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/135.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "missile"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 98,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.97,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-missile-Épico-3",
+  "stats": "dmg=98;clip=7;cd=0.97"
+ }
+}

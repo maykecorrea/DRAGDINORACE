@@ -1,0 +1,43 @@
+{
+ "name": "Presa ciano",
+ "description": "Dino Drag Race — Presa ciano (Raro). 2 de dano. 160 tiros. 0.12s. A de fábrica. Duas bocas, tiro curto, 1 de dano. Pente de 125.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/112.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "mg"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 2,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 160,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.12,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-mg-Raro",
+  "stats": "dmg=2;clip=160;cd=0.12"
+ }
+}

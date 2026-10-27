@@ -1,0 +1,43 @@
+{
+ "name": "Boca de prego",
+ "description": "Dino Drag Race — Boca de prego (Comum). 1 de dano. 100 tiros. 0.15s. A de fábrica. Duas bocas, tiro curto, 1 de dano. Pente de 125.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/78.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "mg"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 1,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 100,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.15,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-mg-Comum-3",
+  "stats": "dmg=1;clip=100;cd=0.15"
+ }
+}

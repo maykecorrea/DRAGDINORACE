@@ -1,0 +1,33 @@
+{
+ "name": "Crânio-rei",
+ "description": "Dino Drag Race — Crânio-rei (Lendário). +70 de vida no piloto.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/228.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "cranio"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Vida",
+   "value": 70,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-cranio-Lendário-3",
+  "stats": "vida+70"
+ }
+}

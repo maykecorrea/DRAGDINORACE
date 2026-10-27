@@ -1,9 +1,9 @@
 import type { DailyState, Save } from "./save";
 
 export const MISSIONS = [
-  { id: "finish", title: "Fecha uma corrida", target: 1, reward: 40 },
-  { id: "win", title: "Ganha uma corrida", target: 1, reward: 70 },
-  { id: "shift", title: "Três trocas no ponto", target: 3, reward: 36 },
+  { id: "finish", title: "Termine uma corrida", target: 1, reward: 40 },
+  { id: "win", title: "Vença uma corrida", target: 1, reward: 70 },
+  { id: "shift", title: "Troque a marcha 3 vezes no ponto", target: 3, reward: 36 },
 ] as const;
 
 export type MissionId = (typeof MISSIONS)[number]["id"];

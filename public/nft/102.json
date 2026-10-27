@@ -1,0 +1,48 @@
+{
+ "name": "Pupa teimosa",
+ "description": "Dino Drag Race — Pupa teimosa (Normal). 12 de dano. 16 tiros. 0.91s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/102.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 12,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 16,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.91,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Normal-3",
+  "stats": "dmg=12;clip=16;cd=0.91;lock=3.4"
+ }
+}

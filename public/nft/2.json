@@ -1,0 +1,33 @@
+{
+ "name": "Rede de escama",
+ "description": "Dino Drag Race — Rede de escama (Comum). +5 de casco.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/2.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "chassis"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Casco",
+   "value": 5,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "chassis-Comum-2",
+  "stats": "casco+5"
+ }
+}

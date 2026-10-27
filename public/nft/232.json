@@ -1,0 +1,33 @@
+{
+ "name": "Garra-rei",
+ "description": "Dino Drag Race — Garra-rei (Lendário). +44 de potência.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/232.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "garra"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Potência",
+   "value": 44,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-garra-Lendário",
+  "stats": "power+44"
+ }
+}

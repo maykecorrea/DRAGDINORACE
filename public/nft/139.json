@@ -1,0 +1,48 @@
+{
+ "name": "Coração roxo",
+ "description": "Dino Drag Race — Coração roxo (Épico). 19 de dano. 7 tiros. 1.05s. Veneno 12/s. Se acerta, sangra até o fim da corrida.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/139.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "poison"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 19,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.05,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Poison",
+   "value": 12,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-poison-Épico",
+  "stats": "dmg=19;clip=7;cd=1.05;poison=12/s"
+ }
+}

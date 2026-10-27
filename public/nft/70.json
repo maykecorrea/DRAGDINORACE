@@ -1,0 +1,33 @@
+{
+ "name": "Frasco solar",
+ "description": "Dino Drag Race — Frasco solar (Lendário). +1.60s de nitro.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/70.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "nitro"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Nitro",
+   "value": "1.60s",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "nitro-Lendário",
+  "stats": "nitro+1.60s"
+ }
+}

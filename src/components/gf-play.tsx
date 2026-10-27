@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { contentV1, type Content } from "../../gf-engine/content.ts";
 import { formatF } from "../../gf-engine/format.ts";
@@ -7,6 +7,7 @@ import { sealsFromState } from "@/game/gf/seals";
 import { Office } from "@/game/gf/ui/Office";
 import { act, dropRun, fetchRun, GfApiError, rememberRev, startRun, type GfRun } from "@/game/gf/ui/api";
 import { getBearerToken } from "@/lib/auth/client";
+import { Prologue } from "@/components/prologue";
 
 type Past = { ending: string | null; score: number | null; week: number };
 
@@ -19,6 +20,7 @@ export function GfPlay() {
   const [frame, setFrame] = useState(0);
   const [pack, setPack] = useState<Content>(contentV1);
   const [past, setPast] = useState<Past[]>([]);
+  const [showPrologue, setShowPrologue] = useState(() => localStorage.getItem("gf-prologue-seen") !== "1");
 
   useEffect(() => {
     let live = true;
@@ -75,7 +77,7 @@ export function GfPlay() {
       if (err instanceof GfApiError) {
         setNote(err.message);
         if (err.run) setRun(err.run);
-      } else setNote("Não deu para herdar a oficina.");
+      } else setNote("Não deu para começar a oficina.");
     } finally {
       setBusy(false);
     }
@@ -99,7 +101,7 @@ export function GfPlay() {
       if (err instanceof GfApiError) {
         setNote(err.message);
         if (err.run) setRun(err.run);
-      } else setNote("Não deu para pegar o caderno.");
+      } else setNote("Não deu para abrir o caderno.");
     } finally {
       setBusy(false);
     }
@@ -107,17 +109,27 @@ export function GfPlay() {
 
   async function abandon() {
     setBusy(true);
+    setRun(null);
+    setFrame(0);
+    setNote("");
     try {
       await dropRun();
-      setRun(null);
-      setFrame(0);
-      setNote("");
     } catch (err) {
-      setNote(err instanceof GfApiError ? err.message : "Não deu para recomeçar.");
+      const message = err instanceof GfApiError ? err.message : "Não deu para recomeçar.";
+      if (message !== "Não há campanha ativa.") setNote(message);
     } finally {
       setBusy(false);
     }
   }
+
+  const acked = useRef(false);
+  useEffect(() => {
+    if (acked.current || !run || run.state.flags.sawPrologue === true) return;
+    if (localStorage.getItem("gf-prologue-seen") === "1") {
+      acked.current = true;
+      void acknowledge();
+    }
+  }, [run]);
 
   if (!ready) {
     return (
@@ -127,13 +139,33 @@ export function GfPlay() {
     );
   }
 
+  if (!run && showPrologue) {
+    return (
+      <main className="relative min-h-dvh bg-black">
+        <Prologue
+          mode="garage"
+          name={name}
+          onDone={() => {
+            localStorage.setItem("gf-prologue-seen", "1");
+            setShowPrologue(false);
+          }}
+        />
+      </main>
+    );
+  }
+
   if (!run) {
     return (
-      <Scene bg={ART.ashes}>
-        <div className="gf-titlecard mx-auto flex min-h-dvh w-full max-w-3xl flex-col justify-end px-4 py-8">
+      <Scene bg="/game/gf/bg_tela_inicial.webp" variant="title">
+        <p className="gf-neon-sign" aria-hidden="true">
+          GARAGEM
+          <br />
+          FALIDA
+        </p>
+        <div className="gf-titlecard flex min-h-dvh w-full max-w-md flex-col justify-center px-6 py-10 sm:px-10">
           <p className="font-pixel text-2xl tracking-widest text-ember">PLUS</p>
-          <h1 className="gf-title font-display text-7xl leading-none text-fg sm:text-8xl">GARAGEM FALIDA</h1>
-          <p className="mt-3 max-w-md text-pretty text-fg">Você herda uma baia, 300 fósseis e uma dívida que cresce sozinha.</p>
+          <h1 className="gf-title font-display text-6xl leading-none text-fg sm:text-7xl">Garagem Falida</h1>
+          <p className="mt-3 max-w-md text-pretty text-fg">Você herdou uma baia, 300 fósseis e uma dívida que cresce sozinha.</p>
           <label className="mt-5 grid max-w-sm gap-1 text-muted">
             Seu nome
             <input value={name} maxLength={16} onChange={(event) => setName(event.target.value)} className="min-h-11 border border-ember bg-bg/90 px-3 text-fg shadow-[3px_3px_0_#090b08] outline-none focus:border-primary" />
@@ -144,7 +176,17 @@ export function GfPlay() {
             onClick={() => void createRun()}
             className="gf-cta mt-3 min-h-11 max-w-sm bg-primary font-display text-3xl leading-none text-ink disabled:opacity-40"
           >
-            Herdar a oficina
+            Começar
+          </button>
+          <button
+            type="button"
+            className="mt-3 max-w-sm text-left text-sm text-primary"
+            onClick={() => {
+              localStorage.removeItem("gf-prologue-seen");
+              setShowPrologue(true);
+            }}
+          >
+            Ver de novo
           </button>
           {note && <p className="mt-3 text-danger">{note}</p>}
           {past.length > 0 && (
@@ -170,13 +212,22 @@ export function GfPlay() {
     const worst = [...log].sort((a, b) => a.impact - b.impact).slice(0, 3);
     const best = [...log].sort((a, b) => b.impact - a.impact).filter((item) => item.impact > 0).slice(0, 3);
     const seals = sealsFromState(run.state);
+    const who = run.state.player.name || "Téo";
+    const say = (text: string) => text.replaceAll("{nome}", who);
     return (
       <Scene bg={ART.sealed}>
         <div className="gf-titlecard mx-auto flex min-h-dvh w-full max-w-3xl flex-col justify-end px-4 py-8">
           <p className="font-pixel text-2xl text-danger">FIM</p>
-          <h1 className="gf-title font-display text-6xl leading-none text-fg sm:text-7xl">{ending.title}</h1>
-          <p className="mt-3 max-w-lg text-pretty text-lg text-fg">{ending.line}</p>
-          {score != null && <p className="mt-2 font-display text-4xl text-primary">Placar {score}</p>}
+          <h1 className="gf-title font-display text-6xl leading-none text-fg sm:text-7xl">{say(ending.title)}</h1>
+          {run.state.ending === "F5_desistencia" ? (
+            <>
+              <p className="mt-3 max-w-lg text-pretty text-lg text-fg">O corpo pediu descanso e não teve.</p>
+              <p className="max-w-lg text-pretty text-lg text-fg">2 Dias sem tratamentos...</p>
+            </>
+          ) : (
+            <p className="mt-3 max-w-lg whitespace-pre-line text-pretty text-lg text-fg">{say(ending.line)}</p>
+          )}
+          {score != null && <p className="mt-2 font-display text-4xl text-primary">Pontos {score}</p>}
           {seals.length > 0 && (
             <ul className="mt-3 max-w-lg text-sm text-[#F7C948]">
               {seals.map((seal) => (
@@ -203,48 +254,42 @@ export function GfPlay() {
   }
 
   if (run.state.flags.sawPrologue !== true) {
-    const frames = [
-      { bg: ART.garage, cast: ART.osso, who: "Seu Osvaldo", line: "Rex Navalha pede a contribuição. O pai fecha a porta sem discutir." },
-      { bg: ART.fire, cast: ART.rex, who: "", line: "A oficina queima de noite. Ele não saiu." },
-      { bg: ART.ashes, cast: ART.ambar, who: "Dona Âmbar", line: "A pasta da herança: 300 no caixa, 18 mil no banco, um boleto de 1.200. O patrimônio é negativo. A baia ainda funciona." },
-    ];
-    const current = frames[Math.min(frame, frames.length - 1)]!;
+    if (localStorage.getItem("gf-prologue-seen") !== "1") {
+      return (
+        <main className="relative min-h-dvh bg-black">
+          <Prologue
+            mode="garage"
+            name={name}
+            onDone={() => {
+              localStorage.setItem("gf-prologue-seen", "1");
+              void acknowledge();
+            }}
+          />
+        </main>
+      );
+    }
     return (
-      <Scene bg={current.bg}>
-        <section className="mx-auto mt-auto flex w-full max-w-3xl flex-col px-4 pb-4">
-          <div className="gf-dialogue flex gap-3 border border-border bg-bg/90 p-3">
-            {current.who && <img src={current.cast} alt="" className="h-28 w-20 shrink-0 object-cover object-top" />}
-            <div>
-              {current.who && <p className="font-pixel text-2xl text-ember">{current.who}</p>}
-              <p className="text-pretty text-lg leading-snug">{current.line}</p>
-              {note && <p className="mt-2 text-danger">{note}</p>}
-            </div>
-          </div>
-          {frame < 2 ? (
-            <button type="button" onClick={() => setFrame(frame + 1)} className="gf-cta mt-2 min-h-11 border border-ember bg-surface px-3 text-left font-display text-2xl leading-none">
-              Continuar
-            </button>
-          ) : (
-            <button type="button" disabled={busy} onClick={() => void acknowledge()} className="gf-cta mt-2 min-h-11 border border-ember bg-surface px-3 text-left font-display text-2xl leading-none disabled:opacity-40">
-              Pegar o caderno
-            </button>
-          )}
-          <Footer />
-        </section>
-      </Scene>
+      <main className="grid min-h-dvh place-items-center bg-bg text-fg">
+        <p className="font-display text-4xl text-primary">Abrindo o portão…</p>
+        {note && <p className="mt-3 text-danger">{note}</p>}
+      </main>
     );
   }
 
   return <Office run={run} pack={pack} onRun={setRun} onLeave={() => void abandon()} />;
 }
 
-function Scene({ bg, children }: { bg: string; children: ReactNode }) {
+function Scene({ bg, children, variant }: { bg: string; children: ReactNode; variant?: "title" }) {
   return (
-    <main className="gf-scene relative min-h-dvh overflow-hidden bg-bg text-fg">
-      <img src={bg} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/50 to-bg/10" />
+    <main className={`gf-fim relative min-h-dvh overflow-hidden bg-bg text-fg${variant === "title" ? " is-start" : ""}`}>
+      <img src={bg} alt="" className="gf-fim-bg pointer-events-none absolute inset-0 h-full w-full object-cover object-center" />
+      {variant === "title" ? (
+        <div className="gf-start-shade pointer-events-none absolute inset-0" />
+      ) : (
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg via-bg/50 to-bg/10" />
+      )}
       <div className="gf-scene-scan pointer-events-none absolute inset-0" />
-      <div className="relative flex min-h-dvh flex-col">{children}</div>
+      <div className="relative z-10 flex min-h-dvh flex-col">{children}</div>
     </main>
   );
 }
@@ -252,7 +297,7 @@ function Scene({ bg, children }: { bg: string; children: ReactNode }) {
 function Footer() {
   return (
     <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
-      <p className="max-w-md text-pretty">Jogo educativo. Personagens, empresas e taxas são fictícios. Não é recomendação financeira.</p>
+      <p className="max-w-xl text-pretty">Todas as informações contidas neste jogo são apenas para finalidade educativa e de treinamento para a vida real.</p>
       <Link to="/modos" className="font-pixel text-xl text-primary">
         Modos
       </Link>

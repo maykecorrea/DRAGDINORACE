@@ -1,0 +1,33 @@
+{
+ "name": "Cetro de vértebra",
+ "description": "Dino Drag Race — Cetro de vértebra (Lendário). +74 de potência.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/75.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "gearbox"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Potência",
+   "value": 74,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "gearbox-Lendário-3",
+  "stats": "power+74"
+ }
+}

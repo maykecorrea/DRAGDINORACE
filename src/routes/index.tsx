@@ -84,13 +84,66 @@ function Home() {
           </nav>
           <ClientOnly>
             <span className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => choose(lang === "pt" ? "en" : "pt")}
-              className="inline-flex min-h-11 items-center border border-border px-2 font-pixel text-sm tracking-widest text-primary"
-            >
-              {lang === "pt" ? "EN" : "PT"}
-            </button>
+            <div className="flex items-center" style={{ gap: "8px" }}>
+              <button
+                type="button"
+                onClick={() => choose("pt")}
+                className="inline-flex items-center font-pixel text-xs tracking-wider"
+                style={{
+                  gap: "6px",
+                  padding: "5px 9px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: lang === "pt" ? "radial-gradient(circle, rgba(214,255,63,0.28) 0%, rgba(214,255,63,0.08) 70%, transparent 100%)" : "transparent",
+                  boxShadow: lang === "pt" ? "0 0 14px rgba(214,255,63,0.55), 0 0 4px rgba(214,255,63,0.35)" : "none",
+                  color: lang === "pt" ? "#d6ff3f" : "#9aa18c",
+                  textShadow: lang === "pt" ? "0 0 8px rgba(214,255,63,0.85)" : "none",
+                  opacity: lang === "pt" ? 1 : 0.55,
+                }}
+              >
+                <img
+                  src="/flags/br.svg"
+                  alt="BR"
+                  style={{
+                    width: "20px",
+                    height: "14px",
+                    objectFit: "cover",
+                    borderRadius: "2px",
+                    filter: lang === "pt" ? "drop-shadow(0 0 6px rgba(214,255,63,0.75))" : "none",
+                  }}
+                />
+                PT
+              </button>
+              <button
+                type="button"
+                onClick={() => choose("en")}
+                className="inline-flex items-center font-pixel text-xs tracking-wider"
+                style={{
+                  gap: "6px",
+                  padding: "5px 9px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: lang === "en" ? "radial-gradient(circle, rgba(214,255,63,0.28) 0%, rgba(214,255,63,0.08) 70%, transparent 100%)" : "transparent",
+                  boxShadow: lang === "en" ? "0 0 14px rgba(214,255,63,0.55), 0 0 4px rgba(214,255,63,0.35)" : "none",
+                  color: lang === "en" ? "#d6ff3f" : "#9aa18c",
+                  textShadow: lang === "en" ? "0 0 8px rgba(214,255,63,0.85)" : "none",
+                  opacity: lang === "en" ? 1 : 0.55,
+                }}
+              >
+                <img
+                  src="/flags/us.svg"
+                  alt="US"
+                  style={{
+                    width: "20px",
+                    height: "14px",
+                    objectFit: "cover",
+                    borderRadius: "2px",
+                    filter: lang === "en" ? "drop-shadow(0 0 6px rgba(214,255,63,0.75))" : "none",
+                  }}
+                />
+                EN
+              </button>
+            </div>
             <SignedOut>
               <Link
                 to="/login"
@@ -172,7 +225,7 @@ function Hero() {
       <div className="hero-ring pointer-events-none absolute inset-0" />
       <div className="anim-in pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-2 bg-gradient-to-t from-bg via-bg/80 to-transparent px-4 pb-5 pt-14 text-center">
         <p className="max-w-3xl font-pixel text-xl tracking-wide text-neon md:text-2xl">
-          DA FLORESTA PROFUNDA, UMA NOVA <span className="utopia-bug" data-text="UTOPIA">UTOPIA</span> SURGE.
+          DO COMETA VERDE, UMA NOVA <span className="utopia-bug" data-text="PISTA">PISTA</span> NASCE.
         </p>
         <div className="pointer-events-auto flex flex-wrap justify-center gap-3">
           <a
@@ -181,17 +234,17 @@ function Hero() {
             rel="noreferrer"
             className="inline-flex min-h-11 items-center bg-neon px-4 font-pixel text-3xl text-ink"
           >
-            Lista de espera
+            Avise-me
           </a>
           <ClientOnly>
             <SignedIn>
               <Link to="/modos" className="inline-flex min-h-11 items-center border border-neon px-4 font-pixel text-3xl text-neon">
-                Ir pra pista
+                Ir para a pista
               </Link>
             </SignedIn>
           </ClientOnly>
           <a href="#sobre" className="inline-flex min-h-11 items-center border border-ember px-4 font-pixel text-3xl text-ember">
-            Descer
+            Ver mais
           </a>
         </div>
       </div>
@@ -302,24 +355,23 @@ function Sobre() {
         <Reveal delay={80}>
         <div className="relative border border-neon bg-bg/80 p-6">
           <div className="scanlines pointer-events-none absolute inset-0" />
-          <h2 className="glitch-title relative font-pixel text-4xl text-ember md:text-5xl" data-text="> REGISTRO_ALIENIGENA.EXE">
-            {"> REGISTRO_ALIENIGENA.EXE"}
+          <h2 className="glitch-title relative font-pixel text-4xl text-ember md:text-5xl" data-text="> DIÁRIO_DO_COMETA">
+            {"> DIÁRIO_DO_COMETA"}
           </h2>
           <p className="relative mt-4 text-pretty leading-relaxed text-muted">
-            O cometa não era pedra. Era gosma, fauna e osso. Cobriu a Terra, as duas biosferas fundiram, e a guerra
-            entre humanos e draconianos ia apagar o que sobrou.
+            Um cometa verde caiu na Terra e acordou os dinos. Humanos e dinos agora dividem a Cidade-Faixa.
           </p>
           <p className="relative mt-3 text-pretty leading-relaxed text-neon">
-            Os líderes sentaram. Projetaram a faixa. A briga virou arrancada: marcha no osso, nitro na hora, 1 contra 1.
+            Lá, ninguém briga no braço. Briga se resolve na pista: arrancada, 1 contra 1.
           </p>
           <ul className="relative mt-6 space-y-4">
             <li className="border-l-4 border-ember pl-4">
               <h3 className="font-pixel text-3xl text-ember">Tecnologia on-chain</h3>
-              <p className="text-sm text-pretty text-muted">Cada carro cunhado é um NFT único. Lendário não se compra. Sai na roleta.</p>
+              <p className="text-sm text-pretty text-muted">Cada carro tem número de série na sua garagem. Lendário não se compra: você conquista.</p>
             </li>
             <li className="border-l-4 border-neon pl-4">
-              <h3 className="font-pixel text-3xl text-neon">Economia da faixa</h3>
-              <p className="text-sm text-pretty text-muted">A moeda é fóssil. Corrida, modo história e peças pagam na mesma ficha.</p>
+              <h3 className="font-pixel text-3xl text-neon">Fósseis da pista</h3>
+              <p className="text-sm text-pretty text-muted">A moeda é o fóssil. Corrida, modo história e missões pagam na mesma conta.</p>
             </li>
           </ul>
         </div>
@@ -339,9 +391,9 @@ function Garagem() {
       </Reveal>
       <div className="mx-auto max-w-6xl px-4 py-14">
         <Reveal>
-        <h2 className="text-center font-pixel text-5xl text-ember md:text-6xl">Plataforma de extração</h2>
+        <h2 className="text-center font-pixel text-5xl text-ember md:text-6xl">Galeria de carros</h2>
         <p className="mx-auto mt-2 max-w-xl text-center text-pretty text-muted">
-          Passe o mouse no cartão. Ele inclina. Os oito lendários não estão na prateleira.
+          Passe o mouse no cartão para ele inclinar. Os oito lendários não estão à venda.
         </p>
         </Reveal>
         <ul className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -377,12 +429,12 @@ function Garagem() {
                       <dd className="text-neon">Lendário</dd>
                     </div>
                   </dl>
-                  <p className="mt-3 flex-1 text-sm text-pretty text-muted">Não está na prateleira. Só sai na roleta.</p>
+                  <p className="mt-3 flex-1 text-sm text-pretty text-muted">Não está à venda. Só se conquista.</p>
                   <Link
                     to="/loja"
                     className={`mt-4 inline-flex min-h-11 items-center justify-center border font-pixel text-2xl ${car.tone === "neon" ? "border-neon text-neon hover:bg-neon hover:text-ink" : "border-ember text-ember hover:bg-ember hover:text-ink"}`}
                   >
-                    Abrir a roleta
+                    Ver os lendários
                   </Link>
                 </article>
               </Tilt>
@@ -433,9 +485,9 @@ function Nucleo() {
     <section id="nucleo" className="scroll-mt-20 px-4 py-20">
       <div className="mx-auto max-w-6xl">
         <Reveal>
-        <h2 className="text-center font-pixel text-5xl text-neon md:text-6xl">Núcleo de distribuição</h2>
+        <h2 className="text-center font-pixel text-5xl text-neon md:text-6xl">Coração da pista</h2>
         <p className="mx-auto mt-2 max-w-xl text-center text-pretty text-muted">
-          O coração reparte o que a faixa gera. O pulso só liga com o mouse em cima.
+          A pista pulsa com cada corrida. Passe o mouse para ver.
         </p>
         </Reveal>
         <Reveal delay={80}>
@@ -444,7 +496,7 @@ function Nucleo() {
             <HoverClip
               src="/home/core.mp4"
               poster="/home/core.jpg"
-              label="Coração mecânico repartindo play-to-earn, liquidez, crescimento e marketing"
+              label="Coração mecânico de osso brilhando em ciano"
             />
           </div>
         </Tilt>
@@ -456,18 +508,18 @@ function Nucleo() {
 
 function Gestacao() {
   const steps = [
-    ["01", "Sorteio", "A roleta escolhe a linhagem antes de existir desenho. Comum, raro, épico ou lendário."],
-    ["02", "Corpo", "A oficina monta um veículo que ainda não tinha ID. Chapa humana, osso e cabo de nave."],
-    ["03", "Registro", "Se o piloto aceita, o giro é gravado e o NFT fica preso na ficha. Depois de aceitar, não muda."],
+    ["01", "Sorteio da classe", "O ovo escolhe a classe do carro: comum, raro, épico ou lendário."],
+    ["02", "Montagem", "A oficina monta o carro: chapa humana, osso e cabo de nave."],
+    ["03", "Garagem", "Aceitou? O carro vai para a sua garagem com um número só dele."],
   ];
 
   return (
     <section id="gestacao" className="scroll-mt-20 border-t border-border px-4 py-20">
       <div className="mx-auto max-w-6xl">
         <Reveal>
-          <h2 className="text-center font-pixel text-5xl text-neon md:text-6xl">Gestação</h2>
+          <h2 className="text-center font-pixel text-5xl text-neon md:text-6xl">Como nasce um carro</h2>
           <p className="mx-auto mt-2 max-w-xl text-center text-pretty text-muted">
-            O NFT não sai da prateleira. Ele é gerado na oficina, visto, e só então gravado. O vídeo só liga com o mouse em cima.
+            Cada carro nasce na oficina, com peças de osso e sucata. Passe o mouse para ver o vídeo.
           </p>
         </Reveal>
         <Reveal delay={80}>
@@ -476,7 +528,7 @@ function Gestacao() {
               <HoverClip
                 src="/home/gestation.mp4"
                 poster="/home/gestation.jpg"
-                label="Oficina onde os NFTs de carro são gerados"
+                label="Oficina onde os carros nascem"
               />
             </div>
           </Tilt>
@@ -502,17 +554,17 @@ function Airdrop({ onNote }: { onNote: (message: string) => void }) {
     <section id="airdrop" className="scroll-mt-20 border-t border-border bg-surface px-4 py-20">
       <Reveal>
       <div className="mx-auto max-w-3xl border border-neon bg-bg px-6 py-12 text-center">
-        <h2 className="font-pixel text-5xl text-neon md:text-6xl">Ponto de extração</h2>
+        <h2 className="font-pixel text-5xl text-neon md:text-6xl">Prêmios</h2>
         <p className="mx-auto mt-4 max-w-lg text-pretty text-muted">
-          A rede social ainda não abre o baú. Quem já extrai é quem corre: fóssil cai na ficha.
+          Quem corre ganha: os fósseis caem na conta depois de cada corrida.
         </p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <button
             type="button"
-            onClick={() => onNote("O canal ainda está fora do ar. A ficha já entra.")}
+            onClick={() => onNote("O canal ainda está fechado. A pista já está aberta.")}
             className="min-h-11 border border-ember px-4 font-pixel text-2xl text-ember"
           >
-            [ + ] Seguir no Twitter
+            [ + ] Seguir no X
           </button>
           <a
             href="https://discord.com/channels/1103133770984468550"
@@ -530,7 +582,7 @@ function Airdrop({ onNote }: { onNote: (message: string) => void }) {
               search={{ modo: "criar" }}
               className="mt-8 inline-flex min-h-12 w-full items-center justify-center bg-neon font-pixel text-3xl text-ink"
             >
-              Reivindicar na ficha
+              Ver na minha conta
             </Link>
           </SignedOut>
           <SignedIn>
@@ -538,7 +590,7 @@ function Airdrop({ onNote }: { onNote: (message: string) => void }) {
               to="/pista"
               className="mt-8 inline-flex min-h-12 w-full items-center justify-center bg-neon font-pixel text-3xl text-ink"
             >
-              Correr e extrair
+              Correr e ganhar
             </Link>
           </SignedIn>
         </ClientOnly>
@@ -560,19 +612,19 @@ function Footer({ onNote }: { onNote: (message: string) => void }) {
           muted
           loop
           playsInline
-          aria-label="Lixão de osso, sucata e letreiro Dino Drag Race"
+          aria-label="Ferro-velho de osso e sucata com o letreiro Dino Drag Race"
           className="w-full object-cover"
         />
       </div>
       </Reveal>
       <Reveal>
       <div className="mx-auto max-w-6xl px-4 pt-12">
-        <h2 className="text-center font-pixel text-4xl text-muted">Roadmap · fases de ignição</h2>
+        <h2 className="text-center font-pixel text-4xl text-muted">Próximas fases</h2>
         <ul className="mt-8 grid gap-4 md:grid-cols-3">
           {[
-            ["Fase 1 · Ignição", "Site no ar. Ficha. Mint de gênese na roleta.", "text-neon"],
-            ["Fase 2 · Aceleração", "Fóssil na faixa. Modo história. Peças na oficina.", "text-ember"],
-            ["Fase 3 · Dominação", "Torneio. Upgrade de lenda. A Ronin segura o NFT.", "text-muted"],
+            ["Fase 1 · Largada", "Site no ar. Conta. Primeiros carros.", "text-neon"],
+            ["Fase 2 · Aceleração", "Fósseis na pista. Modo história. Peças na oficina.", "text-ember"],
+            ["Fase 3 · Campeonato", "Torneio. Carros lendários. Novos rivais.", "text-muted"],
           ].map(([title, body, tone]) => (
             <li key={title} className="border border-border bg-surface p-5">
               <h3 className={`font-pixel text-3xl ${tone}`}>{title}</h3>
@@ -583,12 +635,12 @@ function Footer({ onNote }: { onNote: (message: string) => void }) {
         <div className="mt-10 flex flex-col items-center gap-4">
           <button
             type="button"
-            onClick={() => onNote("O whitepaper ainda está na forja. A pista já está aberta.")}
+            onClick={() => onNote("O livro do jogo ainda está na forja. A pista já está aberta.")}
             className="min-h-11 border border-border px-5 font-pixel text-2xl text-muted hover:border-neon hover:text-neon"
           >
             [ LER_WHITEPAPER.DAT ]
           </button>
-          <p className="font-pixel text-xl text-muted">© 2026 Dino Drag Race. A faixa continua.</p>
+          <p className="font-pixel text-xl text-muted">© 2026 Dino Drag Race. A pista continua.</p>
           <p className="flex gap-4 font-pixel text-xl text-muted">
             <Link to="/privacidade" className="hover:text-neon">Privacidade</Link>
             <Link to="/termos" className="hover:text-neon">Termos</Link>
@@ -638,7 +690,7 @@ function Notice({ message, onClose }: { message: string; onClose: () => void }) 
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-bg/90 p-4" role="dialog" aria-modal="true">
       <div className="w-full max-w-md border border-ember bg-bg p-6 text-center">
-        <h2 className="font-pixel text-3xl text-ember">{"> AVISO DO SISTEMA"}</h2>
+        <h2 className="font-pixel text-3xl text-ember">{"> AVISO"}</h2>
         <p className="mt-4 text-pretty text-muted">{message}</p>
         <button type="button" onClick={onClose} className="mt-6 min-h-11 border border-neon px-5 font-pixel text-2xl text-neon">
           Fechar

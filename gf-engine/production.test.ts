@@ -184,6 +184,7 @@ describe("produção e estoque", () => {
   it("em 4 semanas o CMV da DRE é a soma do material consumido", () => {
     let state = createInitialState(9, "Téo");
     state.cash = 20000;
+    state.flags.xp = 250;
     for (let i = 0; i < 3; i += 1) state = applyAction(state, { type: "WORK", jobId: "reparo" }, contentV1).state;
     state = applyAction(state, { type: "END_DAY" }, contentV1).state;
     state = applyAction(state, { type: "WORK", jobId: "reparo" }, contentV1).state;

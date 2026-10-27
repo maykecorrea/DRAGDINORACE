@@ -1,0 +1,48 @@
+{
+ "name": "Sanguessuga ciano",
+ "description": "Dino Drag Race — Sanguessuga ciano (Raro). 18 de dano. 18 tiros. 0.84s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/120.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 18,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 18,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.84,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Raro-3",
+  "stats": "dmg=18;clip=18;cd=0.84;lock=3.4"
+ }
+}

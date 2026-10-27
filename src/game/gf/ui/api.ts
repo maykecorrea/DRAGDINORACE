@@ -67,15 +67,15 @@ export async function startRun(playerName: string): Promise<GfRun> {
   const body = await readBody(res);
   if (res.status === 409) {
     const run = await fetchRun();
-    const err = new GfApiError(409, "Atualizado em outra aba");
+    const err = new GfApiError(409, "O jogo foi aberto em outra aba.");
     err.run = run;
     throw err;
   }
   if (!res.ok) {
-    throw new GfApiError(res.status, typeof body.error === "string" ? body.error : "Não deu para herdar a oficina.");
+    throw new GfApiError(res.status, typeof body.error === "string" ? body.error : "Não deu para começar a oficina.");
   }
   const run = asRun(body.run);
-  if (!run) throw new GfApiError(422, "A oficina não devolveu a campanha.");
+  if (!run) throw new GfApiError(422, "Não deu para carregar a campanha.");
   rememberRev(run.rev);
   return run;
 }
@@ -105,12 +105,12 @@ export async function act(action: Record<string, unknown>): Promise<{ rev: numbe
     const embedded = asRun(body.run);
     const run = embedded ?? (await fetchRun());
     if (run) rememberRev(run.rev);
-    const err = new GfApiError(409, "Atualizado em outra aba");
+    const err = new GfApiError(409, "O jogo foi aberto em outra aba.");
     err.run = run;
     throw err;
   }
   if (!res.ok || typeof body.rev !== "number" || !body.state) {
-    throw new GfApiError(res.status || 422, typeof body.error === "string" ? body.error : "Não deu para fazer isso.");
+    throw new GfApiError(res.status || 422, typeof body.error === "string" ? body.error : "Opa, isso não deu certo. Tente de novo.");
   }
   rememberRev(body.rev);
   const unlocks = Array.isArray(body.unlocks) ? (body.unlocks as { key: string; title: string; line: string }[]) : [];

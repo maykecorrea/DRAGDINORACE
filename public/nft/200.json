@@ -1,0 +1,33 @@
+{
+ "name": "Visor de íon",
+ "description": "Dino Drag Race — Visor de íon (Raro). +6% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/200.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "lente"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "6%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-lente-Raro-2",
+  "stats": "vmax+6%"
+ }
+}

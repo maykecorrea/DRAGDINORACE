@@ -1,0 +1,48 @@
+{
+ "name": "Arco de sucata",
+ "description": "Dino Drag Race — Arco de sucata (Normal). 46 de dano. 4 tiros. 1.60s. Deixa lerdo. Muito dano e deixa o carro lerdo. Difícil de cravar.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/106.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ray"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 46,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.6,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Slowtime",
+   "value": 2.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ray-Normal",
+  "stats": "dmg=46;clip=4;cd=1.6;slow=0.55x/2.4s"
+ }
+}

@@ -186,7 +186,7 @@ export function CarShow({ target, onClose }: { target: SpinTarget; onClose: () =
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div>
             <p className="font-display text-4xl leading-none">{target.name}</p>
-            <p className="text-sm text-muted">{target.car} · giro de estúdio</p>
+            <p className="text-sm text-muted">{target.car}  · vitrine</p>
           </div>
           <button type="button" className="min-h-11 border border-border px-4 text-sm" onClick={onClose}>
             Fechar

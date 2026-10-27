@@ -1,0 +1,33 @@
+{
+ "name": "Sola de dente",
+ "description": "Dino Drag Race — Sola de dente (Normal). +10 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/192.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "bota"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 10,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-bota-Normal-3",
+  "stats": "accel+10"
+ }
+}

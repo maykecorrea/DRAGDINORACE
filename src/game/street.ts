@@ -20,7 +20,7 @@ const ROWS: [string, string, DriverId, StreetCar["rarity"]][] = [
   ["calha", "CALHA", "geck", "Normal"],
   ["gancho", "GANCHO", "claw", "Normal"],
   ["tambor", "TAMBOR", "nyx", "Normal"],
-  ["valvula", "VALVULA", "lua", "Normal"],
+  ["valvula", "VÁLVULA", "lua", "Normal"],
   ["escora", "ESCORA", "shell", "Normal"],
   ["costela", "COSTELA", "vex", "Normal"],
   ["fenda", "FENDA", "geck", "Normal"],

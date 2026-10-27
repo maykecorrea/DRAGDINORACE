@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cardById } from "../../../../gf-engine/cards.ts";
-import { clockLabel, partsOf } from "../../../../gf-engine/clock.ts";
+import { clockLabel, partsOf, placeOpen } from "../../../../gf-engine/clock.ts";
 import type { Content } from "../../../../gf-engine/content.ts";
-import { leadVisible, quotePreview, workIndex } from "../../../../gf-engine/contracts.ts";
+import { DEPOSITS, leadVisible, quotePreview, workIndex } from "../../../../gf-engine/contracts.ts";
 import { netWorth } from "../../../../gf-engine/finance.ts";
 import { formatF } from "../../../../gf-engine/format.ts";
 import { missingMaterials } from "../../../../gf-engine/production.ts";
-import { here, supplierAt } from "../../../../gf-engine/district.ts";
+import { clientHome, here, illnessOffer, medOffer, placeNome, supplierAt } from "../../../../gf-engine/district.ts";
+import type { PlaceId } from "../../../../gf-engine/district.ts";
 import type { GameState, Job, Lead, MaterialId, Receivable, WeekSummary } from "../../../../gf-engine/state.ts";
 import { act, GfApiError, rememberRev, type GfRun } from "./api";
 import { CrewDesk } from "./CrewDesk";
@@ -14,10 +15,16 @@ import { DebtDesk } from "./DebtDesk";
 import { Face } from "./Face";
 import { CardModal, PhoneDesk } from "./Phone";
 import { GF } from "./pixel";
+import { AgendaPhone } from "./Agenda";
 import { AuctionDesk } from "./AuctionDesk";
+import { Coliseu } from "./Coliseu";
 import { CityStage } from "./v2/CityStage";
-import { HubScene } from "./v2/HubScene";
+import { HubScene, DadGhost } from "./v2/HubScene";
 import { HudV2 } from "./v2/HudV2";
+import { CentralTela } from "./v2/CentralEntrega";
+import { AjustesPainel, CadernoTela, CofreTela, ElevadorTela, FogaoTela, PrateleiraTela, QuadroTela, QuartoTela } from "./v2/OficinaTelas";
+import { PayModal } from "./v2/PayModal";
+import { PhoneShell, type PhoneApp } from "./v2/PhoneShell";
 import { Notebook } from "./Notebook";
 import { ReserveDesk } from "./ReserveDesk";
 import { StockDesk } from "./StockDesk";
@@ -26,10 +33,35 @@ import { GLOSS, dayShort, describeEvents, priceFromPct } from "./text";
 import { blip } from "./sound";
 import { Workshop } from "./Workshop";
 import "./v2/v2.css";
+import "./v2/mapa-mundi.css";
 
-type Screen = "hub" | "clients" | "bays" | "stock" | "crew" | "bank" | "reserve" | "phone" | "notebook" | "obra" | "auction" | "map" | "shop";
+type Screen = "hub" | "clients" | "bays" | "stock" | "crew" | "bank" | "reserve" | "phone" | "notebook" | "obra" | "auction" | "map" | "shop" | "coliseu" | "quarto" | "fogao" | "central";
 type FeedLine = { icon: string; text: string };
-const DEPOSITS = [0, 30, 50, 100] as const;
+const SHOP_BG: Partial<Record<PlaceId, string>> = {
+  ferro_velho: "/assets/gf/v2/lugares/bg_lugar_ferrovelho.jpg",
+  megaosso: "/assets/gf/v2/lugares/bg_lugar_megaosso.jpg",
+  casco_tech: "/assets/gf/v2/lugares/bg_lugar_cascotech.jpg",
+  rato: "/assets/gf/v2/lugares/bg_lugar_beco_rato.jpg",
+};
+
+const EV_ICON: Record<string, string> = {
+  "✔": "/assets/gf/v2/ui2/ev_sucesso.png",
+  "✖": "/assets/gf/v2/ui2/ev_falha.png",
+  "…": "/assets/gf/v2/ui2/ev_andamento.png",
+  "♥": "/assets/gf/v2/ui2/ev_saude.png",
+  "☾": "/assets/gf/v2/ui2/ev_noite.png",
+  "★": "/assets/gf/v2/ui2/ev_nivel.png",
+  "☎": "/assets/gf/v2/ui2/ev_recado.png",
+  "✎": "/assets/gf/v2/ui2/ev_licao.png",
+  "▣": "/assets/gf/v2/ui2/ev_semana.png",
+  "!": "/assets/gf/v2/ui/ui_selo_alerta.png",
+};
+
+function EvIcon({ icon }: { icon: string }) {
+  const src = EV_ICON[icon];
+  if (!src) return <>{icon} </>;
+  return <img className="gf-evico" src={src} alt="" />;
+}
 
 function layoutNow(): { phone: boolean } {
   if (typeof window === "undefined") return { phone: false };
@@ -133,13 +165,49 @@ function Yard({ level, bays }: { level: number; bays: number }) {
   );
 }
 
+function kindOf(icon?: string): "ok" | "erro" | "alerta" | "info" {
+  if (icon === "✔" || icon === "★") return "ok";
+  if (icon === "✖") return "erro";
+  if (icon === "!") return "alerta";
+  return "info";
+}
+
+function hushDev(text: string): string {
+  const t = text.trim();
+  if (
+    t === "Ação não reconhecida." ||
+    t === "A ordem precisa ter os cinco grupos." ||
+    t === "Essa conta não fecha." ||
+    t === "O valor principal não fecha." ||
+    t === "A meta não fecha." ||
+    t === "O depósito não fecha." ||
+    t === "Esse produto não existe." ||
+    t === "Não tem dívida para juntar." ||
+    t === "Esse final não existe." ||
+    t === "O modo de teste está desligado neste servidor." ||
+    t === "Comando de teste desconhecido." ||
+    / não é um número\.$/.test(t) ||
+    / inválido\.$/.test(t)
+  ) return "Opa, isso não deu certo. Tente de novo.";
+  return t;
+}
+
+function failLine(action: Record<string, unknown>, err: unknown): string {
+  const raw = err instanceof Error ? hushDev(err.message) : "";
+  if (raw === "Opa, isso não deu certo. Tente de novo.") return raw;
+  if (raw && !raw.startsWith("Opa, isso não deu certo") && raw.length <= 70) return raw;
+  if (/fetch|network|failed/i.test(raw)) return "Sem rede. Nada foi salvo.";
+  if (action.type === "COOK") return "Não cozinhou: falta ingrediente ou nível.";
+  if (action.type === "EAT") return "Não comeu: esse prato não está na despensa.";
+  if (action.type === "BUY_FOOD") return "Não comprou: faltou dinheiro ou a loja fechou.";
+  return "Não salvou. Tenta de novo.";
+}
+
 export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Content; onRun: (run: GfRun) => void; onLeave: () => void }) {
   const state = run.state;
   const [screen, setScreen] = useState<Screen>("hub");
   const [mapOpen, setMapOpen] = useState(false);
   const [layout, setLayout] = useState(layoutNow);
-  const [toast, setToast] = useState<string | null>(null);
-  const [feed, setFeed] = useState<FeedLine[]>([]);
   const [hint, setHint] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [proposalId, setProposalId] = useState<string | null>(null);
@@ -149,8 +217,28 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
   const [week, setWeek] = useState<WeekSummary | null>(null);
   const [need, setNeed] = useState<{ material: MaterialId; qty: number } | null>(null);
   const [openCard, setOpenCard] = useState<string | null>(null);
+  const [phoneApp, setPhoneApp] = useState<PhoneApp | null>(null);
+  const [aim, setAim] = useState<PlaceId | null>(null);
+  const [payQueue, setPayQueue] = useState<number[]>([]);
+  const [reneg, setReneg] = useState<number | null>(null);
+  const [rankUp, setRankUp] = useState<string | null>(null);
+  const [report, setReport] = useState<{ title: string; lines: FeedLine[] } | null>(null);
+  const [log, setLog] = useState<(FeedLine & { day?: number })[]>([]);
+  const [debugOn] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("debug") === "1");
+  const [debugWeek, setDebugWeek] = useState("6");
   const [tips, setTips] = useState(true);
   const [dad, setDad] = useState(true);
+  const [ajustes, setAjustes] = useState(false);
+  const [cashOpen, setCashOpen] = useState(false);
+  const [arrive, setArrive] = useState(0);
+  const [notices, setNotices] = useState<{ id: number; text: string; icon: "ok" | "erro" | "alerta" | "info" }[]>([]);
+  const [toastOut, setToastOut] = useState(false);
+  const noticeSeq = useRef(0);
+  const trap = useRef<(() => boolean) | null>(null);
+  const mapEsc = useRef<(() => boolean) | null>(null);
+  const bindMapEsc = useCallback((handler: (() => boolean) | null) => {
+    mapEsc.current = handler;
+  }, []);
   const lock = useRef(false);
   const openedSent = useRef(new Set<string>());
 
@@ -187,20 +275,63 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
     };
   }, []);
 
+  const showing = notices[0]?.id;
   useEffect(() => {
-    if (!toast) return;
-    const timer = window.setTimeout(() => setToast(null), 4200);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
+    if (showing == null) return;
+    setToastOut(false);
+    const fade = window.setTimeout(() => setToastOut(true), 4200);
+    const timer = window.setTimeout(() => {
+      setNotices((queue) => queue.filter((item) => item.id !== showing));
+      setToastOut(false);
+    }, 4400);
+    return () => {
+      window.clearTimeout(fade);
+      window.clearTimeout(timer);
+    };
+  }, [showing]);
 
   useEffect(() => {
-    if (!proposalId) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setProposalId(null);
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (trap.current?.()) return;
+      if (openCard) {
+        setOpenCard(null);
+        return;
+      }
+      if (report) {
+        setReport(null);
+        return;
+      }
+      if (cashOpen) {
+        setCashOpen(false);
+        return;
+      }
+      if (phoneApp) {
+        setPhoneApp(null);
+        return;
+      }
+      if (ajustes) {
+        setAjustes(false);
+        return;
+      }
+      if (proposalId) {
+        setProposalId(null);
+        return;
+      }
+      if (screen !== "hub") {
+        setScreen("hub");
+        return;
+      }
+      if (mapOpen) {
+        if (mapEsc.current?.()) return;
+        setMapOpen(false);
+      }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [proposalId]);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [ajustes, proposalId, phoneApp, report, mapOpen, screen, openCard, cashOpen]);
 
   const blockingId = state.cardQueue.find((item) => cardById(pack, item.cardId)?.blocking)?.cardId ?? null;
 
@@ -209,8 +340,7 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
   }, [blockingId, state.calendar.week, state.calendar.day]);
 
   useEffect(() => {
-    if (screen !== "hub" && screen !== "map" && !mapOpen) return;
-    if (openCard || blockingId || state.clock?.paused || state.ending) return;
+    if (openCard || blockingId || state.ending) return;
     let last = performance.now();
     const timer = window.setInterval(() => {
       if (document.hidden || lock.current) {
@@ -231,7 +361,7 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onVis);
     };
-  }, [screen, mapOpen, openCard, blockingId, state.clock?.paused, state.ending, run.rev]);
+  }, [openCard, blockingId, state.ending, run.rev]);
 
   useEffect(() => {
     if (!openCard) return;
@@ -244,6 +374,17 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
       if (!ok) openedSent.current.delete(key);
     });
   }, [openCard, run.id, state.cardQueue]);
+
+  function pushNotice(text: string, icon: "ok" | "erro" | "alerta" | "info" = "info") {
+    const clean = hushDev(text.replaceAll("{nome}", state.player.name || "Téo")).trim();
+    if (!clean) return;
+    setToastOut(false);
+    setNotices((queue) => {
+      if (queue.some((item) => item.text === clean)) return queue;
+      noticeSeq.current += 1;
+      return [...queue, { id: noticeSeq.current, text: clean, icon }];
+    });
+  }
 
   async function go(action: Record<string, unknown>) {
     if (lock.current) return;
@@ -259,24 +400,107 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
         state: result.state,
       });
       const lines = describeEvents(result.events, result.state, pack);
-      if (lines.length > 0) setFeed((prev) => [...lines, ...prev].slice(0, 8));
+      const renegotiated = result.events.find((event) => event.type === "DEBT_PAID" && event.text === "renegociado");
+      const kind = String(action.type ?? "");
+      const dest = typeof action.place === "string" ? action.place : "";
+      const traveling = (kind === "TRAVEL" || kind === "OSSOBUS") && dest.length > 0;
+      if (lines.length > 0 && kind !== "TICK" && kind !== "SET_SPEED" && kind !== "BUY_MED" && kind !== "TREAT" && kind !== "DEBUG" && kind !== "COOK" && kind !== "EAT" && kind !== "BUY_FOOD" && !traveling) {
+        const day = result.state.calendar.week * 10 + result.state.calendar.day;
+        setLog((prev) => [...lines.map((line) => ({ ...line, day })), ...prev.filter((line) => line.day === day)].slice(0, 12));
+        if (!renegotiated) {
+          const morning = result.events.some((event) => event.type === "DAY_ENDED" || event.type === "FAINTED");
+          const client = result.events.some((event) =>
+            event.type === "PROPOSAL_ACCEPTED" ||
+            event.type === "PROPOSAL_REFUSED" ||
+            event.type === "COUNTER_OFFER" ||
+            event.type === "PAID" ||
+            event.type === "DEFAULT" ||
+            event.type === "JOB_OPENED" ||
+            event.type === "DELIVERED",
+          );
+          setReport({
+            title: morning ? "Amanheceu" : client ? "O cliente respondeu" : "O que rolou na oficina",
+            lines,
+          });
+          setMapOpen(false);
+        }
+      }
+      if (traveling && !renegotiated) {
+        const landed = result.events.some((event) => event.type === "TRAVELED");
+        if (lines.length > 0) {
+          const day = result.state.calendar.week * 10 + result.state.calendar.day;
+          setLog((prev) => [...lines.map((line) => ({ ...line, day })), ...prev.filter((line) => line.day === day)].slice(0, 12));
+        }
+        const place = dest as PlaceId;
+        if (!landed) {
+          if (lines.length > 0) {
+            setScreen("hub");
+            setMapOpen(false);
+            setReport({ title: "O que rolou na oficina", lines });
+          }
+        } else if (place === "oficina") {
+          setScreen("hub");
+          setMapOpen(false);
+          if (lines.length > 0) setReport({ title: "O que rolou na oficina", lines });
+        } else {
+          setAim(place);
+          setArrive((n) => n + 1);
+          setScreen("hub");
+          setMapOpen(true);
+        }
+      }
+      if (renegotiated) {
+        setReneg(renegotiated.amount ?? 0);
+        setMapOpen(false);
+      }
+      const paid = result.events.find((event) => (event.type === "PAID" || event.type === "COLISEU_WIN") && (event.amount ?? 0) > 0);
+      if (paid?.amount) {
+        setPayQueue((queue) => [...queue, paid.amount!]);
+        setMapOpen(false);
+      }
+      const ranked = result.events.find((event) => event.type === "LEVEL_UP");
+      if (ranked?.text) setRankUp(ranked.text);
       if (result.unlocks[0]) {
-        setToast(`${result.unlocks[0].title}. ${result.unlocks[0].line}`);
+        pushNotice(`${result.unlocks[0].title}. ${result.unlocks[0].line}`, "info");
         blip("coin");
       } else if (result.events.some((event) => event.type === "CARD" || event.type === "PAID")) {
         blip(result.events.some((event) => event.type === "PAID") ? "coin" : "note");
       }
       const closed = result.events.find((event) => event.type === "WEEK_CLOSED" && event.summary);
       if (closed?.summary) setWeek(closed.summary);
-      if (action.type === "SEND_PROPOSAL") setProposalId(null);
+      if (action.type === "TICK") {
+        const notable = result.events.find((event) =>
+          event.type === "PROPOSAL_ACCEPTED" ||
+          event.type === "PROPOSAL_REFUSED" ||
+          event.type === "COUNTER_OFFER" ||
+          event.type === "JOB_OPENED" ||
+          event.type === "MATERIALS_ARRIVED" ||
+          event.type === "MEMORY" ||
+          event.type === "COOKED",
+        );
+        const spoken = notable ? describeEvents([notable], result.state, pack)[0] : undefined;
+        if (spoken) pushNotice(spoken.text, kindOf(spoken.icon));
+      }
+      if (action.type === "SEND_PROPOSAL") {
+        setProposalId(null);
+        setScreen("bays");
+        pushNotice(lines[0]?.text ?? "Proposta enviada! O carro espera o cliente aceitar.", kindOf(lines[0]?.icon));
+      }
+      if (action.type === "ORDER_PARTS") pushNotice(lines[0]?.text ?? "Pedido confirmado. Olha a rota na central.", kindOf(lines[0]?.icon));
       if (action.type === "CARD_CHOICE") setOpenCard(null);
+      if (kind === "COOK" || kind === "EAT" || kind === "BUY_FOOD") {
+        if (lines[0]) pushNotice(lines[0].text, kindOf(lines[0].icon));
+      }
+      if (action.type === "BUY") pushNotice("Pedido feito.", "ok");
+      if (action.type === "BUY_MED") pushNotice("Foi pra mochila.", "ok");
+      if (action.type === "TREAT") pushNotice(lines[0]?.text ?? "Tratado.", kindOf(lines[0]?.icon));
+      if (action.type === "DEBUG") pushNotice(lines[0]?.text ?? "Teste aplicado.", "info");
       return true;
     } catch (err) {
-      if (action.type !== "TICK" && err instanceof GfApiError) {
-        setToast(err.message);
-        if (err.run) onRun(err.run);
-      } else {
-        setToast("Não deu para fazer isso.");
+      if (action.type !== "TICK") {
+        if (err instanceof GfApiError && err.run) onRun(err.run);
+        const text = failLine(action, err);
+        pushNotice(text, text.includes("outra aba") ? "alerta" : "erro");
       }
       return false;
     } finally {
@@ -317,12 +541,20 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
         onDad={setDad}
         onAct={(action) => void go(action)}
         onMap={() => setMapOpen(true)}
-        onOpen={(next) => setScreen(next)}
+        onOpen={(next) => {
+          if (next === "phone") {
+            setPhoneApp("home");
+            return;
+          }
+          setScreen(next);
+        }}
+        onGear={() => { setPhoneApp(null); setAjustes(true); }}
       />
       <div className="gf-body">
-        {screen === "hub" && (
+        {screen !== "bank" && screen !== "coliseu" && (
           <HubScene
             state={state}
+            pack={pack}
             busy={busy}
             dad={dad}
             onAct={(action) => void go(action)}
@@ -331,80 +563,125 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
                 setMapOpen(true);
                 return;
               }
+              if (next === "phone") {
+                setPhoneApp("home");
+                return;
+              }
+              if (next === "caixa") {
+                setCashOpen(true);
+                return;
+              }
               if (next === "stock") setNeed(null);
               setScreen(next);
             }}
           />
         )}
-        {screen === "clients" && (
-          <Clients state={state} pack={pack} busy={busy} phone={phone} onAct={(action) => void go(action)} onProposal={openProposal} onBack={() => setScreen("hub")} />
+        {screen !== "hub" && screen !== "bank" && screen !== "coliseu" && screen !== "clients" && screen !== "bays" && screen !== "stock" && screen !== "notebook" && screen !== "reserve" && screen !== "quarto" && screen !== "fogao" && screen !== "central" && (
+          <div
+            className={`gf-overlay${screen === "shop" ? " is-place" : ""}`}
+            style={screen === "shop" && SHOP_BG[here(state)] ? { backgroundImage: `url(${SHOP_BG[here(state)]})` } : undefined}
+            onClick={(event) => { if (event.target === event.currentTarget) setScreen("hub"); }}
+          >
+            {screen === "shop" &&
+              (supplierAt(here(state)) ? (
+                <StockDesk
+                  state={state}
+                  pack={pack}
+                  busy={busy}
+                  focus={need}
+                  mode="counter"
+                  lockSupplier={supplierAt(here(state)) ?? undefined}
+                  backLabel="Voltar ao mapa"
+                  onAct={(action) => void go(action)}
+                  onBack={() => {
+                    setScreen("hub");
+                    setMapOpen(true);
+                  }}
+                  onClearFocus={() => setNeed(null)}
+                />
+              ) : (
+                <section className="gf-screen">
+                  <button type="button" onClick={() => setMapOpen(true)}>
+                    Voltar ao mapa
+                  </button>
+                  <p>O balcão só abre quando você está na loja.</p>
+                </section>
+              ))}
+            {screen === "crew" && <CrewDesk state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onBack={() => setScreen("hub")} />}
+            {screen === "obra" && <Workshop state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onBack={() => setScreen("hub")} />}
+            {screen === "auction" && <AuctionDesk state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onBack={() => setScreen("hub")} />}
+          </div>
         )}
+        {screen === "clients" && <QuadroTela state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onClose={() => setScreen("hub")} />}
         {screen === "bays" && (
-          <Bays
+          <ElevadorTela
             state={state}
             pack={pack}
             busy={busy}
-            phone={phone}
             onAct={(action) => void go(action)}
-            onBuy={(material, qty) => {
-              setNeed({ material, qty });
-              setMapOpen(true);
-            }}
             onMap={() => setMapOpen(true)}
-            onBack={() => setScreen("hub")}
+            onQuadro={() => setScreen("clients")}
+            onZap={() => { setScreen("hub"); setPhoneApp("zapdino"); }}
+            onClose={() => setScreen("hub")}
           />
         )}
         {screen === "stock" && (
-          <StockDesk
-            state={state}
-            pack={pack}
-            busy={busy}
-            focus={need}
-            mode="shelf"
-            onAct={(action) => void go(action)}
-            onBack={() => setScreen("hub")}
-            onClearFocus={() => setNeed(null)}
-            onMap={() => setMapOpen(true)}
+          <PrateleiraTela state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onMap={() => setMapOpen(true)} onOrder={() => setScreen("central")} onClose={() => setScreen("hub")} />
+        )}
+        {screen === "central" && <CentralTela state={state} busy={busy} onAct={(action) => void go(action)} onClose={() => setScreen("hub")} />}
+        {screen === "notebook" && <CadernoTela state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onClose={() => setScreen("hub")} />}
+        {screen === "reserve" && <CofreTela state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onClose={() => setScreen("hub")} />}
+        {screen === "quarto" && (
+          <QuartoTela state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onFogao={() => setScreen("fogao")} onClose={() => setScreen("hub")} />
+        )}
+        {screen === "fogao" && (
+          <FogaoTela state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onMap={() => setMapOpen(true)} onClose={() => setScreen("hub")} />
+        )}
+        {ajustes && phoneApp !== "config" && (
+          <AjustesPainel
+            tips={tips}
+            dad={dad}
+            trap={trap}
+            onTips={setTips}
+            onDad={setDad}
+            onClose={() => setAjustes(false)}
+            onWipe={onLeave}
           />
         )}
-        {screen === "shop" &&
-          (supplierAt(here(state)) ? (
-            <StockDesk
-              state={state}
-              pack={pack}
-              busy={busy}
-              focus={need}
-              mode="counter"
-              lockSupplier={supplierAt(here(state)) ?? undefined}
-              backLabel="Voltar ao mapa"
-              onAct={(action) => void go(action)}
-              onBack={() => {
-                setScreen("hub");
-                setMapOpen(true);
-              }}
-              onClearFocus={() => setNeed(null)}
-            />
-          ) : (
-            <section className="gf-screen">
-              <button type="button" onClick={() => setMapOpen(true)}>
-                Voltar ao mapa
-              </button>
-              <p>O balcão só abre se você estiver na loja.</p>
-            </section>
-          ))}
-        {screen === "crew" && <CrewDesk state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onBack={() => setScreen("hub")} />}
         {screen === "bank" && (
-          <DebtDesk state={state} pack={pack} busy={busy} phone={phone} onAct={(action) => void go(action)} onReserve={() => setScreen("reserve")} onBack={() => setScreen("hub")} />
+          <DebtDesk state={state} pack={pack} busy={busy} phone={phone} onAct={(action) => void go(action)} onBack={() => setScreen("hub")} />
         )}
-        {screen === "reserve" && <ReserveDesk state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onBack={() => setScreen("bank")} />}
-        {screen === "phone" && <PhoneDesk state={state} pack={pack} onOpen={setOpenCard} onBack={() => setScreen("hub")} />}
-        {screen === "notebook" && (
-          <Notebook state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onBack={() => setScreen("hub")} onLeave={onLeave} />
+        {screen === "coliseu" && (
+          <Coliseu
+            state={state}
+            busy={busy}
+            open={placeOpen(pack, "coliseu", state.clock?.t ?? pack.time.startT)}
+            onAct={(action) => void go(action)}
+            onBack={() => { setScreen("hub"); setMapOpen(true); }}
+          />
         )}
-        {screen === "obra" && <Workshop state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onBack={() => setScreen("hub")} />}
-        {screen === "auction" && <AuctionDesk state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onBack={() => setScreen("hub")} />}
       </div>
-      <Feed hint={hint} lines={feed} />
+      {report && payQueue.length === 0 && !rankUp && reneg == null && (
+        <div className="gf-report" role="dialog" aria-modal="true" aria-label={report.title} onClick={(event) => { if (event.target === event.currentTarget) setReport(null); }}>
+          <article>
+            <h2>{report.title === "O que aconteceu" ? "O que rolou na oficina" : report.title}</h2>
+            <p>Olha só o que aconteceu enquanto você trabalhava:</p>
+            <ul>
+              {report.lines.map((line, index) => (
+                <li key={`${line.text}-${index}`}><EvIcon icon={line.icon} /> {line.text}</li>
+              ))}
+            </ul>
+            <menu>
+              <button type="button" className="is-go gf-ok" onClick={() => setReport(null)}>Beleza!</button>
+            </menu>
+          </article>
+        </div>
+      )}
+      {!report && log.length > 0 && (
+        <button type="button" className="gf-log" onClick={() => setReport({ title: "O que rolou na oficina", lines: log.slice(0, 8) })}>
+          Ver o que houve
+        </button>
+      )}
       {phone && (
         <nav className="gf-v2-tabs" aria-label="Oficina">
           <button type="button" aria-current={screen === "hub" ? "page" : undefined} onClick={() => setScreen("hub")}>Oficina</button>
@@ -440,10 +717,159 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
           onChoose={(optionId) => void go({ type: "CARD_CHOICE", cardId: openCard, optionId })}
         />
       )}
-      {toast && (
-        <p className="gf-toast" role="alert">
-          {toast}
-        </p>
+      {dad && (
+        <DadGhost
+          state={state}
+          line={notices[0]?.text}
+          pose={notices[0] ? (notices[0].icon === "erro" || notices[0].icon === "alerta" ? "alerta" : notices[0].icon === "ok" ? "orgulhoso" : "apontando") : undefined}
+        />
+      )}
+      {payQueue[0] != null && <PayModal amount={payQueue[0]} onClose={() => setPayQueue((queue) => queue.slice(1))} />}
+      {payQueue.length === 0 && reneg != null && (
+        <div className="gf-report" role="dialog" aria-modal="true" aria-label="Renegociado">
+          <article>
+            <h2>Renegociado</h2>
+            <p>O Sr. Juros-Baixo cortou {formatF(reneg)} e deu +1 semana.</p>
+            <menu>
+              <button type="button" className="is-go" onClick={() => setReneg(null)}>Beleza!</button>
+            </menu>
+          </article>
+        </div>
+      )}
+      {payQueue.length === 0 && reneg == null && rankUp && (
+        <button type="button" className="gf-levelup" onClick={() => setRankUp(null)}>
+          <img src="/assets/gf/map/ui/ui_levelup_banner.png" alt="" />
+          <b>Nível {rankUp}</b>
+          <small>Toque para guardar</small>
+        </button>
+      )}
+      {phoneApp && (
+        <PhoneShell
+          app={phoneApp}
+          title={
+            phoneApp === "zapdino" ? "ZapDino"
+            : phoneApp === "clientes" ? "Clientes"
+            : phoneApp === "banco" ? "Banco"
+            : phoneApp === "pecas" ? "Peças"
+            : phoneApp === "mapa" ? "Mapa"
+            : phoneApp === "caderno" ? "Caderno"
+            : phoneApp === "saude" ? "Saúde"
+            : phoneApp === "agenda" ? "Agenda"
+            : phoneApp === "album" ? "Álbum"
+            : phoneApp === "config" ? "Ajustes"
+            : "Celular"
+          }
+          badge={{
+            zapdino: state.cardQueue.filter((item) => !item.opened).length,
+            clientes: state.leads.filter((lead) => (lead.status ?? "open") === "open" || lead.status === "counter").length,
+            entrega: (state.inbound ?? []).filter((order) => order.carrier === "dinoturbo" || order.carrier === "dinodrone").length,
+          }}
+          onOpen={(app) => {
+            if (app === "entrega") {
+              setPhoneApp(null);
+              setScreen("central");
+              return;
+            }
+            setPhoneApp(app);
+          }}
+          onHome={() => setPhoneApp("home")}
+          onClose={() => setPhoneApp(null)}
+        >
+          {phoneApp === "zapdino" && (
+            <PhoneDesk
+              state={state}
+              pack={pack}
+              onOpen={setOpenCard}
+              onBack={() => setPhoneApp("home")}
+              onMap={(place) => { setAim(place); setPhoneApp(null); setScreen("hub"); setMapOpen(true); }}
+            />
+          )}
+          {phoneApp === "clientes" && (
+            <Clients state={state} pack={pack} busy={busy} phone onAct={(action) => void go(action)} onProposal={openProposal} onBack={() => setPhoneApp("home")} />
+          )}
+          {phoneApp === "banco" && (
+            <DebtDesk state={state} pack={pack} busy={busy} phone onAct={(action) => void go(action)} onBack={() => setPhoneApp("home")} />
+          )}
+          {phoneApp === "pecas" && (
+            <StockDesk state={state} pack={pack} busy={busy} focus={need} mode="shelf" onAct={(action) => void go(action)} onBack={() => setPhoneApp("home")} onClearFocus={() => setNeed(null)} onMap={() => { setPhoneApp(null); setMapOpen(true); }} />
+          )}
+          {phoneApp === "mapa" && (
+            <div className="gf-phone-note">
+              <p>O mapa da cidade abre em tela cheia.</p>
+              <button type="button" className="is-go" onClick={() => { setPhoneApp(null); setMapOpen(true); }}>Abrir mapa</button>
+            </div>
+          )}
+          {phoneApp === "caderno" && (
+            <Notebook state={state} pack={pack} busy={busy} onAct={(action) => void go(action)} onBack={() => setPhoneApp("home")} />
+          )}
+          {phoneApp === "saude" && (
+            <Saude state={state} />
+          )}
+          {phoneApp === "agenda" && <AgendaPhone state={state} pack={pack} />}
+          {phoneApp === "album" && (
+            <div className="gf-album">
+              <img className="gf-album-frame" src="/assets/gf/v2/bilhetes/album_bilhetes_moldura.png?v=9" alt="" />
+              <div className="gf-album-body">
+                <h3>Bilhetes do pai</h3>
+                <img src="/assets/gf/v2/bilhetes/bilhete_do_pai.png?v=9" alt="" />
+                {state.lessonsTriggered.length === 0 && <p>O caderno do pai ainda está quieto.</p>}
+                {state.lessonsTriggered.map((id) => (
+                  <p key={id}>{pack.lessons.find((lesson) => lesson.id === id)?.title ?? id}</p>
+                ))}
+                <h3>Achados</h3>
+                <div className="gf-quest-row">
+                  <img src="/assets/gf/v2/quest/q_carrinho_rajadinha.png?v=9" alt="Carrinho da Rajadinha" />
+                  <img src="/assets/gf/v2/quest/q_cofrinho_vaquinha.png?v=9" alt="Cofrinho" />
+                  <img src="/assets/gf/v2/quest/q_desenho_nico.png?v=9" alt="Desenho do Nico" />
+                  <img src="/assets/gf/v2/quest/q_gibi_raptor.png?v=9" alt="Gibi" />
+                </div>
+              </div>
+            </div>
+          )}
+          {phoneApp === "config" && (
+            <AjustesPainel
+              embed
+              tips={tips}
+              dad={dad}
+              trap={trap}
+              onTips={setTips}
+              onDad={setDad}
+              onClose={() => setPhoneApp("home")}
+              onWipe={onLeave}
+            />
+          )}
+        </PhoneShell>
+      )}
+      {cashOpen && (
+        <div className="gf-report" role="dialog" aria-modal="true" aria-label="Caixa" onClick={(event) => { if (event.target === event.currentTarget) setCashOpen(false); }}>
+          <article>
+            <h2>Caixa</h2>
+            <p>Saldo {formatF(state.cash)}.</p>
+            <ul>
+              {log.length === 0 && <li>Nenhum movimento ainda.</li>}
+              {log.slice(0, 8).map((line, index) => (
+                <li key={`${line.text}-${index}`}><EvIcon icon={line.icon} /> {line.text}</li>
+              ))}
+            </ul>
+            <menu>
+              <button type="button" className="is-go gf-ok" onClick={() => setCashOpen(false)}>Fechar</button>
+            </menu>
+          </article>
+        </div>
+      )}
+      {debugOn && (
+        <form className="gf-debug" onSubmit={(event) => event.preventDefault()}>
+          <b>Teste</b>
+          <label>
+            Semana
+            <input inputMode="numeric" value={debugWeek} onChange={(event) => setDebugWeek(event.target.value)} />
+          </label>
+          <button type="button" onClick={() => void go({ type: "DEBUG", op: "week", week: Number(debugWeek) })}>Pular</button>
+          <button type="button" onClick={() => void go({ type: "DEBUG", op: "lesson", id: "L06" })}>Liberar L06</button>
+          <button type="button" onClick={() => void go({ type: "DEBUG", op: "disease", id: "dz_resfriado" })}>Forçar resfriado</button>
+          <button type="button" onClick={() => void go({ type: "DEBUG", op: "cash", amount: 500 })}>+500 ₣</button>
+          <button type="button" onClick={() => void go({ type: "DEBUG", op: "tourney" })}>Abrir torneio</button>
+        </form>
       )}
     </>
   );
@@ -456,7 +882,10 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
           pack={pack}
           busy={busy}
           focus={need}
-          onAct={(action) => void go(action)}
+          aim={aim}
+          arrive={arrive}
+          onEsc={bindMapEsc}
+          onAct={(action) => go(action)}
           onBack={() => setMapOpen(false)}
           onCounter={() => {
             setMapOpen(false);
@@ -466,6 +895,31 @@ export function Office({ run, pack, onRun, onLeave }: { run: GfRun; pack: Conten
             setMapOpen(false);
             setScreen(next);
           }}
+          onClients={() => {
+            setMapOpen(false);
+            setScreen("clients");
+          }}
+        />
+        <HudV2
+          state={state}
+          pack={pack}
+          busy={busy}
+          blocked={Boolean(blockingId)}
+          tips={tips}
+          dad={dad}
+          onTips={setTips}
+          onDad={setDad}
+          onAct={(action) => void go(action)}
+          onMap={() => setMapOpen(false)}
+          onOpen={(next) => {
+            setMapOpen(false);
+            if (next === "phone") {
+              setPhoneApp("home");
+              return;
+            }
+            setScreen(next);
+          }}
+          onGear={() => { setMapOpen(false); setPhoneApp(null); setAjustes(true); }}
         />
       </div>
     </div>
@@ -530,7 +984,6 @@ function Hud({
   const label = clock ? clockLabel(clock.t) : "";
   const face = label.split(" · ")[0] ?? label;
   const week = label.split(" · ")[1] ?? "";
-  const speeds = [1, 2, 4] as const;
   return (
     <header className="gf-hud">
       <div className="gf-when">
@@ -558,27 +1011,6 @@ function Hud({
         <span className={`gf-energy${tired ? " is-low" : ""}${wiped ? " is-out" : ""}`} title={`Energia ${energy}. O corpo no dia. Não é o ânimo.`}>
           <i />
           {energy}
-        </span>
-        <span className="gf-speed">
-          <button
-            type="button"
-            className={`gf-gear${clock?.paused ? " is-on" : ""}`}
-            style={{ backgroundPosition: "0 0" }}
-            disabled={busy}
-            title={clock?.paused ? "Continuar" : "Pausar"}
-            onClick={() => onAct({ type: "SET_SPEED", speed: clock?.speed ?? pack.time?.defaultSpeed ?? 2, paused: !clock?.paused })}
-          />
-          {speeds.map((speed, index) => (
-            <button
-              key={speed}
-              type="button"
-              className={`gf-gear${clock?.speed === speed && !clock?.paused ? " is-on" : ""}`}
-              style={{ backgroundPosition: `${-(index + 1) * 32}px 0` }}
-              disabled={busy}
-              title={`${speed}×`}
-              onClick={() => onAct({ type: "SET_SPEED", speed, paused: false })}
-            />
-          ))}
         </span>
         <button type="button" className="gf-mapbtn" title="Abrir o mapa mundial" onClick={onMap}>
           Mapa
@@ -695,6 +1127,41 @@ function Hub({
   );
 }
 
+function Saude({ state }: { state: GameState }) {
+  const id = typeof state.flags.disease === "string" ? state.flags.disease : "";
+  const ill = id ? illnessOffer(id) : null;
+  const bag = typeof state.flags.meds === "string" ? state.flags.meds : "";
+  const meds = bag.split(",").map((pair) => {
+    const [med, qty] = pair.split(":");
+    return { med: med ?? "", qty: Number(qty) || 0 };
+  }).filter((item) => item.med && item.qty > 0);
+  return (
+    <div className="gf-phone-note">
+      <h3>Ficha</h3>
+      {ill ? (
+        <p>Doença: {ill.nome}. Vá ao hospital. {medOffer(ill.rx)?.nome ?? "O remédio"} está na farmácia.</p>
+      ) : (
+        <p>Sem doença na ficha. O hospital trata se doer.</p>
+      )}
+      <p>Ânimo {state.morale}. Abaixo de 30 o serviço falha mais.</p>
+      <p>Fôlego {Math.floor(state.clock.energy / 4)}h. Cada hora acordado gasta energia.</p>
+      <h3>Mochila</h3>
+      {meds.length === 0 && <p>Sem remédio. A farmácia vende.</p>}
+      {meds.map((item) => (
+        <p key={item.med}>{medOffer(item.med)?.nome ?? item.med} × {item.qty}</p>
+      ))}
+    </div>
+  );
+}
+
+function replyWhen(state: GameState, lead: Lead): string {
+  const at = lead.proposal?.replyAt;
+  if (typeof at !== "number") return "amanhã";
+  const mins = at - state.clock.t;
+  if (mins <= 0) return "agora";
+  return `em ${Math.max(1, Math.round(mins / 60))}h`;
+}
+
 function Clients({
   state,
   pack,
@@ -724,9 +1191,10 @@ function Clients({
         </button>
       )}
       <h2 className="gf-kicker">Quadro de Clientes</h2>
-      {empty && <p>Ninguém na porta. Prospectar no pátio traz gente na outra semana.</p>}
+      {empty && phone && <img className="gf-empty-art" src="/assets/gf/v2/ui2/cel_clientes_vazio.png" alt="" />}
+      {empty && <p>{phone ? "Nenhum cliente ainda." : "Ninguém na porta. Prospectar no pátio traz gente na outra semana."}</p>}
       {counters.map((lead) => (
-        <article key={lead.id} className="gf-panel gf-card">
+        <article key={lead.id} className="gf-panel gf-card animate-gf-buzz motion-reduce:animate-none">
           <Face id={lead.apparentType} salt={lead.id} />
           <div>
             <h3>{clientNome(pack, lead.apparentType)}</h3>
@@ -744,12 +1212,28 @@ function Clients({
               <button type="button" disabled={busy} onClick={() => onAct({ type: "ANSWER_COUNTER", leadId: lead.id, accept: false })}>
                 Recusar
               </button>
+              <button
+                type="button"
+                disabled={busy || here(state) !== clientHome(lead.apparentType)}
+                title={here(state) === clientHome(lead.apparentType) ? "Sobe 3% o preço, no teto da proposta." : `Pechincha só na casa do cliente (${placeNome(clientHome(lead.apparentType))}).`}
+                onClick={() => onAct({ type: "NUDGE_COUNTER", leadId: lead.id, dir: 3 })}
+              >
+                Empurrar +3%
+              </button>
+              <button
+                type="button"
+                disabled={busy || here(state) !== clientHome(lead.apparentType)}
+                title={here(state) === clientHome(lead.apparentType) ? "Aceita 2% abaixo do que ele pediu." : `Pechincha só na casa do cliente (${placeNome(clientHome(lead.apparentType))}).`}
+                onClick={() => onAct({ type: "NUDGE_COUNTER", leadId: lead.id, dir: -2 })}
+              >
+                Ceder −2%
+              </button>
             </div>
           </div>
         </article>
       ))}
       {open.map((lead) => (
-        <article key={lead.id} className="gf-panel gf-card">
+        <article key={lead.id} className="gf-panel gf-card animate-gf-buzz motion-reduce:animate-none">
           <Face id={lead.apparentType} salt={lead.id} />
           <div>
             <h3>{clientNome(pack, lead.apparentType)}</h3>
@@ -760,11 +1244,11 @@ function Clients({
             {lead.record && <p className={lead.record.includes("calote") ? "gf-danger" : undefined}>⚠ {lead.record}</p>}
             <div className="gf-actions">
               <button type="button" className="gf-go" disabled={busy} onClick={() => onProposal(lead)}>
-                Fazer proposta
+                Proposta
               </button>
               {!lead.record && (
                 <button type="button" disabled={busy || state.calendar.apLeft < 1} onClick={() => onAct({ type: "CHECK_RECORD", targetId: lead.id })}>
-                  Consultar ficha (1 PA + 20 ₣)
+                  Ficha · 1 PA + 20 ₣
                 </button>
               )}
             </div>
@@ -779,7 +1263,7 @@ function Clients({
             <p>
               {serviceNome(pack, lead.service)} · <Money n={lead.proposal?.price ?? lead.refPrice} />
             </p>
-            <p>Aguardando resposta amanhã</p>
+            <p>A resposta chega {replyWhen(state, lead)}</p>
           </div>
         </article>
       ))}
@@ -826,8 +1310,8 @@ function Proposal({
   const days = [];
   for (let day = rule.deadlineMin; day <= rule.deadlineMax; day += 1) days.push(day);
   return (
-    <div className="gf-modal" role="dialog" aria-modal="true" aria-label="Proposta">
-      <div className="gf-panel">
+    <div className="gf-modal" role="dialog" aria-modal="true" aria-label="Proposta" onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <div className="gf-panel gf-slice">
         <p className="gf-kicker">{clientNome(pack, lead.apparentType)}</p>
         <h2>{serviceNome(pack, lead.service)}</h2>
         <p>Referência {formatF(lead.refPrice)}</p>
@@ -1093,7 +1577,7 @@ function Feed({ hint, lines }: { hint: string | null; lines: FeedLine[] }) {
           {lines.length === 0 && <li className="gf-dim">A oficina está quieta.</li>}
           {lines.map((line, index) => (
             <li key={`${line.text}-${index}`}>
-              {line.icon} {line.text}
+              {line.icon ? <EvIcon icon={line.icon} /> : null} {line.text}
             </li>
           ))}
         </ul>

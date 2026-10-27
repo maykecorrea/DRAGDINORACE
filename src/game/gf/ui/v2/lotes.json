@@ -1,0 +1,2499 @@
+{
+ "version": "final-pl5_1a",
+ "calibrado": true,
+ "nota": "Coordenadas em px do mapa costurado final (mapa_mundo_full.jpg, 4966x2766). Calibrado na arte HD (overlay mapa_debug_lotes.png).",
+ "world": {
+  "w": 4966,
+  "h": 2766,
+  "bg": "#1b1411"
+ },
+ "preview": {
+  "src": "/assets/gf/v2/mapa_mundi/mapa_preview.jpg",
+  "w": 1600,
+  "h": 891
+ },
+ "tiles": [
+  {
+   "id": "t00",
+   "src": "/assets/gf/v2/mapa_mundi/mapa_tile_0_0.webp",
+   "half": "/assets/gf/v2/mapa_mundi/mapa_tile_0_0_half.webp",
+   "x": 0,
+   "y": 0,
+   "w": 2485,
+   "h": 1385
+  },
+  {
+   "id": "t01",
+   "src": "/assets/gf/v2/mapa_mundi/mapa_tile_0_1.webp",
+   "half": "/assets/gf/v2/mapa_mundi/mapa_tile_0_1_half.webp",
+   "x": 2483,
+   "y": 0,
+   "w": 2483,
+   "h": 1385
+  },
+  {
+   "id": "t10",
+   "src": "/assets/gf/v2/mapa_mundi/mapa_tile_1_0.webp",
+   "half": "/assets/gf/v2/mapa_mundi/mapa_tile_1_0_half.webp",
+   "x": 0,
+   "y": 1383,
+   "w": 2485,
+   "h": 1383
+  },
+  {
+   "id": "t11",
+   "src": "/assets/gf/v2/mapa_mundi/mapa_tile_1_1.webp",
+   "half": "/assets/gf/v2/mapa_mundi/mapa_tile_1_1_half.webp",
+   "x": 2483,
+   "y": 1383,
+   "w": 2483,
+   "h": 1383
+  }
+ ],
+ "camera": {
+  "minZoom": "fit",
+  "maxZoom": 1.0,
+  "defaultView": {
+   "w": 1500,
+   "h": 850
+  },
+  "start": "oficina",
+  "startFallback": "district"
+ },
+ "wall": {
+  "outer": [
+   340,
+   170,
+   4630,
+   2620
+  ],
+  "inner": [
+   740,
+   440,
+   4220,
+   2320
+  ],
+  "gates": [
+   {
+    "id": "norte",
+    "rect": [
+     2390,
+     200,
+     2600,
+     503
+    ],
+    "aberto": true
+   },
+   {
+    "id": "sul",
+    "rect": [
+     2390,
+     2179,
+     2600,
+     2560
+    ],
+    "aberto": true
+   },
+   {
+    "id": "oeste",
+    "rect": [
+     340,
+     1300,
+     740,
+     1395
+    ],
+    "aberto": false,
+    "nota": "SEM passagem na arte: so ponto de ataque na muralha (rua do meio termina no muro)"
+   },
+   {
+    "id": "leste",
+    "rect": [
+     4220,
+     1300,
+     4630,
+     1395
+    ],
+    "aberto": false,
+    "nota": "SEM passagem na arte: so ponto de ataque na muralha"
+   }
+  ],
+  "towers": [
+   {
+    "id": "satelite_no",
+    "pt": [
+     703,
+     181
+    ]
+   },
+   {
+    "id": "laser_n",
+    "pt": [
+     1754,
+     255
+    ]
+   },
+   {
+    "id": "holofote_n",
+    "pt": [
+     3367,
+     181
+    ]
+   },
+   {
+    "id": "drones_ne",
+    "pt": [
+     4320,
+     255
+    ]
+   },
+   {
+    "id": "tesla_o",
+    "pt": [
+     581,
+     816
+    ]
+   },
+   {
+    "id": "canhao_l",
+    "pt": [
+     4394,
+     1036
+    ]
+   },
+   {
+    "id": "espinhos_o",
+    "pt": [
+     507,
+     1500
+    ]
+   },
+   {
+    "id": "domo_l",
+    "pt": [
+     4467,
+     1549
+    ]
+   },
+   {
+    "id": "metralha_so",
+    "pt": [
+     630,
+     2111
+    ]
+   },
+   {
+    "id": "holo_s",
+    "pt": [
+     1534,
+     2257
+    ]
+   },
+   {
+    "id": "misseis_s",
+    "pt": [
+     3489,
+     2282
+    ]
+   },
+   {
+    "id": "radar_se",
+    "pt": [
+     4418,
+     2135
+    ]
+   }
+  ]
+ },
+ "canal": {
+  "rects": [
+   [
+    740,
+    2195,
+    2415,
+    2290
+   ],
+   [
+    2580,
+    2195,
+    4255,
+    2290
+   ],
+   [
+    740,
+    1875,
+    835,
+    2290
+   ],
+   [
+    4160,
+    1875,
+    4255,
+    2290
+   ]
+  ],
+  "bridge": [
+   2415,
+   2180,
+   2580,
+   2300
+  ]
+ },
+ "streets": {
+  "vx": [
+   887,
+   1308,
+   1812,
+   2228,
+   2767,
+   3182,
+   3686,
+   4110
+  ],
+  "hy": [
+   538,
+   947,
+   1347,
+   1746,
+   2145
+  ],
+  "gateX": 2497,
+  "width": 60,
+  "lane": 14,
+  "walk": 36,
+  "curb": 15
+ },
+ "center": {
+  "id": "objetivo",
+  "rect": [
+   2256,
+   975,
+   2738,
+   1717
+  ],
+  "anchor": [
+   2497,
+   1376
+  ]
+ },
+ "lots": [
+  {
+   "id": "soon1",
+   "kind": "soon",
+   "nome": "Em breve",
+   "chao": "soon",
+   "grid": [
+    0,
+    0
+   ],
+   "rect": [
+    922,
+    573,
+    1278,
+    919
+   ],
+   "inner": [
+    937,
+    588,
+    1263,
+    904
+   ],
+   "anchor": [
+    1100,
+    902
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa_mundi/mapa_soon_1.png",
+    "box": {
+     "w": 303,
+     "h": 379
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": false,
+   "door": [
+    1100,
+    947
+   ],
+   "clickable": "toast",
+   "toast": "Em breve!"
+  },
+  {
+   "id": "hospital",
+   "kind": "place",
+   "nome": "Hospital",
+   "chao": "health",
+   "grid": [
+    0,
+    1
+   ],
+   "rect": [
+    1337,
+    573,
+    1780,
+    919
+   ],
+   "inner": [
+    1352,
+    588,
+    1765,
+    904
+   ],
+   "anchor": [
+    1558,
+    902
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_hospital.png",
+    "box": {
+     "w": 408,
+     "h": 379
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    1558,
+    947
+   ]
+  },
+  {
+   "id": "banco",
+   "kind": "place",
+   "nome": "Banco Fóssil",
+   "chao": "conc",
+   "grid": [
+    0,
+    2
+   ],
+   "rect": [
+    1844,
+    573,
+    2199,
+    919
+   ],
+   "inner": [
+    1859,
+    588,
+    2184,
+    904
+   ],
+   "anchor": [
+    2022,
+    902
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_banco.png",
+    "box": {
+     "w": 327,
+     "h": 379
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    2022,
+    947
+   ]
+  },
+  {
+   "id": "padaria",
+   "kind": "stall",
+   "nome": "Padaria",
+   "chao": "food",
+   "grid": [
+    0,
+    3
+   ],
+   "rect": [
+    2256,
+    573,
+    2738,
+    919
+   ],
+   "inner": [
+    2271,
+    588,
+    2723,
+    904
+   ],
+   "anchor": [
+    2497,
+    902
+   ],
+   "sprite": {
+    "src": "/assets/gf/map/props_hd/mapa_barraca_padaria.png",
+    "box": {
+     "w": 386,
+     "h": 379
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    2497,
+    947
+   ]
+  },
+  {
+   "id": "farmacia",
+   "kind": "place",
+   "nome": "Farmácia",
+   "chao": "health",
+   "grid": [
+    0,
+    4
+   ],
+   "rect": [
+    2795,
+    573,
+    3151,
+    919
+   ],
+   "inner": [
+    2810,
+    588,
+    3136,
+    904
+   ],
+   "anchor": [
+    2973,
+    902
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_farmacia.png",
+    "box": {
+     "w": 328,
+     "h": 379
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    2973,
+    947
+   ]
+  },
+  {
+   "id": "posto",
+   "kind": "place",
+   "nome": "Posto de Saúde",
+   "chao": "health",
+   "grid": [
+    0,
+    5
+   ],
+   "rect": [
+    3213,
+    573,
+    3655,
+    919
+   ],
+   "inner": [
+    3228,
+    588,
+    3640,
+    904
+   ],
+   "anchor": [
+    3434,
+    902
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_posto_saude.png",
+    "box": {
+     "w": 407,
+     "h": 379
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    3434,
+    947
+   ]
+  },
+  {
+   "id": "soon2",
+   "kind": "soon",
+   "nome": "Em breve",
+   "chao": "soon",
+   "grid": [
+    0,
+    6
+   ],
+   "rect": [
+    3716,
+    573,
+    4077,
+    919
+   ],
+   "inner": [
+    3731,
+    588,
+    4062,
+    904
+   ],
+   "anchor": [
+    3896,
+    902
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa_mundi/mapa_soon_3.png",
+    "box": {
+     "w": 307,
+     "h": 379
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": false,
+   "door": [
+    3896,
+    947
+   ],
+   "clickable": "toast",
+   "toast": "Em breve!"
+  },
+  {
+   "id": "praca",
+   "kind": "place",
+   "nome": "Praça",
+   "chao": "pave",
+   "grid": [
+    1,
+    0
+   ],
+   "rect": [
+    922,
+    975,
+    1278,
+    1320
+   ],
+   "inner": [
+    937,
+    990,
+    1263,
+    1305
+   ],
+   "anchor": [
+    1100,
+    1303
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_praca.png",
+    "box": {
+     "w": 328,
+     "h": 376
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    1100,
+    1347
+   ]
+  },
+  {
+   "id": "megaosso",
+   "kind": "place",
+   "nome": "Megaosso",
+   "chao": "conc",
+   "grid": [
+    1,
+    1
+   ],
+   "rect": [
+    1337,
+    975,
+    1780,
+    1320
+   ],
+   "inner": [
+    1352,
+    990,
+    1765,
+    1305
+   ],
+   "anchor": [
+    1558,
+    1303
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_megaosso.png",
+    "box": {
+     "w": 408,
+     "h": 376
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    1558,
+    1347
+   ]
+  },
+  {
+   "id": "ferro_velho",
+   "kind": "place",
+   "nome": "Ferro-Velho",
+   "chao": "dirt",
+   "grid": [
+    1,
+    2
+   ],
+   "rect": [
+    1844,
+    975,
+    2199,
+    1320
+   ],
+   "inner": [
+    1859,
+    990,
+    2184,
+    1305
+   ],
+   "anchor": [
+    2022,
+    1303
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_ferro_velho.png",
+    "box": {
+     "w": 327,
+     "h": 376
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    2022,
+    1347
+   ]
+  },
+  {
+   "id": "casco_tech",
+   "kind": "place",
+   "nome": "Casco-Tech",
+   "chao": "conc",
+   "grid": [
+    1,
+    4
+   ],
+   "rect": [
+    2795,
+    975,
+    3151,
+    1320
+   ],
+   "inner": [
+    2810,
+    990,
+    3136,
+    1305
+   ],
+   "anchor": [
+    2973,
+    1303
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_casco_tech.png",
+    "box": {
+     "w": 328,
+     "h": 376
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    2973,
+    1347
+   ]
+  },
+  {
+   "id": "coliseu",
+   "kind": "place",
+   "nome": "Coliseu",
+   "chao": "conc",
+   "grid": [
+    1,
+    5
+   ],
+   "rect": [
+    3213,
+    975,
+    3655,
+    1320
+   ],
+   "inner": [
+    3228,
+    990,
+    3640,
+    1305
+   ],
+   "anchor": [
+    3434,
+    1303
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_coliseu.png",
+    "box": {
+     "w": 407,
+     "h": 376
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    3434,
+    1347
+   ]
+  },
+  {
+   "id": "galpao",
+   "kind": "place",
+   "nome": "Galpão",
+   "chao": "ind",
+   "grid": [
+    1,
+    6
+   ],
+   "rect": [
+    3716,
+    975,
+    4077,
+    1320
+   ],
+   "inner": [
+    3731,
+    990,
+    4062,
+    1305
+   ],
+   "anchor": [
+    3896,
+    1303
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_galpao_mandibula.png",
+    "box": {
+     "w": 332,
+     "h": 376
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    3896,
+    1347
+   ]
+  },
+  {
+   "id": "tenda",
+   "kind": "place",
+   "nome": "Tenda do Raizão",
+   "chao": "green",
+   "grid": [
+    2,
+    0
+   ],
+   "rect": [
+    922,
+    1375,
+    1278,
+    1717
+   ],
+   "inner": [
+    937,
+    1390,
+    1263,
+    1702
+   ],
+   "anchor": [
+    1100,
+    1700
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_tenda_raizao.png",
+    "box": {
+     "w": 328,
+     "h": 372
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    1100,
+    1746
+   ]
+  },
+  {
+   "id": "dimas",
+   "kind": "stall",
+   "nome": "Dimas",
+   "chao": "food",
+   "grid": [
+    2,
+    1
+   ],
+   "rect": [
+    1337,
+    1375,
+    1780,
+    1717
+   ],
+   "inner": [
+    1352,
+    1390,
+    1765,
+    1702
+   ],
+   "anchor": [
+    1558,
+    1700
+   ],
+   "sprite": {
+    "src": "/assets/gf/map/props_hd/mapa_food_truck_dimas.png",
+    "box": {
+     "w": 354,
+     "h": 372
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    1558,
+    1746
+   ]
+  },
+  {
+   "id": "oficina",
+   "kind": "place",
+   "nome": "Oficina",
+   "chao": "conc",
+   "grid": [
+    2,
+    2
+   ],
+   "rect": [
+    1844,
+    1375,
+    2199,
+    1717
+   ],
+   "inner": [
+    1859,
+    1390,
+    2184,
+    1702
+   ],
+   "anchor": [
+    2022,
+    1700
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_oficina.png",
+    "box": {
+     "w": 327,
+     "h": 372
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    2022,
+    1746
+   ]
+  },
+  {
+   "id": "posto_cometa",
+   "kind": "place",
+   "nome": "Posto Cometa",
+   "chao": "conc",
+   "grid": [
+    2,
+    4
+   ],
+   "rect": [
+    2795,
+    1375,
+    3151,
+    1717
+   ],
+   "inner": [
+    2810,
+    1390,
+    3136,
+    1702
+   ],
+   "anchor": [
+    2973,
+    1700
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_posto_cometa.png",
+    "box": {
+     "w": 328,
+     "h": 372
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    2973,
+    1746
+   ]
+  },
+  {
+   "id": "faixa",
+   "kind": "place",
+   "nome": "Arrancada",
+   "chao": "conc",
+   "grid": [
+    2,
+    5
+   ],
+   "rect": [
+    3213,
+    1375,
+    3655,
+    1717
+   ],
+   "inner": [
+    3228,
+    1390,
+    3640,
+    1702
+   ],
+   "anchor": [
+    3434,
+    1700
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_faixa_arrancada.png",
+    "box": {
+     "w": 407,
+     "h": 372
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    3434,
+    1746
+   ]
+  },
+  {
+   "id": "soon3",
+   "kind": "soon",
+   "nome": "Em breve",
+   "chao": "soon",
+   "grid": [
+    2,
+    6
+   ],
+   "rect": [
+    3716,
+    1375,
+    4077,
+    1717
+   ],
+   "inner": [
+    3731,
+    1390,
+    4062,
+    1702
+   ],
+   "anchor": [
+    3896,
+    1700
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa_mundi/mapa_soon_5.png",
+    "box": {
+     "w": 307,
+     "h": 372
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": false,
+   "door": [
+    3896,
+    1746
+   ],
+   "clickable": "toast",
+   "toast": "Em breve!"
+  },
+  {
+   "id": "soon4",
+   "kind": "soon",
+   "nome": "Em breve",
+   "chao": "soon",
+   "grid": [
+    3,
+    0
+   ],
+   "rect": [
+    922,
+    1775,
+    1278,
+    2110
+   ],
+   "inner": [
+    937,
+    1790,
+    1263,
+    2095
+   ],
+   "anchor": [
+    1100,
+    2093
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa_mundi/mapa_soon_4.png",
+    "box": {
+     "w": 303,
+     "h": 368
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": false,
+   "door": [
+    1100,
+    2145
+   ],
+   "clickable": "toast",
+   "toast": "Em breve!"
+  },
+  {
+   "id": "rato",
+   "kind": "place",
+   "nome": "Beco do Rato",
+   "chao": "ind",
+   "grid": [
+    3,
+    1
+   ],
+   "rect": [
+    1337,
+    1775,
+    1780,
+    2110
+   ],
+   "inner": [
+    1352,
+    1790,
+    1765,
+    2095
+   ],
+   "anchor": [
+    1558,
+    2093
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_beco.png",
+    "box": {
+     "w": 408,
+     "h": 368
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    1558,
+    2145
+   ]
+  },
+  {
+   "id": "sopao",
+   "kind": "stall",
+   "nome": "Sopão",
+   "chao": "food",
+   "grid": [
+    3,
+    2
+   ],
+   "rect": [
+    1844,
+    1775,
+    2199,
+    2110
+   ],
+   "inner": [
+    1859,
+    1790,
+    2184,
+    2095
+   ],
+   "anchor": [
+    2022,
+    2093
+   ],
+   "sprite": {
+    "src": "/assets/gf/map/props_hd/mapa_barraca_sopao.png",
+    "box": {
+     "w": 284,
+     "h": 368
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    2022,
+    2145
+   ]
+  },
+  {
+   "id": "feira",
+   "kind": "stall",
+   "nome": "Feira",
+   "chao": "food",
+   "grid": [
+    3,
+    3
+   ],
+   "rect": [
+    2256,
+    1775,
+    2738,
+    2110
+   ],
+   "inner": [
+    2271,
+    1790,
+    2723,
+    2095
+   ],
+   "anchor": [
+    2497,
+    2093
+   ],
+   "sprite": {
+    "src": "/assets/gf/map/props_hd/mapa_barraca_feira.png",
+    "box": {
+     "w": 386,
+     "h": 368
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    2497,
+    2145
+   ]
+  },
+  {
+   "id": "filtro",
+   "kind": "stall",
+   "nome": "Filtro",
+   "chao": "food",
+   "grid": [
+    3,
+    4
+   ],
+   "rect": [
+    2795,
+    1775,
+    3151,
+    2110
+   ],
+   "inner": [
+    2810,
+    1790,
+    3136,
+    2095
+   ],
+   "anchor": [
+    2973,
+    2093
+   ],
+   "sprite": {
+    "src": "/assets/gf/map/props_hd/mapa_barraca_filtro.png",
+    "box": {
+     "w": 285,
+     "h": 368
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    2973,
+    2145
+   ]
+  },
+  {
+   "id": "leilao",
+   "kind": "place",
+   "nome": "Cais do Leilão",
+   "chao": "dirt",
+   "grid": [
+    3,
+    5
+   ],
+   "rect": [
+    3213,
+    1775,
+    3655,
+    2110
+   ],
+   "inner": [
+    3228,
+    1790,
+    3640,
+    2095
+   ],
+   "anchor": [
+    3434,
+    2093
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa/mapa_predio_leilao.png",
+    "box": {
+     "w": 407,
+     "h": 368
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": true,
+   "door": [
+    3434,
+    2145
+   ]
+  },
+  {
+   "id": "soon5",
+   "kind": "soon",
+   "nome": "Em breve",
+   "chao": "soon",
+   "grid": [
+    3,
+    6
+   ],
+   "rect": [
+    3716,
+    1775,
+    4077,
+    2110
+   ],
+   "inner": [
+    3731,
+    1790,
+    4062,
+    2095
+   ],
+   "anchor": [
+    3896,
+    2093
+   ],
+   "sprite": {
+    "src": "/assets/gf/v2/mapa_mundi/mapa_soon_2.png",
+    "box": {
+     "w": 307,
+     "h": 368
+    },
+    "baseInset": 0.04,
+    "shadow": true
+   },
+   "hit": "alpha+rect",
+   "label": false,
+   "door": [
+    3896,
+    2145
+   ],
+   "clickable": "toast",
+   "toast": "Em breve!"
+  }
+ ],
+ "routes": [
+  {
+   "id": "anel_horario",
+   "kind": "car",
+   "mode": "loop",
+   "pts": [
+    [
+     901,
+     552
+    ],
+    [
+     4096,
+     552
+    ],
+    [
+     4096,
+     2131
+    ],
+    [
+     901,
+     2131
+    ]
+   ],
+   "speed": 260,
+   "sprites": {
+    "lado": "carros8/mapa_carro_taxi_frente.png",
+    "baixo": "carros8/mapa_carro_taxi_baixo.png",
+    "cima": "carros8/mapa_carro_taxi_cima.png"
+   }
+  },
+  {
+   "id": "anel_antihorario",
+   "kind": "car",
+   "mode": "loop",
+   "pts": [
+    [
+     873,
+     2159
+    ],
+    [
+     4124,
+     2159
+    ],
+    [
+     4124,
+     524
+    ],
+    [
+     873,
+     524
+    ]
+   ],
+   "speed": 233,
+   "sprites": {
+    "lado": "carros8/mapa_carro_pickup_frente.png",
+    "baixo": "carros8/mapa_carro_pickup_baixo.png",
+    "cima": "carros8/mapa_carro_pickup_cima.png"
+   }
+  },
+  {
+   "id": "quadra_oeste",
+   "kind": "car",
+   "mode": "loop",
+   "pts": [
+    [
+     1322,
+     961
+    ],
+    [
+     2214,
+     961
+    ],
+    [
+     2214,
+     1732
+    ],
+    [
+     1322,
+     1732
+    ]
+   ],
+   "speed": 192,
+   "sprites": {
+    "lado": "carros8/mapa_carro_hatch_azul_frente.png",
+    "baixo": "carros8/mapa_carro_hatch_azul_baixo.png",
+    "cima": "carros8/mapa_carro_hatch_azul_cima.png"
+   }
+  },
+  {
+   "id": "quadra_leste",
+   "kind": "car",
+   "mode": "loop",
+   "pts": [
+    [
+     2753,
+     1760
+    ],
+    [
+     3700,
+     1760
+    ],
+    [
+     3700,
+     933
+    ],
+    [
+     2753,
+     933
+    ]
+   ],
+   "speed": 192,
+   "sprites": {
+    "lado": "carros8/mapa_carro_muscle_roxo_frente.png",
+    "baixo": "carros8/mapa_carro_muscle_roxo_baixo.png",
+    "cima": "carros8/mapa_carro_muscle_roxo_cima.png"
+   }
+  },
+  {
+   "id": "rua_meio",
+   "kind": "car",
+   "mode": "loop",
+   "pts": [
+    [
+     901,
+     1361
+    ],
+    [
+     2214,
+     1361
+    ],
+    [
+     2214,
+     2131
+    ],
+    [
+     901,
+     2131
+    ]
+   ],
+   "speed": 164,
+   "sprites": {
+    "lado": "carros8/mapa_carro_van_entrega_frente.png",
+    "baixo": "carros8/mapa_carro_van_entrega_baixo.png",
+    "cima": "carros8/mapa_carro_van_entrega_cima.png"
+   }
+  },
+  {
+   "id": "sul_norte",
+   "kind": "car",
+   "mode": "oneway",
+   "pts": [
+    [
+     2511,
+     2420
+    ],
+    [
+     2511,
+     2159
+    ],
+    [
+     2781,
+     2159
+    ],
+    [
+     2781,
+     524
+    ],
+    [
+     2511,
+     524
+    ],
+    [
+     2511,
+     300
+    ]
+   ],
+   "speed": 247,
+   "sprites": {
+    "lado": "carros8/mapa_carro_ossobus_frente.png",
+    "baixo": "carros8/mapa_carro_ossobus_baixo.png",
+    "cima": "carros8/mapa_carro_ossobus_cima.png"
+   },
+   "fade": [
+    [
+     2511,
+     2420
+    ],
+    [
+     2511,
+     300
+    ]
+   ]
+  },
+  {
+   "id": "faixa_sul",
+   "kind": "car",
+   "mode": "loop",
+   "pts": [
+    [
+     901,
+     1760
+    ],
+    [
+     4096,
+     1760
+    ],
+    [
+     4096,
+     2131
+    ],
+    [
+     901,
+     2131
+    ]
+   ],
+   "speed": 247,
+   "sprites": {
+    "lado": "carros8/mapa_carro_guincho_frente.png",
+    "baixo": "carros8/mapa_carro_guincho_baixo.png",
+    "cima": "carros8/mapa_carro_guincho_cima.png"
+   }
+  },
+  {
+   "id": "norte_sul",
+   "kind": "car",
+   "mode": "oneway",
+   "pts": [
+    [
+     2483,
+     300
+    ],
+    [
+     2483,
+     524
+    ],
+    [
+     2214,
+     524
+    ],
+    [
+     2214,
+     933
+    ],
+    [
+     1798,
+     933
+    ],
+    [
+     1798,
+     2159
+    ],
+    [
+     2483,
+     2159
+    ],
+    [
+     2483,
+     2420
+    ]
+   ],
+   "speed": 219,
+   "sprites": {
+    "lado": "carros8/mapa_carro_moto_scooter_frente.png",
+    "baixo": "carros8/mapa_carro_moto_scooter_baixo.png",
+    "cima": "carros8/mapa_carro_moto_scooter_cima.png"
+   },
+   "fade": [
+    [
+     2483,
+     300
+    ],
+    [
+     2483,
+     2420
+    ]
+   ]
+  },
+  {
+   "id": "p_h0_n",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     923,
+     911
+    ],
+    [
+     4074,
+     911
+    ]
+   ],
+   "speed": 104,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_raptor_corredor.png"
+   }
+  },
+  {
+   "id": "p_h0_s",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     4074,
+     983
+    ],
+    [
+     923,
+     983
+    ]
+   ],
+   "speed": 36,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_tricera_vovo.png"
+   }
+  },
+  {
+   "id": "p_h1_o_n",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     923,
+     1311
+    ],
+    [
+     2264,
+     1311
+    ]
+   ],
+   "speed": 55,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_paraso_estudante.png"
+   }
+  },
+  {
+   "id": "p_h1_l_s",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     2731,
+     1383
+    ],
+    [
+     4074,
+     1383
+    ]
+   ],
+   "speed": 47,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_ptero_crianca.png"
+   }
+  },
+  {
+   "id": "p_h2_n",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     923,
+     1710
+    ],
+    [
+     4074,
+     1710
+    ]
+   ],
+   "speed": 38,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_stego_operario.png"
+   }
+  },
+  {
+   "id": "p_h2_s",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     4074,
+     1782
+    ],
+    [
+     923,
+     1782
+    ]
+   ],
+   "speed": 104,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_raptor_corredor.png"
+   }
+  },
+  {
+   "id": "p_anel_n",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     923,
+     574
+    ],
+    [
+     4074,
+     574
+    ]
+   ],
+   "speed": 36,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_tricera_vovo.png"
+   }
+  },
+  {
+   "id": "p_canal",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     923,
+     2181
+    ],
+    [
+     4074,
+     2181
+    ]
+   ],
+   "speed": 55,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_paraso_estudante.png"
+   }
+  },
+  {
+   "id": "p_v0",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     1344,
+     574
+    ],
+    [
+     1344,
+     2109
+    ]
+   ],
+   "speed": 47,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_ptero_crianca.png"
+   }
+  },
+  {
+   "id": "p_v1",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     1776,
+     574
+    ],
+    [
+     1776,
+     2109
+    ]
+   ],
+   "speed": 38,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_stego_operario.png"
+   }
+  },
+  {
+   "id": "p_v2",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     2264,
+     574
+    ],
+    [
+     2264,
+     2109
+    ]
+   ],
+   "speed": 104,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_raptor_corredor.png"
+   }
+  },
+  {
+   "id": "p_v3",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     2731,
+     574
+    ],
+    [
+     2731,
+     2109
+    ]
+   ],
+   "speed": 36,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_tricera_vovo.png"
+   }
+  },
+  {
+   "id": "p_v4",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     3218,
+     574
+    ],
+    [
+     3218,
+     2109
+    ]
+   ],
+   "speed": 55,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_paraso_estudante.png"
+   }
+  },
+  {
+   "id": "p_v5",
+   "kind": "ped",
+   "mode": "pingpong",
+   "pts": [
+    [
+     3650,
+     574
+    ],
+    [
+     3650,
+     2109
+    ]
+   ],
+   "speed": 47,
+   "sprites": {
+    "lado": "passos8/mapa_pedestre_ptero_crianca.png"
+   }
+  }
+ ],
+ "graph": {
+  "nodes": {
+   "887_538": [
+    887,
+    538
+   ],
+   "887_947": [
+    887,
+    947
+   ],
+   "887_1347": [
+    887,
+    1347
+   ],
+   "887_1746": [
+    887,
+    1746
+   ],
+   "887_2145": [
+    887,
+    2145
+   ],
+   "1308_538": [
+    1308,
+    538
+   ],
+   "1308_947": [
+    1308,
+    947
+   ],
+   "1308_1347": [
+    1308,
+    1347
+   ],
+   "1308_1746": [
+    1308,
+    1746
+   ],
+   "1308_2145": [
+    1308,
+    2145
+   ],
+   "1812_538": [
+    1812,
+    538
+   ],
+   "1812_947": [
+    1812,
+    947
+   ],
+   "1812_1347": [
+    1812,
+    1347
+   ],
+   "1812_1746": [
+    1812,
+    1746
+   ],
+   "1812_2145": [
+    1812,
+    2145
+   ],
+   "2228_538": [
+    2228,
+    538
+   ],
+   "2228_947": [
+    2228,
+    947
+   ],
+   "2228_1347": [
+    2228,
+    1347
+   ],
+   "2228_1746": [
+    2228,
+    1746
+   ],
+   "2228_2145": [
+    2228,
+    2145
+   ],
+   "2767_538": [
+    2767,
+    538
+   ],
+   "2767_947": [
+    2767,
+    947
+   ],
+   "2767_1347": [
+    2767,
+    1347
+   ],
+   "2767_1746": [
+    2767,
+    1746
+   ],
+   "2767_2145": [
+    2767,
+    2145
+   ],
+   "3182_538": [
+    3182,
+    538
+   ],
+   "3182_947": [
+    3182,
+    947
+   ],
+   "3182_1347": [
+    3182,
+    1347
+   ],
+   "3182_1746": [
+    3182,
+    1746
+   ],
+   "3182_2145": [
+    3182,
+    2145
+   ],
+   "3686_538": [
+    3686,
+    538
+   ],
+   "3686_947": [
+    3686,
+    947
+   ],
+   "3686_1347": [
+    3686,
+    1347
+   ],
+   "3686_1746": [
+    3686,
+    1746
+   ],
+   "3686_2145": [
+    3686,
+    2145
+   ],
+   "4110_538": [
+    4110,
+    538
+   ],
+   "4110_947": [
+    4110,
+    947
+   ],
+   "4110_1347": [
+    4110,
+    1347
+   ],
+   "4110_1746": [
+    4110,
+    1746
+   ],
+   "4110_2145": [
+    4110,
+    2145
+   ],
+   "2497_538": [
+    2497,
+    538
+   ],
+   "2497_2145": [
+    2497,
+    2145
+   ],
+   "portao_norte": [
+    2497,
+    300
+   ],
+   "portao_sul": [
+    2497,
+    2420
+   ],
+   "ponte": [
+    2497,
+    2240
+   ]
+  },
+  "edges": [
+   [
+    "887_538",
+    "1308_538"
+   ],
+   [
+    "1308_538",
+    "1812_538"
+   ],
+   [
+    "1812_538",
+    "2228_538"
+   ],
+   [
+    "2228_538",
+    "2497_538"
+   ],
+   [
+    "2497_538",
+    "2767_538"
+   ],
+   [
+    "2767_538",
+    "3182_538"
+   ],
+   [
+    "3182_538",
+    "3686_538"
+   ],
+   [
+    "3686_538",
+    "4110_538"
+   ],
+   [
+    "887_947",
+    "1308_947"
+   ],
+   [
+    "1308_947",
+    "1812_947"
+   ],
+   [
+    "1812_947",
+    "2228_947"
+   ],
+   [
+    "2228_947",
+    "2767_947"
+   ],
+   [
+    "2767_947",
+    "3182_947"
+   ],
+   [
+    "3182_947",
+    "3686_947"
+   ],
+   [
+    "3686_947",
+    "4110_947"
+   ],
+   [
+    "887_1347",
+    "1308_1347"
+   ],
+   [
+    "1308_1347",
+    "1812_1347"
+   ],
+   [
+    "1812_1347",
+    "2228_1347"
+   ],
+   [
+    "2767_1347",
+    "3182_1347"
+   ],
+   [
+    "3182_1347",
+    "3686_1347"
+   ],
+   [
+    "3686_1347",
+    "4110_1347"
+   ],
+   [
+    "887_1746",
+    "1308_1746"
+   ],
+   [
+    "1308_1746",
+    "1812_1746"
+   ],
+   [
+    "1812_1746",
+    "2228_1746"
+   ],
+   [
+    "2228_1746",
+    "2767_1746"
+   ],
+   [
+    "2767_1746",
+    "3182_1746"
+   ],
+   [
+    "3182_1746",
+    "3686_1746"
+   ],
+   [
+    "3686_1746",
+    "4110_1746"
+   ],
+   [
+    "887_2145",
+    "1308_2145"
+   ],
+   [
+    "1308_2145",
+    "1812_2145"
+   ],
+   [
+    "1812_2145",
+    "2228_2145"
+   ],
+   [
+    "2228_2145",
+    "2497_2145"
+   ],
+   [
+    "2497_2145",
+    "2767_2145"
+   ],
+   [
+    "2767_2145",
+    "3182_2145"
+   ],
+   [
+    "3182_2145",
+    "3686_2145"
+   ],
+   [
+    "3686_2145",
+    "4110_2145"
+   ],
+   [
+    "887_538",
+    "887_947"
+   ],
+   [
+    "887_947",
+    "887_1347"
+   ],
+   [
+    "887_1347",
+    "887_1746"
+   ],
+   [
+    "887_1746",
+    "887_2145"
+   ],
+   [
+    "1308_538",
+    "1308_947"
+   ],
+   [
+    "1308_947",
+    "1308_1347"
+   ],
+   [
+    "1308_1347",
+    "1308_1746"
+   ],
+   [
+    "1308_1746",
+    "1308_2145"
+   ],
+   [
+    "1812_538",
+    "1812_947"
+   ],
+   [
+    "1812_947",
+    "1812_1347"
+   ],
+   [
+    "1812_1347",
+    "1812_1746"
+   ],
+   [
+    "1812_1746",
+    "1812_2145"
+   ],
+   [
+    "2228_538",
+    "2228_947"
+   ],
+   [
+    "2228_947",
+    "2228_1347"
+   ],
+   [
+    "2228_1347",
+    "2228_1746"
+   ],
+   [
+    "2228_1746",
+    "2228_2145"
+   ],
+   [
+    "2767_538",
+    "2767_947"
+   ],
+   [
+    "2767_947",
+    "2767_1347"
+   ],
+   [
+    "2767_1347",
+    "2767_1746"
+   ],
+   [
+    "2767_1746",
+    "2767_2145"
+   ],
+   [
+    "3182_538",
+    "3182_947"
+   ],
+   [
+    "3182_947",
+    "3182_1347"
+   ],
+   [
+    "3182_1347",
+    "3182_1746"
+   ],
+   [
+    "3182_1746",
+    "3182_2145"
+   ],
+   [
+    "3686_538",
+    "3686_947"
+   ],
+   [
+    "3686_947",
+    "3686_1347"
+   ],
+   [
+    "3686_1347",
+    "3686_1746"
+   ],
+   [
+    "3686_1746",
+    "3686_2145"
+   ],
+   [
+    "4110_538",
+    "4110_947"
+   ],
+   [
+    "4110_947",
+    "4110_1347"
+   ],
+   [
+    "4110_1347",
+    "4110_1746"
+   ],
+   [
+    "4110_1746",
+    "4110_2145"
+   ],
+   [
+    "portao_norte",
+    "2497_538"
+   ],
+   [
+    "portao_sul",
+    "ponte"
+   ],
+   [
+    "ponte",
+    "2497_2145"
+   ]
+  ]
+ },
+ "zones": [
+  {
+   "id": "ermo_norte",
+   "kind": "ataque",
+   "poly": [
+    [
+     0,
+     0
+    ],
+    [
+     4966,
+     0
+    ],
+    [
+     4966,
+     170
+    ],
+    [
+     0,
+     170
+    ]
+   ]
+  },
+  {
+   "id": "ermo_sul",
+   "kind": "ataque",
+   "poly": [
+    [
+     0,
+     2620
+    ],
+    [
+     4966,
+     2620
+    ],
+    [
+     4966,
+     2766
+    ],
+    [
+     0,
+     2766
+    ]
+   ]
+  },
+  {
+   "id": "ermo_oeste",
+   "kind": "ataque",
+   "poly": [
+    [
+     0,
+     170
+    ],
+    [
+     340,
+     170
+    ],
+    [
+     340,
+     2620
+    ],
+    [
+     0,
+     2620
+    ]
+   ]
+  },
+  {
+   "id": "ermo_leste",
+   "kind": "ataque",
+   "poly": [
+    [
+     4630,
+     170
+    ],
+    [
+     4966,
+     170
+    ],
+    [
+     4966,
+     2620
+    ],
+    [
+     4630,
+     2620
+    ]
+   ]
+  }
+ ],
+ "spawns": [
+  {
+   "id": "chegada_norte",
+   "gate": "norte",
+   "pt": [
+    2497,
+    85
+   ]
+  },
+  {
+   "id": "chegada_sul",
+   "gate": "sul",
+   "pt": [
+    2497,
+    2700
+   ]
+  },
+  {
+   "id": "chegada_oeste",
+   "gate": "oeste",
+   "pt": [
+    170,
+    1347
+   ]
+  },
+  {
+   "id": "chegada_leste",
+   "gate": "leste",
+   "pt": [
+    4800,
+    1347
+   ]
+  }
+ ],
+ "sizes": {
+  "ped_h": 32,
+  "car_lado_w": 56,
+  "car_vertical_h": 50
+ }
+}

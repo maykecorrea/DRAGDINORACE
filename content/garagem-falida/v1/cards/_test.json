@@ -1,0 +1,166 @@
+[
+  {
+    "id": "teste_oferta_juca",
+    "kind": "offer",
+    "npc": "juca",
+    "title": "Dinheiro na hora",
+    "act_min": 0,
+    "act_max": 4,
+    "week_min": 90,
+    "week_max": 99,
+    "weight": 10,
+    "once": true,
+    "cooldown_weeks": 0,
+    "priority": 0,
+    "blocking": false,
+    "conditions": [],
+    "text": "Opa, {nome}! Te empresto um dinheiro hoje. Sem papel. A gente se entende. Seu caixa está em {caixa}.",
+    "red_flags": [
+      "Sem papel",
+      "A gente se entende"
+    ],
+    "options": [
+      {
+        "id": "aceitar",
+        "label": "Pegar o dinheiro",
+        "requires": [],
+        "effects": [
+          {
+            "op": "cash",
+            "value": 200
+          },
+          {
+            "op": "schedule",
+            "in_weeks": 3,
+            "hidden": true,
+            "effects": [
+              {
+                "op": "cash",
+                "value": -80
+              },
+              {
+                "op": "flag",
+                "key": "teste_juros",
+                "value": true
+              }
+            ]
+          }
+        ],
+        "dodged_scam": false,
+        "scam": true,
+        "lesson_unlock": null,
+        "decision_impact": -3
+      },
+      {
+        "id": "recusar",
+        "label": "Recusar",
+        "requires": [],
+        "effects": [],
+        "dodged_scam": true,
+        "scam": false,
+        "lesson_unlock": "L06",
+        "decision_impact": 2
+      }
+    ]
+  },
+  {
+    "id": "teste_curto",
+    "kind": "event",
+    "npc": "rex",
+    "title": "Curto-circuito",
+    "act_min": 0,
+    "act_max": 4,
+    "week_min": 90,
+    "week_max": 99,
+    "weight": 8,
+    "once": true,
+    "cooldown_weeks": 0,
+    "priority": 0,
+    "blocking": true,
+    "conditions": [],
+    "text": "A fiação estalou no meio da baia. Cheiro de queimado. Alguém tem que decidir agora.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "pagar",
+        "label": "Trocar fiação",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 80
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -80
+          }
+        ],
+        "dodged_scam": false,
+        "scam": false,
+        "lesson_unlock": null,
+        "decision_impact": -1
+      },
+      {
+        "id": "aguentar",
+        "label": "Deixar depois",
+        "requires": [],
+        "effects": [
+          {
+            "op": "morale",
+            "value": -2
+          }
+        ],
+        "dodged_scam": false,
+        "scam": false,
+        "lesson_unlock": null,
+        "decision_impact": -2
+      }
+    ]
+  },
+  {
+    "id": "teste_historia",
+    "kind": "story",
+    "npc": "pai",
+    "title": "A voz do pai",
+    "act_min": 0,
+    "act_max": 4,
+    "week_min": 90,
+    "week_max": 99,
+    "weight": 1,
+    "once": true,
+    "cooldown_weeks": 0,
+    "priority": 5,
+    "blocking": false,
+    "conditions": [],
+    "text": "{nome}, a oficina ainda cheira a óleo. A dívida está em {divida}. Não assine nada com pressa.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "ouvir",
+        "label": "Ouvir tudo",
+        "requires": [],
+        "effects": [
+          {
+            "op": "morale",
+            "value": 1
+          }
+        ],
+        "dodged_scam": false,
+        "scam": false,
+        "lesson_unlock": null,
+        "decision_impact": 1
+      },
+      {
+        "id": "guardar",
+        "label": "Guardar recado",
+        "requires": [],
+        "effects": [],
+        "dodged_scam": false,
+        "scam": false,
+        "lesson_unlock": null,
+        "decision_impact": 0
+      }
+    ]
+  }
+]

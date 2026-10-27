@@ -1,0 +1,33 @@
+{
+ "name": "Sola comida",
+ "description": "Dino Drag Race — Sola comida (Comum). +2 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/176.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "bota"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 2,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-bota-Comum-2",
+  "stats": "accel+2"
+ }
+}

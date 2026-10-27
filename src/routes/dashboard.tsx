@@ -51,7 +51,7 @@ function Dashboard() {
             <div className="min-w-0">
               <p className="break-words font-display text-3xl leading-none sm:text-4xl">{carLabel(car)}</p>
               <p className="text-sm text-muted">
-                {car.tokenId} · {car.rarity} · nv {xpBar(car.xp ?? 0).level} {carRank(car)} · {Math.round(live.vmax)} mph
+                {car.tokenId} · {car.rarity === "Normal" ? "Incomum" : car.rarity} · nv {xpBar(car.xp ?? 0).level} {carRank(car)} · {Math.round(live.vmax * 1.60934)} km/h
               </p>
               <p className="mt-1 flex items-center gap-2 text-sm text-muted">
                 <img src={pilot.image} alt="" className="h-8 w-8 object-contain" />
@@ -60,7 +60,7 @@ function Dashboard() {
               <p className="mt-1 font-display text-3xl text-primary">
                 {save.fossil} <FossilWord />
               </p>
-              <p className="mt-1 text-sm text-muted">Fóssil entra no fim de cada corrida, no baú do dia e nas missões da pista. Comum custa 140. Normal, a partir de 160.</p>
+              <p className="mt-1 text-sm text-muted">Você ganha fósseis no fim de cada corrida, no baú do dia e nas missões. Comum custa 140. Incomum, a partir de 160.</p>
               {(save.chest ?? "") !== new Date().toISOString().slice(0, 10) && (
                 <button
                   type="button"
@@ -83,7 +83,7 @@ function Dashboard() {
               </div>
             </div>
             {[
-              [t("dash.vmax"), `${Math.round(live.vmax)} mph`],
+              [t("dash.vmax"), `${Math.round(live.vmax * 1.60934)} km/h`],
               [t("dash.accel"), String(Math.round(live.accel))],
               [t("dash.nitro"), `${live.nitroTime.toFixed(1)}s`],
               [t("dash.power"), String(Math.round(live.power))],
@@ -197,7 +197,7 @@ function Dashboard() {
                         <p className="font-pixel text-[10px] tracking-widest text-primary">{on ? t("dash.equipped").toUpperCase() : t(`rarity.${nft.rarity}`)}</p>
                       </div>
                       <button type="button" className="min-h-11 px-2 font-pixel text-[10px] tracking-widest text-primary" onClick={() => setSpin(spinForNft(nft))}>
-                        {lang === "en" ? "SPIN" : "GIRO"}
+                        {lang === "en" ? "GIRAR" : "Giro"}
                       </button>
                       <button
                         type="button"

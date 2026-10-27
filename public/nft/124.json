@@ -1,0 +1,48 @@
+{
+ "name": "Vértebra elétrica",
+ "description": "Dino Drag Race — Vértebra elétrica (Raro). 67 de dano. 5 tiros. 1.46s. Deixa lerdo. Muito dano e deixa o carro lerdo. Difícil de cravar.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/124.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ray"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 67,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 5,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.46,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Slowtime",
+   "value": 2.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ray-Raro",
+  "stats": "dmg=67;clip=5;cd=1.46;slow=0.55x/2.4s"
+ }
+}

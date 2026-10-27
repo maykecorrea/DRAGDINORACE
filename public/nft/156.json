@@ -1,0 +1,48 @@
+{
+ "name": "Olho que não erra",
+ "description": "Dino Drag Race — Olho que não erra (Lendário). 39 de dano. 25 tiros. 0.68s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/156.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 39,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 25,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.68,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Lendário-3",
+  "stats": "dmg=39;clip=25;cd=0.68;lock=3.4"
+ }
+}

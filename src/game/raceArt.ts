@@ -26,6 +26,15 @@ export type RaceArt = {
   longe: HTMLImageElement;
   perto: HTMLImageElement;
   beira: HTMLImageElement;
+  iconeEscudo: HTMLImageElement;
+  iconeCuspe: HTMLImageElement;
+  escudoSheet: HTMLImageElement;
+  empSheet: HTMLImageElement;
+  trasComum: HTMLImageElement;
+  trasNormal: HTMLImageElement;
+  trasRaro: HTMLImageElement;
+  trasEpico: HTMLImageElement;
+  trasLendario: HTMLImageElement;
 };
 
 const FILES = [
@@ -56,6 +65,15 @@ const FILES = [
   "race_parallax_longe.png",
   "race_parallax_perto.png",
   "race_parallax_beira.png",
+  "race_icone_escudo.png",
+  "race_icone_cuspe.png",
+  "race_escudo_sheet.png",
+  "race_emp_sheet.png",
+  "race_carro_tras_comum.png",
+  "race_carro_tras_normal.png",
+  "race_carro_tras_raro.png",
+  "race_carro_tras_epico.png",
+  "race_carro_tras_lendario.png",
 ] as const;
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -95,6 +113,15 @@ const KEYS = [
   "longe",
   "perto",
   "beira",
+  "iconeEscudo",
+  "iconeCuspe",
+  "escudoSheet",
+  "empSheet",
+  "trasComum",
+  "trasNormal",
+  "trasRaro",
+  "trasEpico",
+  "trasLendario",
 ] as const;
 
 export function loadRaceArt(): Promise<RaceArt> {

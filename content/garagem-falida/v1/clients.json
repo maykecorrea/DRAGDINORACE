@@ -1,0 +1,99 @@
+[
+  {
+    "id": "vizinho",
+    "nome": "Vizinho do Distrito",
+    "actMin": 0,
+    "servicos": [{ "id": "oleo", "peso": 3 }, { "id": "reparo", "peso": 2 }],
+    "pagamento": { "tipo": "entrega" },
+    "caloteBase": 0.03,
+    "elasticidade": 2,
+    "pesoPorAto": [4, 8, 3, 2, 1],
+    "falas": ["O triciclo pinga óleo na calçada.", "Pode ser hoje? Eu pago na hora.", "Não precisa de nota, eu moro aqui."]
+  },
+  {
+    "id": "motoboy",
+    "nome": "Entregador Raptor",
+    "actMin": 1,
+    "servicos": [{ "id": "reparo", "peso": 2 }, { "id": "eletrica", "peso": 2 }],
+    "pagamento": { "tipo": "entrega" },
+    "caloteBase": 0.05,
+    "elasticidade": 1.6,
+    "pesoPorAto": [0, 5, 5, 3, 2],
+    "urgencia": { "dias": 2, "preco": 0.2, "retorno": 0.4 },
+    "falas": ["Duas entregas paradas. Se ficar pronto em dois dias, pago mais.", "O cabo de nave soltou no meio da pista.", "Quando eu voltar, trago o primo."]
+  },
+  {
+    "id": "comerciante",
+    "nome": "Pequeno Comerciante",
+    "actMin": 1,
+    "servicos": [{ "id": "funilaria", "peso": 2 }, { "id": "eletrica", "peso": 2 }],
+    "pagamento": { "tipo": "split50_7d", "dias": 7 },
+    "caloteBase": 0.08,
+    "elasticidade": 1.4,
+    "pesoPorAto": [0, 4, 5, 4, 3],
+    "falas": ["Metade agora, metade semana que vem.", "A porta do furgão não fecha.", "Se ficar bom, eu indico a rua."]
+  },
+  {
+    "id": "pechincheiro",
+    "nome": "Cliente Cascudo",
+    "actMin": 1,
+    "servicos": [{ "id": "oleo", "peso": 1 }, { "id": "reparo", "peso": 1 }, { "id": "funilaria", "peso": 1 }],
+    "pagamento": { "tipo": "entrega" },
+    "caloteBase": 0.06,
+    "elasticidade": 3,
+    "desconto": 0.3,
+    "pesoPorAto": [1, 4, 3, 2, 1],
+    "falas": ["Tá caro. Tira trinta por cento.", "Do outro lado da cidade fazem mais barato.", "Eu fecho agora se baixar o preço."]
+  },
+  {
+    "id": "frota",
+    "nome": "Frota Ossobus",
+    "actMin": 2,
+    "servicos": [{ "id": "reparo", "peso": 3 }, { "id": "oleo", "peso": 2 }],
+    "pagamento": { "tipo": "prazo", "dias": 28 },
+    "caloteBase": 0.02,
+    "elasticidade": 1,
+    "pesoPorAto": [0, 0, 4, 5, 4],
+    "requires": { "level": 2, "rep": 40 },
+    "falas": ["Seis revisões por semana. O pagamento chega em quatro semanas.", "A gente precisa de oficina com elevador.", "Contrato no papel, sem pressa de pagar."]
+  },
+  {
+    "id": "corredor",
+    "nome": "Piloto de Arrancada",
+    "actMin": 3,
+    "servicos": [{ "id": "motor", "peso": 2 }, { "id": "custom", "peso": 2 }],
+    "pagamento": { "tipo": "entrega" },
+    "caloteBase": 0.05,
+    "elasticidade": 0.8,
+    "pesoPorAto": [0, 0, 1, 5, 6],
+    "requires": { "level": 3, "deposit": 0.5 },
+    "falas": ["Sem sinal de metade, eu não deixo o carro.", "Quero a peça que aguenta a pista.", "Se ficar bom, eu corro com o nome da oficina."]
+  },
+  {
+    "id": "caloteiro",
+    "nome": "Caloteiro",
+    "actMin": 1,
+    "hidden": true,
+    "disfarce": ["comerciante", "corredor"],
+    "servicos": [{ "id": "funilaria", "peso": 1 }, { "id": "custom", "peso": 1 }],
+    "pagamento": { "tipo": "prazo", "dias": 14 },
+    "caloteBase": 0.6,
+    "elasticidade": 0.5,
+    "pesoPorAto": [0, 2, 2, 2, 1],
+    "recusaSinal": { "min": 0.5, "chance": 0.7 },
+    "falas": ["Pago semana que vem sem falta.", "Sinal? Entre amigos não precisa.", "Pode confiar, eu sempre volto."]
+  },
+  {
+    "id": "prefeitura",
+    "nome": "Prefeitura do Distrito",
+    "actMin": 3,
+    "enabled": true,
+    "servicos": [{ "id": "reparo", "peso": 1 }, { "id": "funilaria", "peso": 1 }],
+    "pagamento": { "tipo": "prazo", "dias": 56 },
+    "caloteBase": 0,
+    "elasticidade": 1,
+    "pesoPorAto": [0, 0, 0, 1, 1],
+    "requires": { "level": 4, "clean": true },
+    "falas": ["Concorrência pública. O pagamento sai em oito semanas.", "Precisa de nome limpo.", "O pedido é grande."]
+  }
+]

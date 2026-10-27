@@ -14,11 +14,11 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "Dino Drag Race" },
-      { name: "description", content: "Drag de cockpit em pixel art. Marcha, nitro e fóssil na Ronin." },
+      { name: "description", content: "Arrancada de dinos no navegador. Marcha, nitro e fósseis." },
       { name: "theme-color", content: "#090b08" },
     ],
     links: [
-      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },

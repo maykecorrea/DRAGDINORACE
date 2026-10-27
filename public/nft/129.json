@@ -1,0 +1,48 @@
+{
+ "name": "Beijo parado",
+ "description": "Dino Drag Race — Beijo parado (Raro). 10 de dano. 4 tiros. 2.14s. Trava 1s. Trava o carro por 1s e zera a velocidade. Quase não acerta.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/129.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ice"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 10,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 2.14,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Freeze",
+   "value": 1,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ice-Raro-3",
+  "stats": "dmg=10;clip=4;cd=2.14;freeze=1s"
+ }
+}

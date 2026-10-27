@@ -1,0 +1,48 @@
+{
+ "name": "Asa de geada",
+ "description": "Dino Drag Race — Asa de geada (Épico). 12 de dano. 6 tiros. 1.79s. Trava 1s. Trava o carro por 1s e zera a velocidade. Quase não acerta.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/145.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ice"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 12,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 6,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.79,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Freeze",
+   "value": 1,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ice-Épico",
+  "stats": "dmg=12;clip=6;cd=1.79;freeze=1s"
+ }
+}

@@ -21,10 +21,10 @@ function Conta() {
   }, [save.callsign]);
 
   return (
-    <PitFrame title="Conta" kicker="CONFIGURAÇÃO">
+    <PitFrame title="Conta" kicker="Configurações">
       <div className="grid max-w-xl gap-4">
         <section className="border border-border bg-surface p-4">
-          <p className="text-xs tracking-widest text-muted">PILOTO</p>
+          <p className="text-xs tracking-widest text-muted">Piloto</p>
           <p className="mt-1 font-display text-4xl leading-none">{user?.displayName || "Sem nome"}</p>
           <p className="text-sm text-muted">{user?.primaryEmail}</p>
           <div className="mt-4">
@@ -39,13 +39,13 @@ function Conta() {
           }}
         >
           <label className="grid gap-1 text-sm">
-            Nome na faixa
+            Nome de piloto
             <input
               value={callsign}
               maxLength={18}
               onChange={(e) => setCallsign(e.target.value)}
               className="min-h-11 border border-border bg-bg px-3 text-fg"
-              placeholder="Como o painel te chama"
+              placeholder="Como o jogo te chama"
             />
           </label>
           <button type="submit" className="mt-3 min-h-11 bg-primary px-4 font-display text-2xl leading-none text-ink">
@@ -53,10 +53,10 @@ function Conta() {
           </button>
         </form>
         <section className="border border-border bg-surface p-4">
-          <p className="text-xs tracking-widest text-muted">ATALHOS</p>
+          <p className="text-xs tracking-widest text-muted">Atalhos</p>
           <h2 className="mt-1 font-display text-4xl leading-none">Atalhos</h2>
           <p className="mt-2 text-sm text-pretty text-muted">
-            Troca a tecla de cada comando. Se escolher uma que já está em uso, as duas trocam de lugar.
+            Troque a tecla de cada comando. Se ela já estiver em uso, as duas trocam.
           </p>
           <div className="mt-3">
             <HotkeyPad
@@ -66,10 +66,10 @@ function Conta() {
           </div>
         </section>
         <section className="border border-border bg-surface p-4">
-          <p className="text-xs tracking-widest text-muted">MAPA</p>
+          <p className="text-xs tracking-widest text-muted">Mapa</p>
           <h2 className="mt-1 font-display text-4xl leading-none">Barra da corrida</h2>
           <p className="mt-2 text-sm text-pretty text-muted">
-            A faixa de início e fim. O padrão é sólida. Pode deixar mais transparente ou tirar. Fica salvo na sua ficha.
+            A faixa de largada e chegada. Pode deixar sólida, transparente ou oculta.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {(
@@ -94,10 +94,10 @@ function Conta() {
           </div>
         </section>
         <section className="border border-border bg-surface p-4">
-          <p className="text-xs tracking-widest text-muted">PAINEL</p>
+          <p className="text-xs tracking-widest text-muted">Painel</p>
           <h2 className="mt-1 font-display text-4xl leading-none">Velocímetro</h2>
           <p className="mt-2 text-sm text-pretty text-muted">
-            O padrão é o mecânico, com agulha. O digital é opcional. Fica salvo na sua ficha.
+            O padrão é o ponteiro. O digital é opcional.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {(
@@ -123,19 +123,59 @@ function Conta() {
         <section className="flex items-center justify-between gap-3 border border-border bg-surface p-4">
           <div>
             <p className="text-fg">Som do motor</p>
-            <p className="text-sm text-muted">{save.muted ? "Mudo" : "Ligado"}</p>
+            <p className="text-sm text-muted">{save.muted ? "Desligado" : "Ligado"}</p>
           </div>
           <button
             type="button"
             onClick={() => commit({ ...save, muted: !save.muted })}
             className="min-h-11 border border-border px-4 text-sm"
           >
-            {save.muted ? "Ligar" : "Mutar"}
+            {save.muted ? "Ligar" : "Desligar"}
+          </button>
+        </section>
+        <section className="border border-border bg-surface p-4">
+          <h2 className="font-display text-4xl leading-none">Prólogo</h2>
+          <p className="mt-2 text-sm text-pretty text-muted">Os 8 cartões passam de novo na próxima vez que você entrar no modo.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="min-h-11 border border-border px-4 text-sm"
+              onClick={() => {
+                try { localStorage.removeItem("ddr-prologue-seen"); } catch { /* ignore */ }
+              }}
+            >
+              Ver de novo no Modo História
+            </button>
+            <button
+              type="button"
+              className="min-h-11 border border-border px-4 text-sm"
+              onClick={() => {
+                try { localStorage.removeItem("gf-prologue-seen"); } catch { /* ignore */ }
+              }}
+            >
+              Ver de novo na Garagem Falida
+            </button>
+          </div>
+        </section>
+        <section className="flex items-center justify-between gap-3 border border-border bg-surface p-4">
+          <div>
+            <p className="text-fg">Tenho 13 anos ou mais</p>
+            <p className="text-sm text-muted">Libera as tarefas do X e do Instagram. Menor joga com um adulto.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const next = localStorage.getItem("ddr-13") === "1" ? "0" : "1";
+              localStorage.setItem("ddr-13", next);
+              commit({ ...save });
+            }}
+            className="min-h-11 border border-border px-4 text-sm"
+          >
+            {typeof window !== "undefined" && localStorage.getItem("ddr-13") === "1" ? "Sim" : "Não"}
           </button>
         </section>
         <p className="text-sm text-pretty text-muted">
-          A garagem, o <FossilWord /> e as peças ficam nesta conta neste aparelho e no servidor da ficha. A cunhagem on-chain
-          na Ronin ainda não dispara transação.
+          A garagem, os <FossilWord /> e as peças ficam salvos na sua conta.
         </p>
       </div>
     </PitFrame>

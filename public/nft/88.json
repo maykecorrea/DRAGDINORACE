@@ -1,0 +1,48 @@
+{
+ "name": "Faísca de cabo",
+ "description": "Dino Drag Race — Faísca de cabo (Comum). 32 de dano. 4 tiros. 1.70s. Deixa lerdo. Muito dano e deixa o carro lerdo. Difícil de cravar.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/88.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ray"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 32,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Slowtime",
+   "value": 2.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ray-Comum",
+  "stats": "dmg=32;clip=4;cd=1.7;slow=0.55x/2.4s"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "name": "Órbita fóssil",
+ "description": "Dino Drag Race — Órbita fóssil (Lendário). +52 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/67.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "tires"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 52,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "tires-Lendário",
+  "stats": "accel+52"
+ }
+}

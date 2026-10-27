@@ -1,0 +1,48 @@
+{
+ "name": "Fio pelado",
+ "description": "Dino Drag Race — Fio pelado (Comum). 39 de dano. 3 tiros. 1.84s. Deixa lerdo. Muito dano e deixa o carro lerdo. Difícil de cravar.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/90.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ray"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 39,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 3,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.84,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Slowtime",
+   "value": 2.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ray-Comum-3",
+  "stats": "dmg=39;clip=3;cd=1.84;slow=0.55x/2.4s"
+ }
+}

@@ -1,0 +1,8 @@
+[
+  { "id": "oleo", "nome": "Troca de óleo fóssil", "ap": 1, "difficulty": 1, "materials": { "oleo": 1 }, "ref": 125, "requires": { "patent": 0 } },
+  { "id": "reparo", "nome": "Reparo simples", "ap": 1, "difficulty": 1, "materials": { "kit": 1, "oleo": 1 }, "ref": 160, "requires": { "patent": 1 } },
+  { "id": "funilaria", "nome": "Funilaria de chapa", "ap": 2, "difficulty": 2, "materials": { "chapa": 2, "kit": 1 }, "ref": 365, "requires": { "compressor": true, "patent": 2 } },
+  { "id": "eletrica", "nome": "Instalação de cabo de nave", "ap": 3, "difficulty": 3, "materials": { "cabo": 2, "kit": 1 }, "ref": 635, "requires": { "patent": 3 } },
+  { "id": "motor", "nome": "Revisão de motor", "ap": 4, "difficulty": 3, "materials": { "oleo": 3, "cabo": 1, "kit": 2, "osso": 1 }, "ref": 945, "requires": { "patent": 4 } },
+  { "id": "custom", "nome": "Peça custom de arrancada", "ap": 8, "difficulty": 4, "materials": { "bobina": 1, "osso": 2, "cabo": 2, "chapa": 2 }, "ref": 2390, "requires": { "patent": 5 } }
+]

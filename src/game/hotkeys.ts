@@ -37,7 +37,7 @@ const NAMED: Record<string, string> = {
   ArrowUp: "↑",
   ArrowDown: "↓",
   Enter: "Enter",
-  Backspace: "Backspace",
+  Backspace: "Apagar",
   Tab: "Tab",
 };
 
@@ -59,8 +59,8 @@ export function readKeys(save: { keys?: Partial<Hotkeys> }): Hotkeys {
 
 export function keyLabel(code: string): string {
   if (NAMED[code]) return NAMED[code];
-  if (code.startsWith("Key")) return code.slice(3);
-  if (code.startsWith("Digit")) return code.slice(5);
+  if (code.startsWith("Tecla")) return code.slice(3);
+  if (code.startsWith("Número")) return code.slice(5);
   return code;
 }
 

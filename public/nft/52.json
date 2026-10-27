@@ -1,0 +1,33 @@
+{
+ "name": "Trilho de plasma",
+ "description": "Dino Drag Race — Trilho de plasma (Épico). +34 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/52.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "tires"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 34,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "tires-Épico",
+  "stats": "accel+34"
+ }
+}

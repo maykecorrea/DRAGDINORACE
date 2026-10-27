@@ -1,0 +1,43 @@
+{
+ "name": "Coroa de prego",
+ "description": "Dino Drag Race — Coroa de prego (Lendário). 4 de dano. 273 tiros. 0.09s. A de fábrica. Duas bocas, tiro curto, 1 de dano. Pente de 125.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/149.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "mg"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 273,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.09,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-mg-Lendário-2",
+  "stats": "dmg=4;clip=273;cd=0.09"
+ }
+}

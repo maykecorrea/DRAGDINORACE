@@ -1,0 +1,5 @@
+[
+  { "id": "cofrinho", "nome": "Cofre do Distrito", "bps": 12, "liquidity": "imediato", "enabled": true },
+  { "id": "tesouro", "nome": "Tesouro do Distrito", "bps": 20, "liquidity": "proximo_fechamento", "enabled": true },
+  { "id": "fundo", "nome": "Fundo Faixa", "bps": 30, "range": [-150, 200], "actMin": 3, "liquidity": "proximo_fechamento", "enabled": true }
+]

@@ -1,0 +1,14 @@
+SEED VISUAL
+seeds/seed-normal-traseira.png
+Cópia de public/game/car-1.png (NYXATOPS). É o padrão dos normais de prateleira: car-0 a car-5.
+
+PROMPT
+Pixel-art de loja, quadrado, veículo centralizado.
+Câmera travada exatamente atrás do carro. Visão traseira reta, como miniatura de drag race.
+Pixel denso, blocos grandes, sucata cyberpunk fundida com anatomia de dinossauro.
+Fundo preto sólido. Sem magenta, sem borda branca, sem recorte de figurinha, sem sombra de adesivo.
+Sem piloto, sem pessoa, sem texto, sem número.
+O carro inteiro preenche o quadro. Luzes traseiras, escape e a silhueta precisam ser legíveis por trás.
+
+NEGATIVO
+side view, profile, three-quarter, white outline, sticker border, cutout, paper edge, driver, person, text, letters, numbers, magenta background, plain background glow, blur, photoreal, anime

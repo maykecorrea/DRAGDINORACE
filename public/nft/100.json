@@ -1,0 +1,48 @@
+{
+ "name": "Cauda que segue",
+ "description": "Dino Drag Race — Cauda que segue (Normal). 10 de dano. 20 tiros. 0.85s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/100.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 10,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 20,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.85,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Normal",
+  "stats": "dmg=10;clip=20;cd=0.85;lock=3.4"
+ }
+}

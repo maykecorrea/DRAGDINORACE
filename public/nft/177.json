@@ -1,0 +1,33 @@
+{
+ "name": "Pé de osso",
+ "description": "Dino Drag Race — Pé de osso (Comum). +4 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/177.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "bota"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 4,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-bota-Comum-3",
+  "stats": "accel+4"
+ }
+}

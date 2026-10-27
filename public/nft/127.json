@@ -1,0 +1,48 @@
+{
+ "name": "Presa de inverno",
+ "description": "Dino Drag Race — Presa de inverno (Raro). 8 de dano. 5 tiros. 1.98s. Trava 1s. Trava o carro por 1s e zera a velocidade. Quase não acerta.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/127.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ice"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 8,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 5,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.98,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Freeze",
+   "value": 1,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ice-Raro",
+  "stats": "dmg=8;clip=5;cd=1.98;freeze=1s"
+ }
+}

@@ -1,0 +1,48 @@
+{
+ "name": "Grito de nave",
+ "description": "Dino Drag Race — Grito de nave (Épico). 121 de dano. 5 tiros. 1.43s. Deixa lerdo. Muito dano e deixa o carro lerdo. Difícil de cravar.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/144.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ray"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 121,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 5,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.43,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Slowtime",
+   "value": 2.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ray-Épico-3",
+  "stats": "dmg=121;clip=5;cd=1.43;slow=0.55x/2.4s"
+ }
+}

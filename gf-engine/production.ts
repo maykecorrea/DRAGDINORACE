@@ -6,7 +6,11 @@ import { addMorale } from "./morale.ts";
 import { addRep } from "./reputation.ts";
 import { chance } from "./rng.ts";
 import { consumeMaterials, hasMaterials, receiveBatch, removeSupplierStock } from "./stock.ts";
+import { assertShelf } from "./fittings.ts";
+import { runHands } from "./hands.ts";
 import type { Day, EmployeeId, GameState, HiredEmployee, Job, MaterialId, ServiceId, SupplierId } from "./state.ts";
+import { assertOpen, DAY, WEEK } from "./clock.ts";
+import { addPantry, foodById, type FoodId } from "./body.ts";
 
 const SUPPLIERS: SupplierId[] = ["ferro_velho", "casco_tech", "megaosso", "rato"];
 
@@ -199,10 +203,17 @@ export function promoteJobs(state: GameState, content: Content): void {
 export function receiveInbound(state: GameState, _content: Content, events: GfEvent[]): void {
   const orders = state.inbound ?? [];
   if (orders.length === 0) return;
-  const due = orders.filter((order) => order.atWeek < state.calendar.week || (order.atWeek === state.calendar.week && order.atDay <= state.calendar.day));
-  if (due.length === 0) return;
-  state.inbound = orders.filter((order) => !due.includes(order));
-  for (const order of due) {
+  const due = orders.filter((order) => inboundDue(order, state));
+  const home = state.flags.district == null || state.flags.district === "oficina";
+  const week6 = state.calendar.week === 5;
+  const drop = due.filter((order) => !(week6 && !home));
+  if (drop.length === 0) return;
+  state.inbound = orders.filter((order) => !drop.includes(order));
+  for (const order of drop) {
+    if (order.lost) {
+      events.push({ type: "MATERIALS_ARRIVED", text: "perdido", amount: 0 });
+      continue;
+    }
     let qty = 0;
     for (const item of order.items) {
       receiveBatch(state, item.material, {
@@ -215,8 +226,18 @@ export function receiveInbound(state: GameState, _content: Content, events: GfEv
       });
       qty += item.qty;
     }
-    events.push({ type: "MATERIALS_ARRIVED", text: order.supplier, amount: qty });
+    for (const food of order.foods ?? []) {
+      if (!foodById(food.id)) continue;
+      addPantry(state, food.id as FoodId, food.qty);
+      qty += food.qty;
+    }
+    events.push({ type: "MATERIALS_ARRIVED", text: order.carrier ?? order.supplier, amount: qty });
   }
+}
+
+function inboundDue(order: NonNullable<GameState["inbound"]>[number], state: GameState): boolean {
+  if (typeof order.arriveT === "number") return (state.clock?.t ?? 0) >= order.arriveT;
+  return order.atWeek < state.calendar.week || (order.atWeek === state.calendar.week && order.atDay <= state.calendar.day);
 }
 
 function failJob(state: GameState, content: Content, job: Job, events: GfEvent[]): void {
@@ -277,6 +298,7 @@ export function workOnJob(state: GameState, content: Content, action: Record<str
   if (!job) throw new GameError("servico_invalido", "Esse serviço não está na baia.");
   if (job.status === "waiting_materials" || job.status === "queued") throw new GameError("sem_peca", "Falta peça na prateleira.");
   if (job.status !== "in_progress") throw new GameError("servico_invalido", "Esse serviço não está na baia.");
+  if (job.handId) throw new GameError("com_funcionario", "Esse serviço está com um funcionário da baía.");
   const want = Math.max(1, whole(action.ap) ?? 1);
   const left = job.apNeeded - job.apDone;
   if (left <= 0) return;
@@ -299,7 +321,7 @@ function fitsSkill(content: Content, employee: HiredEmployee, job: Job): boolean
 function claimJob(state: GameState, content: Content, employee: HiredEmployee): Job | undefined {
   const owned = state.jobs.find((job) => job.assignedTo === employee.id && job.status === "in_progress");
   if (owned) return owned;
-  const open = state.jobs.find((job) => job.status === "in_progress" && job.assignedTo === "teo" && fitsSkill(content, employee, job));
+  const open = state.jobs.find((job) => job.status === "in_progress" && job.assignedTo === "teo" && !job.handId && fitsSkill(content, employee, job));
   if (!open) return undefined;
   open.assignedTo = employee.id as EmployeeId;
   return open;
@@ -327,6 +349,7 @@ export function runStaffDay(state: GameState, content: Content, events: GfEvent[
       resolveQuality(state, content, job, events);
     }
   }
+  runHands(state, events);
 }
 
 type BuyItem = { material: MaterialId; qty: number };
@@ -369,6 +392,7 @@ function buy(state: GameState, content: Content, action: Record<string, unknown>
   if (typeof district === "string" && district !== order.supplier) {
     throw new GameError("longe_da_loja", "Você não está nesse balcão.");
   }
+  if (typeof district === "string") assertOpen(content, order.supplier, state.clock.t);
   const supplier = supplierRow(content, order.supplier);
   let cost = 0;
   const priced = order.items.map((item) => {
@@ -379,6 +403,7 @@ function buy(state: GameState, content: Content, action: Record<string, unknown>
     cost += price * item.qty;
     return { ...item, unitCost: price };
   });
+  assertShelf(state, order.items.reduce((sum, item) => sum + item.qty, 0));
   if (order.terms === "prazo14") {
     if (supplier.creditDays == null) throw new GameError("prazo_recusado", "Esse fornecedor não vende a prazo.");
     if (state.rep < (supplier.creditRep ?? 0)) throw new GameError("prazo_recusado", "A reputação ainda não abre o prazo.");
@@ -475,10 +500,91 @@ function assign(state: GameState, action: Record<string, unknown>, events: GfEve
   events.push({ type: "ASSIGNED", jobId: job.id, text: String(job.assignedTo) });
 }
 
+export const TIOZAO_PRICES: Partial<Record<MaterialId, number>> = {
+  kit: 15,
+  oleo: 25,
+  chapa: 35,
+  cabo: 70,
+  osso: 50,
+};
+
+export const CARRIERS = {
+  dinoturbo: { nome: "DinoTurbo", frase: "Mais barato e mais devagar.", freightBase: 8, freightEach: 4, minutesBase: 80, minutesEach: 15, loss: 0.01 },
+  dinodrone: { nome: "DinoDrone", frase: "Mais caro e mais rápido.", freightBase: 20, freightEach: 9, minutesBase: 30, minutesEach: 5, loss: 0.005 },
+} as const;
+
+export type CarrierId = keyof typeof CARRIERS;
+
+export function deliveryQuote(units: number, carrier: CarrierId): { freight: number; minutes: number; loss: number } {
+  const row = CARRIERS[carrier];
+  const n = Math.max(0, Math.floor(units));
+  return { freight: row.freightBase + row.freightEach * n, minutes: row.minutesBase + row.minutesEach * n, loss: row.loss };
+}
+
+function orderParts(state: GameState, content: Content, action: Record<string, unknown>, events: GfEvent[]): void {
+  const carrier = action.carrier === "dinodrone" ? "dinodrone" : action.carrier === "dinoturbo" ? "dinoturbo" : null;
+  if (!carrier) throw new GameError("compra_invalida", "Escolhe o DinoTurbo ou o DinoDrone.");
+  const ids = new Set(content.materials.map((item) => item.id));
+  const items: { material: MaterialId; qty: number }[] = [];
+  for (const row of Array.isArray(action.items) ? action.items : []) {
+    if (!row || typeof row !== "object") throw new GameError("compra_invalida", "Esse material não está na lista.");
+    const material = (row as { material?: unknown }).material;
+    const qty = whole((row as { qty?: unknown }).qty);
+    if (typeof material !== "string" || !ids.has(material as MaterialId) || qty == null || qty <= 0) {
+      throw new GameError("compra_invalida", "Esse material não está na lista.");
+    }
+    if (TIOZAO_PRICES[material as MaterialId] == null) throw new GameError("compra_invalida", "O Tiozão não tem essa peça.");
+    items.push({ material: material as MaterialId, qty });
+  }
+  const foods: { id: FoodId; qty: number; unitCost: number }[] = [];
+  for (const row of Array.isArray(action.foods) ? action.foods : []) {
+    if (!row || typeof row !== "object") throw new GameError("compra_invalida", "Essa comida não está na lista.");
+    const food = foodById(String((row as { food?: unknown }).food ?? ""));
+    const qty = whole((row as { qty?: unknown }).qty);
+    if (!food || !food.stall || food.price <= 0 || qty == null || qty <= 0) {
+      throw new GameError("compra_invalida", "O Tiozão não entrega essa comida.");
+    }
+    foods.push({ id: food.id, qty, unitCost: food.price });
+  }
+  if (items.length === 0 && foods.length === 0) throw new GameError("compra_invalida", "O pedido veio vazio.");
+  assertShelf(state, items.reduce((sum, item) => sum + item.qty, 0));
+  const units = items.reduce((sum, item) => sum + item.qty, 0) + foods.reduce((sum, item) => sum + item.qty, 0);
+  const quote = deliveryQuote(units, carrier);
+  const priced = items.map((item) => ({ ...item, unitCost: TIOZAO_PRICES[item.material] ?? 0 }));
+  const goods = priced.reduce((sum, item) => sum + item.unitCost * item.qty, 0) + foods.reduce((sum, item) => sum + item.unitCost * item.qty, 0);
+  const cost = goods + quote.freight;
+  if (state.cash - cost < -state.overdraftLimit) throw new GameError("sem_caixa", "O limite do banco não cobre essa entrega.");
+  state.cash -= cost;
+  const now = state.clock?.t ?? state.calendar.week * WEEK + (state.calendar.day - 1) * DAY;
+  const arrive = now + quote.minutes;
+  const week = Math.floor(arrive / WEEK);
+  const day = (Math.floor((arrive % WEEK) / DAY) + 1) as Day;
+  const inbound = state.inbound ?? [];
+  inbound.push({
+    id: `in-${seq(state)}`,
+    supplier: "ferro_velho",
+    items: priced,
+    foods,
+    atWeek: week,
+    atDay: day,
+    fromT: now,
+    arriveT: arrive,
+    carrier,
+    lost: chance(state, quote.loss),
+    freight: quote.freight,
+  });
+  state.inbound = inbound;
+  events.push({ type: "BOUGHT", text: carrier, amount: cost });
+}
+
 export function applyProduction(state: GameState, action: Record<string, unknown>, content: Content, events: GfEvent[]): boolean {
   const kind = String(action.type ?? "");
   if (kind === "BUY") {
     buy(state, content, action, events);
+    return true;
+  }
+  if (kind === "ORDER_PARTS") {
+    orderParts(state, content, action, events);
     return true;
   }
   if (kind === "SELL_SCRAP") {

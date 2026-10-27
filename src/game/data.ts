@@ -43,12 +43,12 @@ export type Driver = {
 };
 
 export const DRIVERS: Driver[] = [
-  { id: "vex", name: "VEX-REX", car: "Cromo Mandíbula", sprite: 0, line: "Mandíbula de trem de pouso. O reator é sucata de nave." },
-  { id: "nyx", name: "NYXATOPS", car: "Franja Holo", sprite: 1, line: "Três antenas de casco. O visor é vidro de cockpit rachado." },
-  { id: "geck", name: "GECK-404", car: "Lagarto Glitch", sprite: 2, line: "Braço de servo. Cauda de cabo. Se errar a segunda, já era." },
-  { id: "lua", name: "LUA-PTERO", car: "Asa de Taxa", sprite: 3, line: "Asa de vela solar. O bico é um bocal de propulsor." },
-  { id: "shell", name: "SHELLNAKAMOTO", car: "Casco Gênesis", sprite: 4, line: "O casco é casco de nave. Rebite, faixa e vigia." },
-  { id: "claw", name: "HYPECLAW", car: "Garra WAGMI", sprite: 5, line: "Garra de bocal. Manta térmica em cima do reator." },
+  { id: "vex", name: "VEX-REX", car: "Cromo Mandíbula", sprite: 0, line: "Rex Navalha na pista. Mandíbula de trem de pouso e reator de nave." },
+  { id: "nyx", name: "NYXATOPS", car: "Franja Holo", sprite: 1, line: "Três antenas no casco. O visor é vidro de cabine rachado." },
+  { id: "geck", name: "GECK-404", car: "Lagarto Glitch", sprite: 2, line: "Braço de robô e cauda de cabo. Errou a segunda marcha, já era." },
+  { id: "lua", name: "LUA-PTERO", car: "Asa de Taxa", sprite: 3, line: "Asa de vela solar. O bico é um bocal de foguete." },
+  { id: "shell", name: "SHELLNAKAMOTO", car: "Casco Gênesis", sprite: 4, line: "O casco é casco de nave. Rebite, faixa e janelinha." },
+  { id: "claw", name: "HYPECLAW", car: "Garra WAGMI", sprite: 5, line: "Garra de bocal. Manta térmica em cima do motor." },
 ];
 
 export const BONUS: Record<DriverId, Upgrades> = {
@@ -80,7 +80,7 @@ export const RIVALS: Rival[] = [
     id: "geck",
     driver: "geck",
     label: "Rua",
-    talk: "ngmi se você acertar o verde.",
+    talk: "Acertou o verde? Mesmo assim eu chego antes.",
     build: { engine: 0, gearbox: 0, nitro: 1, tires: 0, chassis: 0 },
     reaction: 0.34,
     shiftAt: 0.78,
@@ -91,7 +91,7 @@ export const RIVALS: Rival[] = [
   {
     id: "claw",
     driver: "claw",
-    label: "Hype",
+    label: "Agito",
     talk: "Eu saio na frente. Você que tente me ver.",
     build: { engine: 1, gearbox: 0, nitro: 1, tires: 2, chassis: 0 },
     reaction: 0.2,
@@ -115,8 +115,8 @@ export const RIVALS: Rival[] = [
   {
     id: "shell",
     driver: "shell",
-    label: "Hodl",
-    talk: "Não vende na terceira. Eu chego inteiro.",
+    label: "Firme",
+    talk: "Eu não troco na pressa. Chego inteiro.",
     build: { engine: 1, gearbox: 1, nitro: 1, tires: 0, chassis: 1 },
     reaction: 0.26,
     shiftAt: 0.95,
@@ -127,8 +127,8 @@ export const RIVALS: Rival[] = [
   {
     id: "lua",
     driver: "lua",
-    label: "Taxa",
-    talk: "Segura o nitro que a asa cobra juros.",
+    label: "Asa",
+    talk: "Segura o nitro, que a minha asa é mais rápida.",
     build: { engine: 1, gearbox: 1, nitro: 2, tires: 1, chassis: 0 },
     reaction: 0.18,
     shiftAt: 0.9,
@@ -154,21 +154,21 @@ export const MINT_COST = 260;
 export const MAX_LEVEL = 4;
 
 export const CATALOG: { driverId: DriverId; rarity: Rarity; cost: number; note: string; name?: string; image?: string }[] = [
-  { driverId: "geck", rarity: "Normal", cost: 160, note: "Calha aberta. A gosma verde corre no teto.", name: "CALHA", image: "/game/normal/car-calha.png?v=9" },
+  { driverId: "geck", rarity: "Normal", cost: 160, note: "Calha aberta. A gosma verde escorre no teto.", name: "CALHA", image: "/game/normal/car-calha.png?v=9" },
   { driverId: "claw", rarity: "Normal", cost: 190, note: "O aerofólio é um gancho. Dois faróis.", name: "GANCHO", image: "/game/normal/car-gancho.png?v=9" },
-  { driverId: "nyx", rarity: "Normal", cost: 210, note: "A cabine é um tambor. Uma vigia só.", name: "TAMBOR", image: "/game/normal/car-tambor.png?v=9" },
-  { driverId: "lua", rarity: "Normal", cost: 240, note: "Roda de válvula no convés. Vaza roxo.", name: "VALVULA", image: "/game/normal/car-valvula.png?v=9" },
+  { driverId: "nyx", rarity: "Normal", cost: 210, note: "A cabine é um tambor. Uma janelinha só.", name: "TAMBOR", image: "/game/normal/car-tambor.png?v=9" },
+  { driverId: "lua", rarity: "Normal", cost: 240, note: "Roda de válvula no teto. Vaza brilho roxo.", name: "VÁLVULA", image: "/game/normal/car-valvula.png?v=9" },
   { driverId: "shell", rarity: "Normal", cost: 280, note: "Viga de escora no porta-malas. Boca de osso.", name: "ESCORA", image: "/game/normal/car-escora.png?v=9" },
-  { driverId: "vex", rarity: "Normal", cost: 180, note: "Para-choque de costela. Simples, de frente.", name: "COSTELA", image: "/game/normal/car-costela.png?v=8" },
+  { driverId: "vex", rarity: "Normal", cost: 180, note: "Para-choque de costela. Simples e de frente.", name: "COSTELA", image: "/game/normal/car-costela.png?v=8" },
   { driverId: "geck", rarity: "Normal", cost: 200, note: "Cunha baixa. Uma fenda âmbar no lugar do vidro.", name: "FENDA", image: "/game/normal/car-fenda.png?v=9" },
-  { driverId: "nyx", rarity: "Normal", cost: 220, note: "Nariz de broca. Vigia redonda, ferrugem.", name: "BROCA", image: "/game/normal/car-broca.png?v=9" },
-  { driverId: "lua", rarity: "Normal", cost: 250, note: "Capô de balde. Faixa de perigo, brilho roxo.", name: "BALDE", image: "/game/normal/car-balde.png?v=3" },
+  { driverId: "nyx", rarity: "Normal", cost: 220, note: "Nariz de broca. Janelinha redonda e ferrugem.", name: "BROCA", image: "/game/normal/car-broca.png?v=9" },
+  { driverId: "lua", rarity: "Normal", cost: 250, note: "Capô de balde. Faixa de perigo e brilho roxo.", name: "BALDE", image: "/game/normal/car-balde.png?v=3" },
   { driverId: "claw", rarity: "Normal", cost: 260, note: "Um pino só no nariz. Dois faróis.", name: "PINO", image: "/game/normal/car-pino.png?v=10" },
 ];
 
 export const PARTS: { key: keyof Upgrades; name: string; blurb: string }[] = [
   { key: "chassis", name: "Vida", blurb: "O casco. A faixa fica mais longa e a parede dói menos." },
-  { key: "engine", name: "Velocidade max", blurb: "Teto em milhas. Só o lendário, com o motor no máximo, passa de 15784 mph." },
+  { key: "engine", name: "Velocidade máxima", blurb: "Teto de velocidade. Só o lendário, com o motor no máximo, passa de 25402 km/h." },
   { key: "tires", name: "Aceleração", blurb: "O quanto o carro morde a largada e sobe de marcha." },
   { key: "nitro", name: "Tempo de nitro", blurb: "Segundos que a garrafa fica acesa." },
   { key: "gearbox", name: "Potência", blurb: "Torque na puxada e na troca." },
@@ -290,7 +290,12 @@ export function driverById(id: DriverId): Driver {
   return DRIVERS.find((d) => d.id === id) ?? DRIVERS[0];
 }
 
+export function rarityLabel(rarity: string): string {
+  return rarity === "Normal" ? "Incomum" : rarity;
+}
+
 export type PilotId =
+  | "teo"
   | "vex"
   | "geck"
   | "claw"
@@ -312,15 +317,15 @@ export type Pilot = {
 };
 
 export const PILOTS: Pilot[] = [
-  { id: "vex", name: "VEX-REX", grade: "Rua", image: "/game/pilot-0.png?v=8", line: "O banco de fábrica. Quase não empurra.", cost: 0, bonus: { durability: 1.02, vmax: 1.01, accel: 1.02, nitroTime: 1.02, power: 1.02 } },
-  { id: "geck", name: "GECK-404", grade: "Rua", image: "/game/pilot-2.png?v=8", line: "Segura o nitro um pouco mais.", cost: 120, bonus: { durability: 1.01, vmax: 1.01, accel: 1.02, nitroTime: 1.08, power: 1.01 } },
-  { id: "claw", name: "HYPECLAW", grade: "Rua", image: "/game/pilot-5.png?v=8", line: "Sai na garra. A aceleração sobe.", cost: 140, bonus: { durability: 1.01, vmax: 1.01, accel: 1.08, nitroTime: 1.02, power: 1.02 } },
-  { id: "nyx", name: "NYXATOPS", grade: "Rua", image: "/game/pilot-1.png?v=8", line: "Troca no fio. A potência sobe.", cost: 180, bonus: { durability: 1.02, vmax: 1.02, accel: 1.02, nitroTime: 1.02, power: 1.08 } },
-  { id: "lua", name: "LUA-PTERO", grade: "Rua", image: "/game/pilot-3.png?v=8", line: "A asa puxa o ponteiro e o nitro.", cost: 220, bonus: { durability: 1.02, vmax: 1.03, accel: 1.02, nitroTime: 1.06, power: 1.02 } },
-  { id: "shell", name: "SHELLNAKAMOTO", grade: "Rua", image: "/game/pilot-4.png?v=8", line: "Chega inteiro. Durabilidade e potência.", cost: 280, bonus: { durability: 1.1, vmax: 1.02, accel: 1.02, nitroTime: 1.02, power: 1.05 } },
-  { id: "neuro", name: "NEURO", grade: "Lendário", image: "/game/legend/pilot-neuro.png?v=2", line: "Troca no milissegundo. Potência e nitro.", cost: 1400, bonus: { durability: 1.05, vmax: 1.03, accel: 1.05, nitroTime: 1.1, power: 1.14 } },
+  { id: "teo", name: "Téo", grade: "Rua", image: "/game/pilot-0.png?v=8", line: "Você mesmo no volante. Sem bônus, com coragem.", cost: 0, bonus: { durability: 1, vmax: 1, accel: 1, nitroTime: 1, power: 1 } },
+  { id: "geck", name: "GECK-404", grade: "Rua", image: "/game/pilot-2.png?v=8", line: "Segura o nitro por mais tempo.", cost: 120, bonus: { durability: 1.01, vmax: 1.01, accel: 1.02, nitroTime: 1.08, power: 1.01 } },
+  { id: "claw", name: "HYPECLAW", grade: "Rua", image: "/game/pilot-5.png?v=8", line: "Sai na garra. Mais aceleração.", cost: 140, bonus: { durability: 1.01, vmax: 1.01, accel: 1.08, nitroTime: 1.02, power: 1.02 } },
+  { id: "nyx", name: "NYXATOPS", grade: "Rua", image: "/game/pilot-1.png?v=8", line: "Troca na hora certa. Mais potência.", cost: 180, bonus: { durability: 1.02, vmax: 1.02, accel: 1.02, nitroTime: 1.02, power: 1.08 } },
+  { id: "lua", name: "LUA-PTERO", grade: "Rua", image: "/game/pilot-3.png?v=8", line: "A asa puxa o ponteiro. Mais nitro.", cost: 220, bonus: { durability: 1.02, vmax: 1.03, accel: 1.02, nitroTime: 1.06, power: 1.02 } },
+  { id: "shell", name: "SHELLNAKAMOTO", grade: "Rua", image: "/game/pilot-4.png?v=8", line: "Chega inteiro. Mais casco e potência.", cost: 280, bonus: { durability: 1.1, vmax: 1.02, accel: 1.02, nitroTime: 1.02, power: 1.05 } },
+  { id: "neuro", name: "NEURO", grade: "Lendário", image: "/game/legend/pilot-neuro.png?v=2", line: "Troca no milissegundo. Mais potência e nitro.", cost: 1400, bonus: { durability: 1.05, vmax: 1.03, accel: 1.05, nitroTime: 1.1, power: 1.14 } },
   { id: "ronin", name: "RONIN", grade: "Lendário", image: "/game/legend/pilot-ronin.png?v=2", line: "Aguenta a batida. O casco sobe mais.", cost: 1500, bonus: { durability: 1.14, vmax: 1.04, accel: 1.05, nitroTime: 1.05, power: 1.05 } },
-  { id: "trex", name: "T-REX", grade: "Lendário", image: "/game/legend/pilot-trex.png?v=2", line: "O teto da bancada. Quase tudo no máximo.", cost: 1800, bonus: { durability: 1.08, vmax: 1.04, accel: 1.08, nitroTime: 1.08, power: 1.08 } },
+  { id: "trex", name: "T-REX", grade: "Lendário", image: "/game/legend/pilot-trex.png?v=2", line: "O máximo da oficina. Quase tudo no topo.", cost: 1800, bonus: { durability: 1.08, vmax: 1.04, accel: 1.08, nitroTime: 1.08, power: 1.08 } },
 ];
 
 export function pilotById(id?: string): Pilot {

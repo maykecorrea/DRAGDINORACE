@@ -1,0 +1,33 @@
+{
+ "name": "Coroa quebrada",
+ "description": "Dino Drag Race — Coroa quebrada (Épico). +43 de vida no piloto.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/213.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "cranio"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Vida",
+   "value": 43,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-cranio-Épico-3",
+  "stats": "vida+43"
+ }
+}

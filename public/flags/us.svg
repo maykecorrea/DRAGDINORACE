@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 741 390">
+  <rect width="741" height="390" fill="#b22234"/>
+  <path d="M0,30h741M0,90h741M0,150h741M0,210h741M0,270h741M0,330h741" stroke="#ffffff" stroke-width="30"/>
+  <rect width="296.4" height="210" fill="#3c3b6e"/>
+  <!-- 50 stars simplified grid for crisp display at icon size -->
+  <g fill="#ffffff">
+    <g id="s">
+      <polygon points="24.7,7 26.6,13 32.8,13 27.8,16.7 29.7,22.7 24.7,19 19.7,22.7 21.6,16.7 16.6,13 22.8,13"/>
+    </g>
+    <use href="#s" x="49.4"/><use href="#s" x="98.8"/><use href="#s" x="148.2"/><use href="#s" x="197.6"/><use href="#s" x="247"/>
+    <use href="#s" x="24.7" y="17.5"/><use href="#s" x="74.1" y="17.5"/><use href="#s" x="123.5" y="17.5"/><use href="#s" x="172.9" y="17.5"/><use href="#s" x="222.3" y="17.5"/>
+    <use href="#s" y="35"/><use href="#s" x="49.4" y="35"/><use href="#s" x="98.8" y="35"/><use href="#s" x="148.2" y="35"/><use href="#s" x="197.6" y="35"/><use href="#s" x="247" y="35"/>
+    <use href="#s" x="24.7" y="52.5"/><use href="#s" x="74.1" y="52.5"/><use href="#s" x="123.5" y="52.5"/><use href="#s" x="172.9" y="52.5"/><use href="#s" x="222.3" y="52.5"/>
+    <use href="#s" y="70"/><use href="#s" x="49.4" y="70"/><use href="#s" x="98.8" y="70"/><use href="#s" x="148.2" y="70"/><use href="#s" x="197.6" y="70"/><use href="#s" x="247" y="70"/>
+    <use href="#s" x="24.7" y="87.5"/><use href="#s" x="74.1" y="87.5"/><use href="#s" x="123.5" y="87.5"/><use href="#s" x="172.9" y="87.5"/><use href="#s" x="222.3" y="87.5"/>
+    <use href="#s" y="105"/><use href="#s" x="49.4" y="105"/><use href="#s" x="98.8" y="105"/><use href="#s" x="148.2" y="105"/><use href="#s" x="197.6" y="105"/><use href="#s" x="247" y="105"/>
+    <use href="#s" x="24.7" y="122.5"/><use href="#s" x="74.1" y="122.5"/><use href="#s" x="123.5" y="122.5"/><use href="#s" x="172.9" y="122.5"/><use href="#s" x="222.3" y="122.5"/>
+    <use href="#s" y="140"/><use href="#s" x="49.4" y="140"/><use href="#s" x="98.8" y="140"/><use href="#s" x="148.2" y="140"/><use href="#s" x="197.6" y="140"/><use href="#s" x="247" y="140"/>
+  </g>
+</svg>

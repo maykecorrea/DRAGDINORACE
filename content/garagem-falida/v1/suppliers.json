@@ -1,0 +1,46 @@
+[
+  {
+    "id": "ferro_velho",
+    "nome": "Ferro-Velho do Zé",
+    "prices": { "kit": 15, "oleo": 25, "chapa": 35, "cabo": 70, "osso": 50, "bobina": null },
+    "pagamento": "à vista",
+    "qualityMod": -0.1,
+    "scrapBuy": 0.4,
+    "ap": 0
+  },
+  {
+    "id": "casco_tech",
+    "nome": "Casco-Tech",
+    "prices": { "kit": 18, "oleo": 28, "chapa": 45, "cabo": 90, "osso": 65, "bobina": 320 },
+    "pagamento": "à vista; 14 dias com Fama 30+, nome limpo e limite de 2.000",
+    "qualityMod": 0,
+    "creditDays": 14,
+    "creditRep": 30,
+    "creditLimit": 2000,
+    "ap": 0
+  },
+  {
+    "id": "megaosso",
+    "nome": "Megaosso",
+    "prices": { "kit": 13, "oleo": 21, "chapa": 34, "cabo": 68, "osso": 49, "bobina": 260 },
+    "pagamento": "à vista ou 3× (+8%)",
+    "qualityMod": 0,
+    "installments": 3,
+    "installmentMarkup": 0.08,
+    "minOrder": { "kit": 20, "oleo": 20, "chapa": 10, "cabo": 10, "osso": 10, "bobina": 5 },
+    "ap": 0
+  },
+  {
+    "id": "rato",
+    "nome": "Beco do Rato",
+    "prices": { "kit": 8, "oleo": 12, "chapa": 20, "cabo": 40, "osso": 30, "bobina": 150 },
+    "pagamento": "à vista, ⚡1",
+    "qualityMod": -0.2,
+    "defect": 0.3,
+    "raidChance": 0.1,
+    "raidFromPurchase": 3,
+    "raidFine": 1500,
+    "raidRep": -15,
+    "ap": 1
+  }
+]

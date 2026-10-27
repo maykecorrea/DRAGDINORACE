@@ -1,0 +1,33 @@
+{
+ "name": "Escama de vidro",
+ "description": "Dino Drag Race — Escama de vidro (Lendário). +58 de casco.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/62.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "chassis"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Casco",
+   "value": 58,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "chassis-Lendário-2",
+  "stats": "casco+58"
+ }
+}

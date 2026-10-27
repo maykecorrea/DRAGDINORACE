@@ -1,0 +1,8 @@
+[
+  { "id": "tico", "nome": "Tico", "funcao": "aprendiz", "salary": 180, "apPerDay": 1, "skill": 1, "week": 2, "enabled": true, "fala": "Me deixa aprender na baia. Eu aperto o que o senhor mandar." },
+  { "id": "brasa", "nome": "Dona Brasa", "funcao": "mecanica", "salary": 450, "apPerDay": 2, "skill": 3, "week": 6, "rep": 25, "enabled": true, "fala": "Motor pior eu já vi. E eu não volto amanhã para refazer." },
+  { "id": "osso_duro", "nome": "Osso Duro", "funcao": "soldador", "salary": 400, "apPerDay": 2, "skill": 3, "skillBonus": { "funilaria": 1, "custom": 1 }, "level": 2, "enabled": true, "fala": "Chapa e peça especial. Parafuso eu deixo para o aprendiz." },
+  { "id": "labia", "nome": "Lábia", "funcao": "vendedora", "salary": 280, "commission": 0.05, "leadBonus": 3, "level": 1, "enabled": true, "fala": "Eu trago clientes. Minha parte vem do que entrar." },
+  { "id": "ambar", "nome": "Dona Âmbar", "funcao": "contadora", "salary": 260, "week": 8, "enabled": true, "fala": "Eu leio o número que o caixa esconde." },
+  { "id": "zeca", "nome": "Primo Zeca", "funcao": "ajudante", "salary": 120, "apPerDay": 1, "skill": 0, "week": 3, "error": 0.25, "theft": 0.05, "trap": true, "enabled": true, "fala": "Trabalho por 120. Não precisa registrar, é família." }
+]

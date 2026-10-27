@@ -616,9 +616,9 @@ function paintStops(ctx: CanvasRenderingContext2D, camX: number, camY: number, v
     ctx.rotate(rot);
     ctx.lineWidth = 8;
     ctx.strokeStyle = "rgba(20,16,12,0.82)";
-    ctx.strokeText("STOP", 0, 0);
+    ctx.strokeText("PARE", 0, 0);
     ctx.fillStyle = "rgba(255,255,255,0.95)";
-    ctx.fillText("STOP", 0, 0);
+    ctx.fillText("PARE", 0, 0);
     ctx.restore();
   }
   ctx.restore();
@@ -804,8 +804,8 @@ export function CityDrive({
     loja: "Loja",
     pecas: "Peças",
     forja: "Forja",
-    bar: "Bar",
-    stake: "Stake",
+    bar: "Fliperama",
+    stake: "Ninho",
   });
   labels.current = {
     garagem: t("city.garagem"),
@@ -1320,7 +1320,7 @@ export function CityDrive({
         <div className="bg-black/75 px-3 py-2 text-right shadow-[0_0_18px_rgba(214,255,63,0.18)]">
           <p className="font-display text-3xl leading-none text-primary">{t("dash.mode2")}</p>
           <p className={`font-pixel text-sm tracking-widest ${box.cut ? "text-[#f7c948]" : "text-fg"}`}>
-            {box.gear}ª · {mph} mph
+            {box.gear}ª · {Math.round(mph * 1.60934)} km/h
           </p>
           <div className="ml-auto mt-1 h-1.5 w-28 bg-white/15" aria-hidden>
             <div className={`h-full ${box.cut ? "bg-[#f7c948]" : "bg-primary"}`} style={{ width: `${box.rpm * 10}%` }} />

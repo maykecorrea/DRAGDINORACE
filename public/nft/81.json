@@ -1,0 +1,43 @@
+{
+ "name": "Foguete de prego",
+ "description": "Dino Drag Race — Foguete de prego (Comum). 32 de dano. 5 tiros. 1.24s. Voa reto. Em cheio dói mais. Se passar perto, estoura com menos dano.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/81.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "missile"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 32,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 5,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.24,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-missile-Comum-3",
+  "stats": "dmg=32;clip=5;cd=1.24"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "name": "Sola de lava",
+ "description": "Dino Drag Race — Sola de lava (Raro). +12 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/206.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "bota"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 12,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-bota-Raro-2",
+  "stats": "accel+12"
+ }
+}

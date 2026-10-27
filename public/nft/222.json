@@ -1,0 +1,33 @@
+{
+ "name": "Pé que sai na frente",
+ "description": "Dino Drag Race — Pé que sai na frente (Épico). +31 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/222.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "bota"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 31,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-bota-Épico-3",
+  "stats": "accel+31"
+ }
+}

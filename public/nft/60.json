@@ -1,0 +1,33 @@
+{
+ "name": "Hélice de osso",
+ "description": "Dino Drag Race — Hélice de osso (Épico). +48 de potência.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/60.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "gearbox"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Potência",
+   "value": 48,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "gearbox-Épico-3",
+  "stats": "power+48"
+ }
+}

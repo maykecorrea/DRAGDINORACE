@@ -1,0 +1,33 @@
+{
+ "name": "Fronte de plasma",
+ "description": "Dino Drag Race — Fronte de plasma (Épico). +28 de vida no piloto.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/212.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "cranio"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Vida",
+   "value": 28,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-cranio-Épico-2",
+  "stats": "vida+28"
+ }
+}

@@ -1,4 +1,5 @@
 import type { Content } from "./content.ts";
+import { here } from "./district.ts";
 import { GameError } from "./errors.ts";
 import { makeDebt, type GfEvent } from "./finance.ts";
 import { addMorale } from "./morale.ts";
@@ -79,14 +80,16 @@ function hire(state: GameState, content: Content, action: Record<string, unknown
   if (!id || !isId(id)) throw new GameError("sem_funcionario", "Essa pessoa não está na rua.");
   const def = defOf(content, id);
   if (!def || !def.enabled) throw new GameError("sem_funcionario", "Essa pessoa não está na rua.");
-  if (state.employees.some((item) => item.id === id)) throw new GameError("sem_funcionario", "Essa pessoa já está na oficina.");
+  if (def.id === "brasa" && here(state) !== "oficina") {
+    throw new GameError("longe", "A Dona Brasa só entra com você na oficina.");
+  }
   if ((def.week ?? 0) > state.calendar.week || (def.rep ?? 0) > state.rep || (def.level ?? 0) > state.garage.level) {
     throw new GameError("sem_funcionario", "Essa pessoa ainda não está na porta.");
   }
   if (produces(def) && productionCount(state) >= state.garage.bays) {
-    throw new GameError("sem_baia", "Não há baia para mais um braço de produção.");
+    throw new GameError("sem_baia", "Não tem baia para mais um ajudante.");
   }
-  if (!canAfford(state, def.salary)) throw new GameError("sem_caixa", "O cheque especial não cobre a taxa de contratação.");
+  if (!canAfford(state, def.salary)) throw new GameError("sem_caixa", "O limite do banco não cobre a contratação.");
   state.cash -= def.salary;
   const hired: HiredEmployee = {
     id,
@@ -108,7 +111,7 @@ function fire(state: GameState, content: Content, action: Record<string, unknown
   const employee = state.employees.find((item) => item.id === id);
   if (!employee) throw new GameError("sem_funcionario", "Essa pessoa não está na oficina.");
   const cost = employee.salary * 2;
-  if (!canAfford(state, cost)) throw new GameError("sem_caixa", "O cheque especial não cobre a rescisão.");
+  if (!canAfford(state, cost)) throw new GameError("sem_caixa", "O limite do banco não cobre a demissão.");
   state.cash -= cost;
   state.employees = state.employees.filter((item) => item.id !== id);
   releaseJobs(state, id);
@@ -125,7 +128,7 @@ function train(state: GameState, action: Record<string, unknown>, events: GfEven
   if (!tico) throw new GameError("sem_funcionario", "O Tico não está na oficina.");
   if (tico.skill >= 2) throw new GameError("sem_curso", "O Tico já aprendeu o que o curso ensina.");
   if (typeof state.flags.ticoReadyWeek === "number") throw new GameError("sem_curso", "O curso já está andando.");
-  if (!canAfford(state, TRAIN_COST)) throw new GameError("sem_caixa", "O curso custa 300. O caixa não fecha.");
+  if (!canAfford(state, TRAIN_COST)) throw new GameError("sem_caixa", "O curso custa 300. O caixa não dá.");
   state.cash -= TRAIN_COST;
   state.flags.ticoReadyWeek = state.calendar.week + TRAIN_WEEKS;
   events.push({ type: "TRAINING", text: "tico", amount: TRAIN_COST, week: state.flags.ticoReadyWeek });
@@ -137,7 +140,7 @@ function payBack(state: GameState, action: Record<string, unknown>, events: GfEv
   const employee = state.employees.find((item) => item.id === id);
   if (!employee || employee.owedWeeks <= 0) throw new GameError("nada_devido", "Não há salário atrasado.");
   const cost = employee.salary * employee.owedWeeks;
-  if (!canAfford(state, cost)) throw new GameError("sem_caixa", "O cheque especial não cobre o salário atrasado.");
+  if (!canAfford(state, cost)) throw new GameError("sem_caixa", "O limite do banco não cobre o salário atrasado.");
   state.cash -= cost;
   employee.owedWeeks = 0;
   events.push({ type: "WAGES_PAID", text: id, amount: cost });
@@ -152,7 +155,7 @@ function quitForWage(state: GameState, content: Content, employee: HiredEmployee
   state.employees = state.employees.filter((item) => item.id !== employee.id);
   releaseJobs(state, employee.id);
   if (employee.id === "ambar") state.flags.accountant = false;
-  addRep(state, content, QUIT_REP, "funcionário saiu por salário");
+  addRep(state, content, QUIT_REP, "ajudante saiu por salário atrasado");
   events.push({ type: "QUIT", text: employee.id, amount: severance });
 }
 

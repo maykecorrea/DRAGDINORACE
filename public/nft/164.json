@@ -1,0 +1,48 @@
+{
+ "name": "Trono gelado",
+ "description": "Dino Drag Race — Trono gelado (Lendário). 15 de dano. 9 tiros. 1.45s. Trava 1s. Trava o carro por 1s e zera a velocidade. Quase não acerta.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/164.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ice"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 15,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 9,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.45,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Freeze",
+   "value": 1,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-ice-Lendário-2",
+  "stats": "dmg=15;clip=9;cd=1.45;freeze=1s"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "name": "Olho de cometa",
+ "description": "Dino Drag Race — Olho de cometa (Raro). +8% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/199.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "lente"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "8%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-lente-Raro",
+  "stats": "vmax+8%"
+ }
+}

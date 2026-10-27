@@ -1,0 +1,33 @@
+{
+ "name": "Ampola roxa",
+ "description": "Dino Drag Race — Ampola roxa (Raro). +0.36s de nitro.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/208.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ampola"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Nitro",
+   "value": "0.36s",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-ampola-Raro",
+  "stats": "nitro+0.36s"
+ }
+}

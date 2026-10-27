@@ -57,8 +57,8 @@ const timeSchema = z.object({
     workExtra: z.number().int().nonnegative(),
     restBonus: z.number().int(),
     nightCoffee: z.number().int(),
-    sleepBase: z.number().int().nonnegative(),
-    sleepPerHour: z.number().int().nonnegative(),
+    sleepBase: z.number().nonnegative(),
+    sleepPerHour: z.number().nonnegative(),
     tired: z.number().int(),
     exhausted: z.number().int(),
     shortHours: z.number().positive(),
@@ -271,7 +271,7 @@ const serviceSchema = z.object({
   difficulty: z.number().int().positive(),
   materials: z.partialRecord(materialId, z.number().int().positive()),
   ref: z.number().int().positive(),
-  requires: z.object({ compressor: z.boolean().optional(), level: z.number().int().nonnegative().optional() }),
+  requires: z.object({ compressor: z.boolean().optional(), level: z.number().int().nonnegative().optional(), patent: z.number().int().nonnegative().optional() }),
 });
 const clientSchema = z.object({
   id: z.string().min(1),

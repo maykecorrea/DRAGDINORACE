@@ -20,7 +20,7 @@ function Pista() {
   if (isPending) {
     return (
       <main className="grid min-h-dvh place-items-center bg-bg">
-        <p className="font-display text-4xl text-primary">Acendendo o giro…</p>
+        <p className="font-display text-4xl text-primary">Esquentando o motor…</p>
       </main>
     );
   }

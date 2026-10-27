@@ -1,4 +1,4 @@
-import type { Content, DebtTemplate } from "./content.ts";
+import { levelOf, xpOf } from "./body.ts";
 import { GameError } from "./errors.ts";
 import { bps } from "./format.ts";
 import { addMorale } from "./morale.ts";
@@ -86,7 +86,7 @@ export function openingDebts(content: Content): Debt[] {
   );
 }
 
-/** Juros compostos sem pagamento. Usado na prova do agiota. */
+/** Juros sobre juros sem pagamento. Usado na prova do agiota. */
 export function compoundUnchecked(principal: number, weeklyBps: number, weeks: number): number {
   let balance = principal;
   for (let i = 0; i < weeks; i += 1) balance += bps(balance, weeklyBps);
@@ -135,6 +135,41 @@ export function netWorth(state: GameState, content: Content): number {
   return Math.round(
     state.cash + savings + stock * content.balance.inventoryNetFactor + assets + receivables * content.balance.receivableNetFactor + carcasses - debt,
   );
+}
+
+/** Parcela que sai no fechamento do mês. Não é o contrato inteiro. */
+function billOf(state: GameState, content: Content, debt: Debt): number {
+  if (debt.balance <= 0) return 0;
+  const tpl = content.debtTemplates[debt.template];
+  if (!tpl || tpl.min === "auto") return 0;
+  if (tpl.min === "full") {
+    const at = debt.dueWeek ?? tpl.dueWeek ?? 0;
+    return state.calendar.week >= at ? debt.balance : 0;
+  }
+  if (tpl.min === "interest") return Math.min(debt.balance, bps(debt.balance, debt.weeklyBps));
+  if (tpl.min === "pct15") {
+    const fatura = (debt.statement ?? 0) + (debt.revolving ?? 0);
+    return Math.min(debt.balance, Math.round((fatura * (tpl.pct ?? 15)) / 100));
+  }
+  if (tpl.min === "price") {
+    if (debt.dueWeek != null && state.calendar.week < debt.dueWeek) return 0;
+    return Math.min(debt.balance, debt.pricePayment ?? 0);
+  }
+  const fixed = typeof debt.minPayment === "number" ? debt.minPayment : (tpl.minValue ?? 0);
+  return Math.min(debt.balance, fixed);
+}
+
+export function monthDue(state: GameState, content: Content): number {
+  let due = 0;
+  for (const debt of state.debts) due += billOf(state, content, debt);
+  for (const hand of state.hands ?? []) {
+    due += hand.pay > 0 ? hand.pay : Math.max(0, hand.salary - hand.advance);
+  }
+  return due;
+}
+
+export function monthResult(state: GameState, content: Content): number {
+  return state.cash - monthDue(state, content);
 }
 
 function groupOf(content: Content, debt: Debt): string {
@@ -344,7 +379,7 @@ function requireOpen(state: GameState): void {
 }
 
 function manual(state: GameState, nextCash: number): void {
-  if (nextCash < -state.overdraftLimit) throw new GameError("sem_caixa", "O cheque especial não cobre essa compra.");
+  if (nextCash < -state.overdraftLimit) throw new GameError("sem_caixa", "O limite do banco não cobre essa compra.");
 }
 
 export function bookReceipt(state: GameState, amount: number, revenue: number, materials: number): void {
@@ -378,7 +413,7 @@ export function applyFinance(state: GameState, action: Action, content: Content,
   if (kind === "PAY_DEBT") {
     const debt = state.debts.find((item) => item.id === action.debtId);
     const value = whole(action.value);
-    if (!debt || value == null || value <= 0 || value > debt.balance) throw new GameError("pagamento_invalido", "Esse pagamento não cabe na dívida.");
+    if (!debt || value == null || value <= 0 || value > debt.balance) throw new GameError("pagamento_invalido", "Esse pagamento é maior que a dívida.");
     const penalty = debt.earlyPenaltyBps ? bps(value, debt.earlyPenaltyBps) : 0;
     manual(state, state.cash - value - penalty);
     state.cash -= value + penalty;
@@ -403,19 +438,19 @@ export function applyFinance(state: GameState, action: Action, content: Content,
     const product = action.product;
     const value = whole(action.value);
     if ((product !== "cofrinho" && product !== "tesouro" && product !== "fundo") || value == null || value <= 0) {
-      throw new GameError("reserva_invalida", "Diz quanto e em qual reserva.");
+      throw new GameError("reserva_invalida", "Diga quanto e em qual cofre.");
     }
     if (product === "fundo" && (state.garage.level < 3 || state.calendar.act < 3)) {
       throw new GameError("reserva_invalida", "O Fundo Faixa abre no ato 3, com a oficina de verdade.");
     }
     if (kind === "SAVE") {
-      if (state.cash < value) throw new GameError("sem_caixa", "Não guarda dinheiro que você não tem.");
+      if (state.cash < value) throw new GameError("sem_caixa", "Não dá para guardar dinheiro que você não tem.");
       state.cash -= value;
       state.savings[product] += value;
       events.push({ type: "SAVED", amount: value, text: product });
       return true;
     }
-    if (state.savings[product] < value) throw new GameError("sem_reserva", "A reserva não tem esse valor.");
+    if (state.savings[product] < value) throw new GameError("sem_reserva", "O cofre não tem esse valor.");
     state.savings[product] -= value;
     if (product === "cofrinho") state.cash += value;
     else state.savings.pendingWithdraw.push({ product, value });
@@ -425,7 +460,7 @@ export function applyFinance(state: GameState, action: Action, content: Content,
 
   if (kind === "SET_AUTODEPOSIT") {
     const pct = whole(action.pct);
-    if (pct == null || pct < 0 || pct > content.balance.savingsAutoMax) throw new GameError("percentual_invalido", "O automático fica entre 0 e 50.");
+    if (pct == null || pct < 0 || pct > content.balance.savingsAutoMax) throw new GameError("percentual_invalido", "O automático vai de 0 a 50.");
     state.savings.autoDepositPct = pct;
     events.push({ type: "AUTODEPOSIT", amount: pct });
     return true;
@@ -434,26 +469,26 @@ export function applyFinance(state: GameState, action: Action, content: Content,
   if (kind === "TAKE_LOAN") {
     const id = String(action.template ?? "");
     const blocked = ["banco_pai", "fornecedor_casco", "cheque_especial"];
-    if (blocked.includes(id) || !content.debtTemplates[id]) throw new GameError("credito_recusado", "Esse crédito não está na mesa.");
+    if (blocked.includes(id) || !content.debtTemplates[id]) throw new GameError("credito_recusado", "Esse empréstimo não está disponível.");
     if (state.debts.some((debt) => debt.template === id && debt.balance > 0)) throw new GameError("credito_recusado", "Você já deve para esse credor.");
     const tpl = templateOf(content, id);
     const value = whole(action.value);
-    if (value == null || value <= 0 || (tpl.limit != null && value > tpl.limit)) throw new GameError("credito_recusado", "O valor não passa no limite.");
+    if (value == null || value <= 0 || (tpl.limit != null && value > tpl.limit)) throw new GameError("credito_recusado", "O valor passa do limite.");
     const weeks = whole(action.weeks) ?? tpl.weeks ?? tpl.minWeeks;
     if (tpl.min === "price") {
       if (weeks == null) throw new GameError("prazo_invalido", "Falta o prazo.");
       if (tpl.minWeeks != null && weeks < tpl.minWeeks) throw new GameError("prazo_invalido", "O prazo é curto demais.");
       if (tpl.maxWeeks != null && weeks > tpl.maxWeeks) throw new GameError("prazo_invalido", "O prazo é longo demais.");
-      if (tpl.weeks != null && weeks !== tpl.weeks) throw new GameError("prazo_invalido", "Esse crédito só tem um prazo.");
+      if (tpl.weeks != null && weeks !== tpl.weeks) throw new GameError("prazo_invalido", "Esse empréstimo só tem um prazo.");
     }
     const needs = tpl.requires;
-    if (needs?.rep != null && state.rep < needs.rep) throw new GameError("credito_recusado", "A reputação ainda não alcança.");
+    if (needs?.rep != null && state.rep < needs.rep) throw new GameError("credito_recusado", "Ainda falta fama.");
     if (needs?.clean && state.flags.negativado === true) throw new GameError("credito_recusado", "O nome está sujo.");
     if (needs?.weeksClean != null && Number(state.flags.weeksClean ?? 0) < needs.weeksClean) {
-      throw new GameError("credito_recusado", "Ainda há atraso recente.");
+      throw new GameError("credito_recusado", "Ainda tem atraso recente.");
     }
     if (needs?.lessons?.some((lesson) => !state.lessonsTriggered.includes(lesson))) {
-      throw new GameError("credito_recusado", "Falta estudo para esse crédito.");
+      throw new GameError("credito_recusado", "Leia mais lições para esse empréstimo.");
     }
     const debt = makeDebt(content, id, value, state.calendar.week, { weeks: weeks ?? undefined });
     state.debts.push(debt);
@@ -475,10 +510,11 @@ export function applyFinance(state: GameState, action: Action, content: Content,
 
   if (kind === "WORK") {
     const job = serviceOf(content, String(action.jobId ?? ""));
-    if (!job) throw new GameError("servico_invalido", "Não tem esse serviço na baia.");
+    if (!job) throw new GameError("servico_invalido", "Esse serviço não está na baia.");
     if (job.requires.compressor && !state.garage.hasCompressor) throw new GameError("sem_compressor", "Sem compressor não tem funilaria.");
-    if ((job.requires.level ?? 0) > state.garage.level) throw new GameError("servico_invalido", "A oficina ainda não sobe a esse serviço.");
-    if (state.calendar.apLeft < job.ap) throw new GameError("sem_pa", "Sem ponto de ação.");
+    if ((job.requires.level ?? 0) > state.garage.level) throw new GameError("servico_invalido", "A oficina ainda não faz esse serviço.");
+    if ((job.requires.patent ?? 0) > levelOf(xpOf(state)).level) throw new GameError("nivel_baixo", "Sua patente ainda não libera esse serviço.");
+    if (state.calendar.apLeft < job.ap) throw new GameError("sem_pa", "Sem energia.");
     for (const [id, need] of Object.entries(job.materials)) {
       const lot = state.inventory[id as MaterialId];
       if (!lot || lot.qty < need) throw new GameError("sem_peca", "Falta peça na prateleira.");
@@ -500,7 +536,7 @@ export function applyFinance(state: GameState, action: Action, content: Content,
   }
 
   if (kind === "STUDY") {
-    if (state.calendar.apLeft < content.balance.studyAp) throw new GameError("sem_pa", "Sem ponto de ação.");
+    if (state.calendar.apLeft < content.balance.studyAp) throw new GameError("sem_pa", "Sem energia.");
     const next = content.lessons.find((lesson) => !state.lessonsTriggered.includes(lesson.id));
     if (!next) throw new GameError("sem_licao", "O caderno desta semana já foi lido.");
     state.calendar.apLeft -= content.balance.studyAp;
@@ -516,11 +552,11 @@ export function applyFinance(state: GameState, action: Action, content: Content,
     if (state.flags.protection || state.flags.refusedGang) throw new GameError("ja_resolvido", "A gangue já teve a resposta.");
     if (action.accept === true) {
       state.flags.protection = content.balance.gang.base;
-      state.decisionsLog.push({ week: state.calendar.week, label: "Pagou proteção", impact: -content.balance.gang.base });
+      state.decisionsLog.push({ week: state.calendar.week, label: "Pagou o pedágio", impact: -content.balance.gang.base });
       events.push({ type: "GANG_PAID" });
     } else {
       state.flags.refusedGang = true;
-      state.decisionsLog.push({ week: state.calendar.week, label: "Recusou a gangue", impact: 0 });
+      state.decisionsLog.push({ week: state.calendar.week, label: "Disse não à gangue", impact: 0 });
       events.push({ type: "GANG_REFUSED" });
     }
     return true;
@@ -528,18 +564,18 @@ export function applyFinance(state: GameState, action: Action, content: Content,
 
   if (kind === "UPGRADE") {
     const level = state.garage.level;
-    if (state.garage.upgradingTo != null) throw new GameError("obra_em_curso", "A obra ainda está de pé.");
+    if (state.garage.upgradingTo != null) throw new GameError("obra_em_curso", "A obra ainda está andando.");
     const next = content.garageLevels[level + 1];
-    if (!next || next.cost <= 0 || level >= 5) throw new GameError("nivel_maximo", "A oficina não sobe mais.");
+    if (!next || next.cost <= 0 || level >= 5) throw new GameError("nivel_maximo", "A oficina já está no nível máximo.");
     const needRep = [0, 0, 30, 45, 60, 75][next.level] ?? 0;
-    if (state.rep < needRep) throw new GameError("sem_fama", "A fama ainda não segura essa obra.");
+    if (state.rep < needRep) throw new GameError("sem_fama", "Ainda falta fama para essa obra.");
     const mode = action.mode === "coop" || action.mode === "parcelado" ? action.mode : "vista";
     if (mode === "vista") {
       manual(state, state.cash - next.cost);
       state.cash -= next.cost;
     } else if (mode === "coop") {
       const tpl = content.debtTemplates.coop_ossada;
-      if (!tpl) throw new GameError("credito_recusado", "A cooperativa não está na mesa.");
+      if (!tpl) throw new GameError("credito_recusado", "A cooperativa não está disponível.");
       if (state.rep < (tpl.requires?.rep ?? 35) || state.flags.negativado === true) {
         throw new GameError("credito_recusado", "A cooperativa recusou a obra.");
       }
@@ -550,7 +586,7 @@ export function applyFinance(state: GameState, action: Action, content: Content,
     }
     state.garage.upgradingTo = next.level;
     state.garage.bays = Math.max(1, state.garage.bays - 1);
-    events.push({ type: "OBRA", amount: next.cost, text: next.nome });
+    events.push({ type: "OBRA", amount: next.cost, text: `${next.nome}. A obra só aumenta o espaço. Prateleira e elevador se compram depois.` });
     return true;
   }
 

@@ -1,0 +1,33 @@
+{
+ "name": "Olho embaçado",
+ "description": "Dino Drag Race — Olho embaçado (Comum). +2% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/170.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "lente"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "2%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-lente-Comum-2",
+  "stats": "vmax+2%"
+ }
+}

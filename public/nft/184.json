@@ -1,0 +1,33 @@
+{
+ "name": "Mira de cabo",
+ "description": "Dino Drag Race — Mira de cabo (Normal). +5% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/184.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "lente"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "5%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-lente-Normal",
+  "stats": "vmax+5%"
+ }
+}

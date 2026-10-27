@@ -281,7 +281,7 @@ describe("fila", () => {
     opened.cardQueue = [{ cardId: "golpe", week: 0, day: 1, opened: true, expiresWeek: 0, expiresDay: 1 }];
     const sniffed = applyAction(opened, { type: "END_DAY" }, content);
     assert.equal(sniffed.state.flags.scams_dodged, 1);
-    assert.equal(sniffed.state.morale, 52);
+    assert.equal(sniffed.state.morale, 85.333);
     assert.equal(sniffed.events.some((event) => event.type === "SCAM_DODGED"), true);
     assert.ok(sniffed.state.lessonsTriggered.includes("L06"));
   });
@@ -311,8 +311,8 @@ describe("fila", () => {
   it("sinal vermelho só com a contadora", () => {
     assert.equal(shouldMarkFlags({}), false);
     assert.equal(shouldMarkFlags({ accountant: true }), true);
-    assert.deepEqual(flagRanges("Sem papelada. A gente se entende.", ["Sem papelada", "A gente se entende"]), [
-      { start: 0, end: 12 },
+    assert.deepEqual(flagRanges("Sem papelada. A gente se entende.", ["Sem papel", "A gente se entende"]), [
+      { start: 0, end: 9 },
       { start: 14, end: 32 },
     ]);
   });

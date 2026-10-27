@@ -33,14 +33,14 @@ export function Workshop({
       {building ? (
         <p>A obra está de pé. No domingo a placa muda e uma baia volta.</p>
       ) : !next || next.cost <= 0 ? (
-        <p>Não tem mais parede para subir.</p>
+        <p>Não dá para crescer mais.</p>
       ) : (
         <article className="gf-panel">
           <h3>
             {next.nome} · {formatF(next.cost)}
           </h3>
           <p>
-            Pede fama {need}. Você tem {state.rep}. Durante a semana, uma baia fica interditada.
+            Precisa de fama {need}. Você tem {state.rep}. Durante a semana, uma baia fica interditada.
           </p>
           <div className="gf-fields">
             <button type="button" className="gf-go" disabled={busy || state.rep < need || state.cash < next.cost} onClick={() => onAct({ type: "UPGRADE", mode: "vista" })}>

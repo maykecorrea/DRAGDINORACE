@@ -1,0 +1,379 @@
+[
+  {
+    "id": "voz_pai",
+    "kind": "story",
+    "npc": "pai",
+    "title": "A voz do pai",
+    "week_min": 0,
+    "week_max": 0,
+    "weight": 1,
+    "once": true,
+    "priority": 9,
+    "text": "{nome}, a oficina ainda cheira a óleo. A dívida está em {divida}. Não assine nada com pressa. O que você tem menos o que você deve: isso é o patrimônio.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "ouvir",
+        "label": "Ouvir tudo",
+        "effects": [
+          {
+            "op": "lesson",
+            "id": "L30"
+          },
+          {
+            "op": "morale",
+            "value": 1
+          }
+        ],
+        "decision_impact": 1
+      },
+      {
+        "id": "guardar",
+        "label": "Guardar recado",
+        "effects": [
+          {
+            "op": "lesson",
+            "id": "L30"
+          }
+        ],
+        "decision_impact": 0
+      }
+    ]
+  },
+  {
+    "id": "vender_moto",
+    "kind": "story",
+    "npc": "pai",
+    "title": "A moto do pai",
+    "week_min": 3,
+    "week_max": 5,
+    "weight": 1,
+    "once": true,
+    "priority": 6,
+    "text": "A Velha Osso está parada. Vender por 2.500 paga parte da dívida cara. O pai ia entender. Mas vai doer um pouco.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "vender",
+        "label": "Vender (2.500)",
+        "effects": [
+          {
+            "op": "cash",
+            "value": 2500
+          },
+          {
+            "op": "asset_remove",
+            "asset_id": "moto_pai"
+          },
+          {
+            "op": "morale",
+            "value": -10
+          }
+        ],
+        "decision_impact": 2
+      },
+      {
+        "id": "ficar",
+        "label": "Ficar com a moto",
+        "decision_impact": 1
+      }
+    ]
+  },
+  {
+    "id": "protecao_mandibula",
+    "kind": "story",
+    "npc": "rex",
+    "title": "O pedágio",
+    "week_min": 3,
+    "week_max": 3,
+    "weight": 1,
+    "once": true,
+    "priority": 8,
+    "text": "Rex Navalha: \"Seguro do bairro, 250 por semana. Quem paga, ninguém mexe.\" Não é contrato. Seu pai sempre disse não.",
+    "red_flags": [
+      "Não é contrato"
+    ],
+    "options": [
+      {
+        "id": "pagar",
+        "label": "Pagar o pedágio",
+        "effects": [
+          {
+            "op": "flag",
+            "key": "protection",
+            "value": 250
+          },
+          {
+            "op": "flag",
+            "key": "paying_gang",
+            "value": true
+          }
+        ],
+        "scam": true,
+        "decision_impact": -6
+      },
+      {
+        "id": "recusar",
+        "label": "Fechar a porta",
+        "effects": [
+          {
+            "op": "flag",
+            "key": "refusedGang",
+            "value": true
+          }
+        ],
+        "dodged_scam": true,
+        "lesson_unlock": "L25",
+        "decision_impact": 4
+      }
+    ]
+  },
+  {
+    "id": "brasa_chega",
+    "kind": "story",
+    "npc": "brasa",
+    "title": "Dona Brasa",
+    "week_min": 6,
+    "week_max": 8,
+    "weight": 1,
+    "once": true,
+    "priority": 5,
+    "text": "Dona Brasa quer trabalhar na baia: \"Motor pior eu já vi.\" O salário é alto, mas o serviço fica bom.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "contratar",
+        "label": "Contratar Brasa",
+        "effects": [
+          {
+            "op": "employee_hire",
+            "id": "brasa"
+          }
+        ],
+        "decision_impact": 2
+      },
+      {
+        "id": "depois",
+        "label": "Agora não",
+        "decision_impact": 0
+      }
+    ]
+  },
+  {
+    "id": "aniversario",
+    "kind": "story",
+    "npc": "pai",
+    "title": "Um ano",
+    "week_min": 16,
+    "week_max": 16,
+    "weight": 1,
+    "once": true,
+    "priority": 7,
+    "text": "Faz um ano que o pai virou luz de cometa. Hoje vale uma pausa. Descansar também faz parte.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "lembrar",
+        "label": "Fazer uma pausa",
+        "effects": [
+          {
+            "op": "morale",
+            "value": 4
+          },
+          {
+            "op": "lesson",
+            "id": "L29"
+          }
+        ],
+        "decision_impact": 1
+      },
+      {
+        "id": "trabalhar",
+        "label": "Seguir trabalhando",
+        "effects": [
+          {
+            "op": "morale",
+            "value": -4
+          }
+        ],
+        "decision_impact": -1
+      }
+    ]
+  },
+  {
+    "id": "mercadoria",
+    "kind": "story",
+    "npc": "rex",
+    "title": "As caixas",
+    "week_min": 24,
+    "week_max": 28,
+    "weight": 1,
+    "once": true,
+    "priority": 9,
+    "conditions": [
+      {
+        "flag": "paying_gang",
+        "eq": true
+      }
+    ],
+    "text": "A gangue quer guardar umas caixas misteriosas na oficina. Quem aceita fica preso a eles. Quem recusa perde um cliente.",
+    "red_flags": [
+      "guardar umas caixas"
+    ],
+    "options": [
+      {
+        "id": "aceitar",
+        "label": "Guardar caixas",
+        "effects": [
+          {
+            "op": "ending",
+            "id": "peao"
+          }
+        ],
+        "scam": true,
+        "decision_impact": -20
+      },
+      {
+        "id": "recusar",
+        "label": "Recusar",
+        "effects": [
+          {
+            "op": "flag",
+            "key": "protection",
+            "value": 0
+          },
+          {
+            "op": "flag",
+            "key": "paying_gang",
+            "value": false
+          },
+          {
+            "op": "flag",
+            "key": "refusedGang",
+            "value": true
+          }
+        ],
+        "decision_impact": 4
+      }
+    ]
+  },
+  {
+    "id": "denuncia",
+    "kind": "story",
+    "npc": "ankylo",
+    "title": "Denúncia",
+    "act_min": 3,
+    "week_min": 21,
+    "week_max": 36,
+    "weight": 1,
+    "once": true,
+    "priority": 9,
+    "conditions": [
+      {
+        "flag": "proof_camera",
+        "eq": true
+      },
+      {
+        "flag": "proof_tico",
+        "eq": true
+      },
+      {
+        "flag": "proof_recibo",
+        "eq": true
+      },
+      {
+        "flag": "associacao",
+        "eq": true
+      }
+    ],
+    "text": "A Delegada Ankylo lê as três provas e o carimbo da Associação. Se você entregar, Os Mandíbula saem da rua.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "entregar",
+        "label": "Entregar provas",
+        "effects": [
+          {
+            "op": "flag",
+            "key": "gangDown",
+            "value": true
+          },
+          {
+            "op": "flag",
+            "key": "protection",
+            "value": 0
+          },
+          {
+            "op": "flag",
+            "key": "paying_gang",
+            "value": false
+          },
+          {
+            "op": "flag",
+            "key": "refusedGang",
+            "value": false
+          },
+          {
+            "op": "morale",
+            "value": 30
+          },
+          {
+            "op": "rep",
+            "value": 15
+          },
+          {
+            "op": "lesson",
+            "id": "L25"
+          }
+        ],
+        "decision_impact": 10
+      },
+      {
+        "id": "guardar",
+        "label": "Esperar mais",
+        "decision_impact": -1
+      }
+    ]
+  },
+  {
+    "id": "memorial",
+    "kind": "story",
+    "npc": "pai",
+    "title": "A placa",
+    "act_min": 4,
+    "week_min": 37,
+    "week_max": 40,
+    "weight": 1,
+    "once": true,
+    "priority": 6,
+    "text": "Dá para acender a placa Ferrugem & Filho. A foto do pai fica na parede da baia nova. A pista de arrancada está logo ali.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "acender",
+        "label": "Acender a placa",
+        "effects": [
+          {
+            "op": "flag",
+            "key": "memorial",
+            "value": true
+          },
+          {
+            "op": "morale",
+            "value": 6
+          },
+          {
+            "op": "lesson",
+            "id": "L24"
+          }
+        ],
+        "decision_impact": 3
+      },
+      {
+        "id": "esperar",
+        "label": "Esperar a obra",
+        "decision_impact": 0
+      }
+    ]
+  }
+]

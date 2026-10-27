@@ -1,0 +1,43 @@
+{
+ "name": "Asa que racha",
+ "description": "Dino Drag Race — Asa que racha (Épico). 81 de dano. 9 tiros. 0.90s. Voa reto. Em cheio dói mais. Se passar perto, estoura com menos dano.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/133.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "missile"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 81,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 9,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.9,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-missile-Épico",
+  "stats": "dmg=81;clip=9;cd=0.9"
+ }
+}

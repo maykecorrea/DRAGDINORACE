@@ -1,0 +1,33 @@
+{
+ "name": "Bota de esteira",
+ "description": "Dino Drag Race — Bota de esteira (Normal). +8 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/190.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "bota"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Normal"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 8,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 250,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-bota-Normal",
+  "stats": "accel+8"
+ }
+}

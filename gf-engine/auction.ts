@@ -43,16 +43,17 @@ export function stepAuction(state: GameState, content: Content, events: GfEvent[
 export function applyAuction(state: GameState, action: Record<string, unknown>, content: Content, events: GfEvent[]): boolean {
   const kind = String(action.type ?? "");
   if (kind !== "INSPECT_LOT" && kind !== "BUY_LOT" && kind !== "WORK_CARCASS" && kind !== "LIST_CARCASS") return false;
-  if (state.garage.level < 1) throw new GameError("nivel_baixo", "O leilão abre na oficina remendada.");
+  if (state.garage.level < 1) throw new GameError("nivel_baixo", "O leilão abre quando a oficina estiver remendada.");
+  if (state.flags.district !== "leilao") throw new GameError("longe", "As ações do leilão só funcionam no Cais do Leilão.");
   if (kind === "INSPECT_LOT") {
-    if (state.calendar.apLeft < 1) throw new GameError("sem_pa", "Sem ponto de ação.");
+    if (state.calendar.apLeft < 1) throw new GameError("sem_pa", "Sem energia.");
     const rows = lots(state);
     const lot = rows.find((item) => item.id === action.id);
     if (!lot) throw new GameError("lote_sumiu", "Esse lote já saiu do pátio.");
     state.calendar.apLeft -= 1;
     lot.revealed = true;
     state.auctionLots = rows;
-    events.push({ type: "INSPECTED", text: lot.defect ? "vício" : "limpa" });
+    events.push({ type: "INSPECTED", text: lot.defect ? "defeito" : "limpa" });
     return true;
   }
   if (kind === "BUY_LOT") {
@@ -62,7 +63,7 @@ export function applyAuction(state: GameState, action: Record<string, unknown>, 
     if (!lot || !def) throw new GameError("lote_sumiu", "Esse lote já saiu do pátio.");
     const extra = lot.defect ? Math.round(def.material * 0.3) : 0;
     const price = lot.price + extra;
-    if (state.cash - price < -state.overdraftLimit) throw new GameError("sem_caixa", "O cheque especial não cobre a carcaça.");
+    if (state.cash - price < -state.overdraftLimit) throw new GameError("sem_caixa", "O limite do banco não cobre esse carro.");
     state.cash -= price;
     state.carcasses.push({
       id: lot.id,
@@ -78,16 +79,16 @@ export function applyAuction(state: GameState, action: Record<string, unknown>, 
     return true;
   }
   const carcass = state.carcasses.find((item) => item.id === action.id);
-  if (!carcass) throw new GameError("lote_sumiu", "Essa carcaça não está no pátio.");
+  if (!carcass) throw new GameError("lote_sumiu", "Esse carro não está no pátio.");
   if (kind === "WORK_CARCASS") {
-    if (carcass.apLeft <= 0) throw new GameError("ja_pronta", "Essa carcaça já está pronta.");
-    if (state.calendar.apLeft < 1) throw new GameError("sem_pa", "Sem ponto de ação.");
+    if (carcass.apLeft <= 0) throw new GameError("ja_pronta", "Esse carro já está pronto.");
+    if (state.calendar.apLeft < 1) throw new GameError("sem_pa", "Sem energia.");
     state.calendar.apLeft -= 1;
     carcass.apLeft -= 1;
     events.push({ type: "CARCASS_WORK", text: carcass.type, amount: carcass.apLeft });
     return true;
   }
-  if (carcass.apLeft > 0) throw new GameError("ainda_nao", "Ainda falta braço nessa carcaça.");
+  if (carcass.apLeft > 0) throw new GameError("ainda_nao", "Ainda falta trabalho nesse carro.");
   const def = content.carcasses.find((item) => item.id === carcass.type);
   const low = def?.sell[0] ?? carcass.boughtFor;
   const high = def?.sell[1] ?? low;

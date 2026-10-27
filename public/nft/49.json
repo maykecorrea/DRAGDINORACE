@@ -1,0 +1,33 @@
+{
+ "name": "Forja dos crânios",
+ "description": "Dino Drag Race — Forja dos crânios (Épico). +26% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/49.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "engine"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "26%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "engine-Épico",
+  "stats": "vmax+26%"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "name": "Hover de osso",
+ "description": "Dino Drag Race — Hover de osso (Épico). +27 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/53.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "tires"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 27,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "tires-Épico-2",
+  "stats": "accel+27"
+ }
+}

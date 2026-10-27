@@ -5,9 +5,10 @@ import { BoughtModal } from "@/components/bought-modal";
 import { MintRoulette, type SpinHaul } from "@/components/mint-roulette";
 import { FossilWord } from "@/components/fossil-word";
 import { PitFrame } from "@/components/pit";
-import { liveStats, MINT_COST } from "@/game/data";
+import { liveStats, MINT_COST, rarityLabel } from "@/game/data";
 import { forSale } from "@/game/prize";
 import { loadSave, selectedCar } from "@/game/save";
+import { kmh } from "@/game/raceConfig";
 import { carArt, carLabel } from "@/game/forge";
 import { PART_TIERS, TIER_COLOR, canWear, carRank, partArt, partById, partsOfTier, slotLabel, wearReason, xpBar, type PartSlot, type PartTier } from "@/game/parts";
 import { PILOT_SLOTS, REAR_KINDS, WEAPON_KINDS, armArt, armById, armsOf, kindLabel, kitArt, kitById, kitsOf, pilotSlotLabel, wornLabel, type GunKind, type PilotSlot } from "@/game/armory";
@@ -111,10 +112,10 @@ function Pecas() {
             <button type="button" className="flex items-center gap-3 text-left" onClick={() => setSpin(spinForNft(car))}>
               <img src={carArt(car)} alt="" className="h-16 w-24 object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.8)]" />
               <span className="[text-shadow:0_1px_0_#000,0_0_8px_#000,0_2px_10px_rgba(0,0,0,0.95)]">
-                <span className="block font-pixel text-[10px] tracking-[0.35em] text-[#d6ff3f]">OFICINA</span>
+                <span className="block font-pixel text-[10px] tracking-[0.35em] text-[#d6ff3f]">Oficina</span>
                 <span className="block font-display text-4xl leading-none text-white sm:text-5xl">{carLabel(car)}</span>
                 <span className="mt-1 block text-xs text-white/70">
-                  Nv {bar.level} · rank {rank} · {Math.round(live.vmax)} mph · vida {Math.round(live.durability)}
+                  Nv. {bar.level} · rank {rarityLabel(rank)} · {kmh(live.vmax)} km/h · vida {Math.round(live.durability)}
                 </span>
                 <span className="mt-2 block h-2 w-48 bg-black/70">
                   <span className="block h-full bg-[#d6ff3f]" style={{ width: `${Math.max(8, Math.min(100, (live.durability / 320) * 100))}%` }} />
@@ -141,7 +142,7 @@ function Pecas() {
               );
             })}
           </ul>
-          <p className="mb-2 text-xs text-white/90 [text-shadow:0_1px_0_#000,0_0_8px_#000,0_2px_10px_rgba(0,0,0,0.95)]">A corrida dá XP nesse carro. A forja apaga o nível. O carro novo nasce no zero.</p>
+          <p className="mb-2 text-xs text-white/90 [text-shadow:0_1px_0_#000,0_0_8px_#000,0_2px_10px_rgba(0,0,0,0.95)]">Cada corrida dá XP para este carro. A forja zera o nível: o carro novo começa do zero.</p>
           <div className="mb-2 flex gap-1 overflow-x-auto">
             {([
               ["pecas", "Peças"],
@@ -165,7 +166,7 @@ function Pecas() {
             onClick={() => setRoulette(true)}
             className="mb-2 min-h-11 bg-[#ff5a3c] px-3 font-display text-2xl leading-none text-black disabled:opacity-40"
           >
-            {freeSpins > 0 ? `Roleta itens · ${freeSpins} giro de missão` : `Roleta itens · ${MINT_COST}`}
+            {freeSpins > 0 ? `Ovo de itens · ${freeSpins} giro de missão` : `Ovo de itens · ${MINT_COST}`}
           </button>
           {desk === "pecas" && (
           <ul className="mb-2 flex gap-1 overflow-x-auto pb-1">
@@ -187,11 +188,11 @@ function Pecas() {
           {desk === "armas" && (
             <div className="mb-2 grid gap-1 sm:grid-cols-2">
               <p className="border border-white/15 bg-black/55 px-3 py-2 [text-shadow:0_1px_0_#000]">
-                <span className="block font-pixel text-[10px] tracking-widest text-[#d6ff3f]">FRENTE</span>
+                <span className="block font-pixel text-[10px] tracking-widest text-[#d6ff3f]">Frente</span>
                 <span className="block font-display text-2xl leading-none text-white">{wornLabel(save.arm, save.frontal, "frontal")}</span>
               </p>
               <p className="border border-white/15 bg-black/55 px-3 py-2 [text-shadow:0_1px_0_#000]">
-                <span className="block font-pixel text-[10px] tracking-widest text-[#ffb020]">TRASEIRA</span>
+                <span className="block font-pixel text-[10px] tracking-widest text-[#ffb020]">Traseira</span>
                 <span className="block font-display text-2xl leading-none text-white">{wornLabel(save.rearArm, save.rear, "traseira")}</span>
               </p>
             </div>
@@ -319,7 +320,7 @@ function Pecas() {
                     <span className="block font-pixel text-[10px] tracking-widest" style={{ color: TIER_COLOR[part.tier] }}>{slotLabel(part.slot)}</span>
                     <span className="mt-1 block font-display text-2xl leading-none text-white">{part.name}</span>
                     <span className="mt-1 block text-xs text-white/70">{part.blurb}</span>
-                    <span className="mt-1 block text-xs text-white/50">Na caixa {owned}</span>
+                    <span className="mt-1 block text-xs text-white/50">Na caixa: {owned}</span>
                   </span>
                   <span className="mt-3 flex flex-col gap-1">
                     <button
@@ -328,7 +329,7 @@ function Pecas() {
                       onClick={() => forSale(part.tier) && buy(part.id)}
                       className="min-h-11 bg-[#d6ff3f] px-2 font-display text-xl leading-none text-black disabled:opacity-40"
                     >
-                      {!forSale(part.tier) ? "Só na roleta" : locked ? "Bloqueado" : save.fossil < part.cost ? "Falta fóssil" : <>{part.cost} <FossilWord lime /></>}
+                      {!forSale(part.tier) ? "Só no ovo" : locked ? "Bloqueado" : save.fossil < part.cost ? "Faltam fósseis" : <>{part.cost} <FossilWord lime /></>}
                     </button>
                     <button
                       type="button"
@@ -363,11 +364,11 @@ function Pecas() {
                       <span className="block font-pixel text-[10px] tracking-widest" style={{ color: TIER_COLOR[piece.tier] }}>{kindLabel(piece.kind)}</span>
                       <span className="mt-1 block font-display text-2xl leading-none text-white">{piece.name}</span>
                       <span className="mt-1 block text-xs text-white/70">{piece.blurb}</span>
-                      <span className="mt-1 block text-xs text-white/50">Na caixa {owned}</span>
+                      <span className="mt-1 block text-xs text-white/50">Na caixa: {owned}</span>
                     </span>
                     <span className="mt-3 flex flex-col gap-1">
                       <button type="button" disabled={!forSale(piece.tier) || !!locked || save.fossil < piece.cost} onClick={() => forSale(piece.tier) && buy(piece.id)} className="min-h-11 bg-[#d6ff3f] px-2 font-display text-xl leading-none text-black disabled:opacity-40">
-                        {!forSale(piece.tier) ? "Só na roleta" : locked ? "Bloqueado" : save.fossil < piece.cost ? "Falta fóssil" : <>{piece.cost} <FossilWord lime /></>}
+                        {!forSale(piece.tier) ? "Só no ovo" : locked ? "Bloqueado" : save.fossil < piece.cost ? "Faltam fósseis" : <>{piece.cost} <FossilWord lime /></>}
                       </button>
                       <button type="button" disabled={on || owned < 1 || !!locked} onClick={() => equipArm(piece.id)} className="min-h-11 border border-white/30 px-2 text-sm text-white disabled:opacity-40">
                         {on ? "Equipado" : locked && owned > 0 ? "Bloqueado" : "Equipar"}
@@ -397,11 +398,11 @@ function Pecas() {
                       <span className="block font-pixel text-[10px] tracking-widest" style={{ color: TIER_COLOR[piece.tier] }}>{pilotSlotLabel(piece.slot)}</span>
                       <span className="mt-1 block font-display text-2xl leading-none text-white">{piece.name}</span>
                       <span className="mt-1 block text-xs text-white/70">{piece.blurb}</span>
-                      <span className="mt-1 block text-xs text-white/50">Na caixa {owned}</span>
+                      <span className="mt-1 block text-xs text-white/50">Na caixa: {owned}</span>
                     </span>
                     <span className="mt-3 flex flex-col gap-1">
                       <button type="button" disabled={!forSale(piece.tier) || !!locked || save.fossil < piece.cost} onClick={() => forSale(piece.tier) && buy(piece.id)} className="min-h-11 bg-[#d6ff3f] px-2 font-display text-xl leading-none text-black disabled:opacity-40">
-                        {!forSale(piece.tier) ? "Só na roleta" : locked ? "Bloqueado" : save.fossil < piece.cost ? "Falta fóssil" : <>{piece.cost} <FossilWord lime /></>}
+                        {!forSale(piece.tier) ? "Só no ovo" : locked ? "Bloqueado" : save.fossil < piece.cost ? "Faltam fósseis" : <>{piece.cost} <FossilWord lime /></>}
                       </button>
                       <button type="button" disabled={on || owned < 1 || !!locked} onClick={() => equipKit(piece.id)} className="min-h-11 border border-white/30 px-2 text-sm text-white disabled:opacity-40">
                         {on ? "Equipado" : locked && owned > 0 ? "Bloqueado" : "Equipar"}

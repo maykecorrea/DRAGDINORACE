@@ -84,7 +84,7 @@ export function stepCampaign(state: GameState, content: Content, events: GfEvent
   if (state.morale < 30) revealLesson(state, events, "L29");
   if (week === 16) {
     const hit = addMorale(state, content, -15);
-    events.push({ type: "MEMORY", text: "Aniversário da morte do pai", week });
+    events.push({ type: "MEMORY", text: "Um ano da luz do pai", week });
     if (hit.collapsed) events.push({ type: "COLLAPSE", week });
     revealLesson(state, events, "L29");
   }
@@ -104,7 +104,7 @@ export function stepCampaign(state: GameState, content: Content, events: GfEvent
         scam.status = "collapsed";
         scam.shownValue = 0;
         events.push({ type: "SCAM_COLLAPSE", text: "ovo", amount: scam.principal });
-        if (state.flags.recruited === true) addRep(state, content, -10, "recrutou para a pirâmide");
+        if (state.flags.recruited === true) addRep(state, content, -10, "chamou gente para a pirâmide");
         revealLesson(state, events, "L15");
       }
     }
@@ -177,7 +177,7 @@ export function stepCampaign(state: GameState, content: Content, events: GfEvent
     const bank = state.debts.find((debt) => debt.template === "banco_pai");
     if (boleto && (bank?.missed ?? 0) === 0 && state.garage.level >= 1 && state.lessonsTriggered.length >= 3) {
       state.flags.act1_done = true;
-      addRep(state, content, 5, "objetivos do ato 1");
+      addRep(state, content, 5, "metas do ato 1");
       addMorale(state, content, 10);
       events.push({ type: "ACT_DONE", amount: 1 });
     }
@@ -186,7 +186,7 @@ export function stepCampaign(state: GameState, content: Content, events: GfEvent
     const reserve = state.savings.cofrinho >= 4 * weekBurn(state, content);
     if (state.garage.level >= 2 && state.employees.length >= 1 && reserve && state.flags.fleet === true) {
       state.flags.act2_done = true;
-      addRep(state, content, 5, "objetivos do ato 2");
+      addRep(state, content, 5, "metas do ato 2");
       addMorale(state, content, 10);
       events.push({ type: "ACT_DONE", amount: 2 });
     }
@@ -195,7 +195,7 @@ export function stepCampaign(state: GameState, content: Content, events: GfEvent
     const bank = state.debts.find((debt) => debt.template === "banco_pai");
     if ((bank == null || bank.balance <= 0) && state.garage.level >= 3 && state.flags.gangDown === true) {
       state.flags.act3_done = true;
-      addRep(state, content, 5, "objetivos do ato 3");
+      addRep(state, content, 5, "metas do ato 3");
       addMorale(state, content, 10);
       events.push({ type: "ACT_DONE", amount: 3 });
     }

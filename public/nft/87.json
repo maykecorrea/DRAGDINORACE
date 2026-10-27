@@ -1,0 +1,48 @@
+{
+ "name": "Fruto podre",
+ "description": "Dino Drag Race — Fruto podre (Comum). 7 de dano. 4 tiros. 1.46s. Veneno 5/s. Se acerta, sangra até o fim da corrida.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/87.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "poison"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.46,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Poison",
+   "value": 5,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-poison-Comum-3",
+  "stats": "dmg=7;clip=4;cd=1.46;poison=5/s"
+ }
+}

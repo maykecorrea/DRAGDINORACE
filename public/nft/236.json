@@ -1,0 +1,33 @@
+{
+ "name": "Sola do rex",
+ "description": "Dino Drag Race — Sola do rex (Lendário). +31 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/236.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "bota"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 31,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-bota-Lendário-2",
+  "stats": "accel+31"
+ }
+}

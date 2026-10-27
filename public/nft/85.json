@@ -1,0 +1,48 @@
+{
+ "name": "Cuspe verde",
+ "description": "Dino Drag Race — Cuspe verde (Comum). 6 de dano. 5 tiros. 1.35s. Veneno 4/s. Se acerta, sangra até o fim da corrida.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/85.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "poison"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 6,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 5,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 1.35,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Poison",
+   "value": 4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-poison-Comum",
+  "stats": "dmg=6;clip=5;cd=1.35;poison=4/s"
+ }
+}

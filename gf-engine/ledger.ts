@@ -27,12 +27,12 @@ export function cashCascade(summary: WeekSummary): { lines: CascadeLine[]; total
     { key: "received", label: "Recebido", signed: summary.received, tone: "in" },
     { key: "tax", label: "Imposto", signed: -summary.tax, tone: "out" },
     { key: "salaries", label: "Salários", signed: -summary.salaries, tone: "out" },
-    { key: "fixed", label: "Fixos", signed: -summary.fixed, tone: "out" },
+    { key: "fixed", label: "Contas fixas", signed: -summary.fixed, tone: "out" },
     { key: "interest", label: "Juros", signed: -summary.interest, tone: "out" },
     { key: "debts", label: "Parcelas", signed: -summary.debtPaid, tone: "out" },
-    { key: "materials", label: "Material", signed: -summary.materials, tone: "out" },
+    { key: "materials", label: "Peças", signed: -summary.materials, tone: "out" },
   ];
-  if (other !== 0) lines.push({ key: "other", label: "Outros movimentos", signed: other, tone: other > 0 ? "in" : "out" });
+  if (other !== 0) lines.push({ key: "other", label: "Outros", signed: other, tone: other > 0 ? "in" : "out" });
   return { lines, total: lines.reduce((sum, line) => sum + line.signed, 0) };
 }
 
@@ -105,7 +105,7 @@ export function simulateDebt(principal: number, weeklyPercent: number, payment: 
       paid += pay;
       points.push({ week, balance, paid });
     }
-    return { never: true, weeks: 0, totalPaid: 0, points, phrase: "Nunca termina: você só paga juros" };
+    return { never: true, weeks: 0, totalPaid: 0, points, phrase: "Não acaba nunca: você só paga juros" };
   }
   let balance = principal;
   let totalPaid = 0;

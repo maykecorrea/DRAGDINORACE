@@ -8,13 +8,9 @@ import type { LedgerLine, StakePos } from "@/game/save";
 
 export const Route = createFileRoute("/stake")({ component: Stake });
 
-const BONUS = 1.1;
-const LOCKS = [
-  { days: 7, apr: 0.12, label: "7d" },
-  { days: 30, apr: 0.28, label: "30d" },
-  { days: 90, apr: 0.48, label: "90d" },
-  { days: 180, apr: 0.72, label: "180d" },
-  { days: 365, apr: 1.2, label: "365d" },
+const EGGS = [
+  { days: 7, prize: 40, label: "7 dias" },
+  { days: 30, prize: 180, label: "30 dias" },
 ] as const;
 
 const RANKS = [
@@ -47,16 +43,14 @@ function when(at: number) {
 function Stake() {
   const { save, commit } = useSave();
   const [now, setNow] = useState(() => Date.now());
-  const [lock, setLock] = useState(1);
-  const [amount, setAmount] = useState("");
+  const [egg, setEgg] = useState(0);
   const [note, setNote] = useState("");
   const [burst, setBurst] = useState<{ id: number; amount: number } | null>(null);
   const stakes = save.stakes ?? [];
-  const picked = LOCKS[lock] ?? LOCKS[1];
-  const apr = picked.apr * BONUS;
-  const total = stakes.reduce((sum, pos) => sum + pos.amount, 0);
-  const reward = stakes.reduce((sum, pos) => sum + claimable(pos, now), 0);
-  const rank = [...RANKS].reverse().find((item) => total >= item.min) ?? RANKS[0];
+  const picked = EGGS[egg] ?? EGGS[0]!;
+  const readyEggs = stakes.filter((pos) => now >= pos.at + pos.days * DAY);
+  const reward = readyEggs.reduce((sum, pos) => sum + pos.amount, 0);
+  const rank = [...RANKS].reverse().find((item) => save.fossil >= item.min) ?? RANKS[0];
   const log = (save.ledger ?? []).filter((line) => line.kind !== "bar");
 
   useEffect(() => {
@@ -80,69 +74,60 @@ function Stake() {
     });
   }
 
-  function travar() {
-    const value = Math.floor(Number(amount));
-    if (!Number.isFinite(value) || value < 1) {
-      setNote("Coloca um valor.");
-      return;
-    }
-    if (value > save.fossil) {
-      setNote("Fóssil insuficiente.");
-      return;
-    }
+  function chocar() {
     const pos: StakePos = {
       id: crypto.randomUUID(),
-      amount: value,
+      amount: picked.prize,
       days: picked.days,
-      apr,
+      apr: 0,
       at: Date.now(),
       claimed: 0,
     };
-    setAmount("");
     setNote("");
-    setBurst({ id: Date.now(), amount: value });
-    push({ kind: "stake", label: `Travar ${picked.days}d`, amount: value }, [pos, ...stakes], save.fossil - value);
+    setBurst({ id: Date.now(), amount: picked.prize });
+    push({ kind: "stake", label: `Ovo de ${picked.days} dias`, amount: picked.prize }, [pos, ...stakes], save.fossil);
   }
 
   function coletar() {
-    if (reward < 0.01) return;
-    const next = stakes.map((pos) => ({ ...pos, claimed: pos.claimed + claimable(pos, now) }));
+    if (readyEggs.length === 0) return;
+    const ids = new Set(readyEggs.map((pos) => pos.id));
+    const next = stakes.filter((pos) => !ids.has(pos.id));
     setNote("");
-    push({ kind: "claim", label: "Coletar", amount: reward }, next, save.fossil + reward);
+    push({ kind: "claim", label: "Pegar prêmio", amount: reward }, next, save.fossil + reward);
   }
 
   function soltar(pos: StakePos) {
     if (now < pos.at + pos.days * DAY) return;
     const gain = claimable(pos, now);
     const next = stakes.filter((item) => item.id !== pos.id);
-    push({ kind: "unstake", label: "Soltar", amount: pos.amount }, next, save.fossil + pos.amount + gain);
+    push({ kind: "unstake", label: "Abrir ovo", amount: pos.amount }, next, save.fossil + pos.amount + gain);
   }
 
   if (!streetOpen(save)) {
     return (
-      <PitFrame title="Stake" kicker="FÓSSIL TRAVADO">
-        <p className="max-w-xl text-sm text-muted">O stake abre depois de 4 corridas. Travar fóssil rende por dia, e o prazo longo rende mais. Não dá pra tirar antes do prazo.</p>
+      <PitFrame title="Ninho" kicker="Ovos no ninho">
+        <p className="max-w-xl text-sm text-muted">O ninho abre depois de 4 corridas. Choque um ovo e volte no dia certo para pegar o prêmio.</p>
         <Link to="/pista" className="mt-4 inline-flex min-h-11 items-center bg-primary px-4 font-display text-3xl leading-none text-ink">Pista</Link>
       </PitFrame>
     );
   }
 
   return (
-    <PitFrame title="Stake" kicker="FÓSSIL TRAVADO">
+    <PitFrame title="Ninho" kicker="Ovos no ninho">
       <div className="grid items-start gap-4 lg:grid-cols-[1fr_220px]">
         <div>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border border-primary/40 bg-surface px-3 py-2">
-            <p className="font-pixel text-[10px] tracking-widest text-primary">TEMPORADA DA GOSMA</p>
-            <p className="text-sm text-primary">+10% no travamento</p>
+            <p className="font-pixel text-[10px] tracking-widest text-primary">Temporada da gosma</p>
+            <p className="text-sm text-primary">Ovo bônus na temporada</p>
           </div>
-          <p className="mb-3 text-sm text-muted">Travar tira o fóssil da mão até o prazo acabar. 7 dias rende pouco. 365 dias rende muito. Coletar pega só o rendimento. Soltar devolve o valor, depois do prazo.</p>
+          <p className="mb-3 text-sm text-muted">Coloque um ovo no ninho e volte depois. Ovo de 7 dias dá prêmio pequeno. Ovo de 30 dias dá prêmio grande. Você vê o prêmio antes.</p>
           <p className="mb-3 text-xs tracking-widest text-muted">
-            TOTAL TRAVADO {fmt(total)} · TEMPORADA 80 DIAS · GRAU {rank.name}
+            Ovos chocando: {stakes.length} · prêmio pronto {fmt(reward)}
           </p>
           <section className="border border-border bg-surface p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-xs tracking-widest text-muted">A COLETAR</p>
+                <p className="text-xs tracking-widest text-muted">Prêmio pronto</p>
                 <p className="font-display text-5xl leading-none text-primary">
                   {fmt(reward)} <FossilWord />
                 </p>
@@ -153,7 +138,7 @@ function Stake() {
                 disabled={reward < 0.01}
                 className="min-h-11 border border-primary px-3 text-sm text-primary disabled:opacity-40"
               >
-                Coletar
+                Pegar prêmio
               </button>
             </div>
             <div className="mt-5 grid grid-cols-5 gap-2">
@@ -168,54 +153,28 @@ function Stake() {
               })}
             </div>
             <div className="mt-5">
-              <p className="text-xs tracking-widest text-muted">PRAZO</p>
-              <input
-                type="range"
-                min={0}
-                max={LOCKS.length - 1}
-                step={1}
-                value={lock}
-                onChange={(e) => setLock(Number(e.target.value))}
-                className="stake-range mt-2"
-              />
-              <div className="flex justify-between font-pixel text-[8px] tracking-widest sm:text-[10px]">
-                {LOCKS.map((item, index) => (
-                  <span key={item.days} className={index === lock ? "text-primary" : "text-muted"}>
-                    {item.label}
-                  </span>
+              <p className="text-xs tracking-widest text-muted">Tempo</p>
+              <div className="mt-2 flex gap-2">
+                {EGGS.map((item, index) => (
+                  <button key={item.days} type="button" onClick={() => setEgg(index)} className={`min-h-11 flex-1 border px-3 text-left ${index === egg ? "border-primary text-primary" : "border-border text-muted"}`}>
+                    <span className="block font-display text-2xl leading-none">{item.label}</span>
+                    <span className="block text-xs">prêmio {item.prize}</span>
+                  </button>
                 ))}
               </div>
             </div>
-            <p className="mt-4 text-sm text-muted">
-              APR atual <span className="font-display text-3xl text-primary">{Math.round(apr * 100)}%</span>
-            </p>
-            <form
-              className="mt-3 flex flex-wrap gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                travar();
-              }}
-            >
-              <input
-                inputMode="numeric"
-                value={amount ? fmt(Number(amount)) : ""}
-                onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
-                placeholder="Quantidade"
-                className="min-h-11 flex-1 border border-border bg-bg px-3 text-sm"
-              />
-              <button type="submit" className="min-h-11 bg-primary px-4 font-display text-2xl leading-none text-ink">
-                Travar
-              </button>
-            </form>
+            <button type="button" onClick={chocar} className="mt-4 min-h-11 bg-primary px-4 font-display text-2xl leading-none text-ink">
+              Chocar · prêmio {picked.prize}
+            </button>
             <p className="mt-2 text-xs text-muted">
               Na conta {fmt(save.fossil)} <FossilWord />
             </p>
             {note && <p className="mt-2 text-sm text-danger">{note}</p>}
           </section>
           <section className="mt-4 border border-border bg-surface p-4">
-            <p className="text-xs tracking-widest text-muted">POSIÇÕES ABERTAS</p>
+            <p className="text-xs tracking-widest text-muted">Ovos chocando</p>
             {stakes.length === 0 ? (
-              <p className="mt-3 text-sm text-muted">Nenhuma posição aberta.</p>
+              <p className="mt-3 text-sm text-muted">Nenhum ovo chocando.</p>
             ) : (
               <ul className="mt-3 grid gap-2">
                 {stakes.map((pos) => {
@@ -224,9 +183,9 @@ function Stake() {
                   return (
                     <li key={pos.id} className="flex flex-wrap items-center justify-between gap-2 border border-border px-3 py-2">
                       <div>
-                        <p className="font-display text-2xl leading-none">{fmt(pos.amount)} fóssil</p>
+                        <p className="font-display text-2xl leading-none">Prêmio {fmt(pos.amount)}</p>
                         <p className="text-xs text-muted">
-                          {pos.days}d · {Math.round(pos.apr * 100)}% · {open ? "livre" : `${Math.ceil(left / DAY)}d restantes`} · a coletar {fmt(claimable(pos, now))}
+                          {pos.days} dias · {open ? "pronto" : `${Math.ceil(left / DAY)}d restantes`}
                         </p>
                       </div>
                       <button
@@ -235,7 +194,7 @@ function Stake() {
                         onClick={() => soltar(pos)}
                         className="min-h-11 border border-border px-3 text-sm disabled:opacity-40"
                       >
-                        Soltar
+                        Abrir ovo
                       </button>
                     </li>
                   );
@@ -244,17 +203,17 @@ function Stake() {
             )}
           </section>
           <section className="mt-4 border border-border bg-surface p-4">
-            <p className="text-xs tracking-widest text-muted">HISTÓRICO</p>
+            <p className="text-xs tracking-widest text-muted">Histórico</p>
             {log.length === 0 ? (
-              <p className="mt-3 text-sm text-muted">Sua conta não possui nenhuma atividade recente.</p>
+              <p className="mt-3 text-sm text-muted">Nada por aqui ainda.</p>
             ) : (
               <div className="mt-3 overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="text-xs tracking-widest text-muted">
                     <tr>
-                      <th className="py-2 pr-3 font-normal">Fóssil</th>
+                      <th className="py-2 pr-3 font-normal">Prêmio</th>
                       <th className="py-2 pr-3 font-normal">Ação</th>
-                      <th className="py-2 pr-3 font-normal">Status</th>
+                      <th className="py-2 pr-3 font-normal">Situação</th>
                       <th className="py-2 font-normal">Data</th>
                     </tr>
                   </thead>
@@ -285,9 +244,9 @@ function Stake() {
           ))}
           <div className="stake-burst-card">
             <img src="/game/stake-host.gif" alt="" className="stake-burst-host" />
-            <p className="font-display text-7xl leading-none text-primary">TRAVADO</p>
+            <p className="font-display text-7xl leading-none text-primary">OVO</p>
             <p className="mt-1 font-pixel text-3xl tracking-widest text-fg">
-              {fmt(burst.amount)} FÓSSIL
+              {fmt(burst.amount)} FÓSSEIS
             </p>
           </div>
         </div>

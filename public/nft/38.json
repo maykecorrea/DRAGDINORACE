@@ -1,0 +1,33 @@
+{
+ "name": "Colchão de íon",
+ "description": "Dino Drag Race — Colchão de íon (Raro). +16 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/38.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "tires"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 16,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "tires-Raro-2",
+  "stats": "accel+16"
+ }
+}

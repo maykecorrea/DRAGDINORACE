@@ -1,0 +1,33 @@
+{
+ "name": "Pulmão de samambaia",
+ "description": "Dino Drag Race — Pulmão de samambaia (Épico). +20% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/50.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "engine"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "20%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "engine-Épico-2",
+  "stats": "vmax+20%"
+ }
+}

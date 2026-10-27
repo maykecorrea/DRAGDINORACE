@@ -77,7 +77,9 @@ export type Save = {
   reduceFx?: boolean;
   /** Câmera da corrida. Padrão: perseguição. */
   camera?: "perseguicao" | "cockpit";
-  /** Dificuldade da IA no racha de rua. */
+  /** Fichas grátis do fliperama. Zeram à meia-noite. */
+  arcadeDay?: string;
+  arcadeLeft?: number;
   ai?: "facil" | "medio" | "dificil";
 };
 
@@ -122,6 +124,8 @@ export function loadSave(): Save {
       if (validKeys(merged)) parsed.keys = merged;
       else delete parsed.keys;
     }
+    if (parsed.pilot === "vex") parsed.pilot = "teo";
+    parsed.pilots = (parsed.pilots ?? []).map((id) => (id === "vex" ? "teo" : id));
     if ((parsed.races ?? 0) === 0 && parsed.cars.length <= 1 && parsed.fossil < 400) parsed.fossil = 500;
     return parsed;
   } catch {

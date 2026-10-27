@@ -1,0 +1,33 @@
+{
+ "name": "Sorriso de gosma",
+ "description": "Dino Drag Race — Sorriso de gosma (Raro). +0.79s de nitro.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/42.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "nitro"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Nitro",
+   "value": "0.79s",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "nitro-Raro-3",
+  "stats": "nitro+0.79s"
+ }
+}

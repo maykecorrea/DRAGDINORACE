@@ -24,20 +24,56 @@ import versionInfo from "../../public/version.json";
 import { carLabel, cockpitKey, cockpitPlate, sideMark } from "./forge";
 import { keyLabel, readKeys } from "./hotkeys";
 import { isSpaceKey, noteSpaceDown, noteSpaceUp, readBrake, type SpaceLatch } from "./brakeLatch";
-import { raceXp, partById } from "./parts";
-import { BOSSES, STORY, grantStoryPart, storyLoadout, storyOpen, storyRivalStats, type StoryPhase } from "./story";
+import { driveMph, kmh } from "./raceConfig";
+import { gunPower, loadPower, statPower } from "./power";
+import { weaponById } from "./weapons";
+import { BOSSES, STORY, grantStoryPart, rollStoryLoot, storyLoadout, storyOpen, storyRivalStats, type StoryPhase } from "./story";
 import { createDuel, createFree, createPvp, raceVerdict, raceReason, stepMatch, stripFor, LANE_GAP, armWeapon, armRear, gearsFor, mph, botForLevel, levelForChapter, purse, raceStatsOf, type Grade, type LaunchGrade, type Match } from "./sim";
 import { armById, armedDef, armedRear } from "./armory";
 import { bumpDaily, missionReady } from "./missions";
 import { reportQuestRace } from "@/game/quests.functions";
+import { Prologue } from "@/components/prologue";
 import { Prep } from "./Prep";
 import { P2PRoom } from "@/lib/multiplayer";
 import { applyCar, applyShot, asPvpMsg, type PvpMsg } from "./pvp";
-import { rollLoot, streetBuild, streetById, streetNear, bandStats, levelBand, STREET_PRIZE } from "./street";
+import { rollLoot, streetBuild, streetById, streetNear, levelBand, STREET_PRIZE } from "./street";
+import { partById, raceXp } from "./parts";
 
 type Screen = "menu" | "drive" | "rivals" | "result" | "intro" | "pvp";
 
 const PROLOGUE_KEY = "ddr-prologue-seen";
+
+function PunchImg({ src, className }: { src: string; className?: string }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const [miss, setMiss] = useState(false);
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      const board = ref.current;
+      if (!board) return;
+      board.width = img.width;
+      board.height = img.height;
+      const g = board.getContext("2d");
+      if (!g) return;
+      g.clearRect(0, 0, board.width, board.height);
+      g.drawImage(img, 0, 0);
+      const frame = g.getImageData(0, 0, board.width, board.height);
+      const px = frame.data;
+      for (let i = 0; i < px.length; i += 4) {
+        const r = px[i] ?? 0;
+        const gg = px[i + 1] ?? 0;
+        const b = px[i + 2] ?? 0;
+        if (r > 170 && b > 170 && gg < 150 && Math.abs(r - b) < 80) px[i + 3] = 0;
+      }
+      g.putImageData(frame, 0, 0);
+      setMiss(false);
+    };
+    img.onerror = () => setMiss(true);
+    img.src = src;
+  }, [src]);
+  if (miss) return <span className={`${className ?? ""} grid place-items-center bg-surface text-xs text-muted`}>?</span>;
+  return <canvas ref={ref} className={className} />;
+}
 
 function prologueSeen(): boolean {
   try {
@@ -83,6 +119,7 @@ type Result = {
   grades: Grade[];
   fossil: number;
   part: string | null;
+  parts?: string[];
   redlight: boolean;
   rivalName: string;
   rivalId: string;
@@ -93,6 +130,7 @@ type Result = {
   rivalGrades: Grade[];
   youPlace: 1 | 2;
   rivalPlace: 1 | 2;
+  xpGain?: number;
   hp: number;
   hpMax: number;
   wrecked: boolean;
@@ -142,17 +180,9 @@ function didWin(m: Match): boolean {
   return raceVerdict(m) === "win";
 }
 
-const STAKES = [50, 100, 250, 500, 1000];
-
-function potOf(stake: number) {
-  const pot = Math.max(0, Math.round(stake)) * 2;
-  const fee = Math.floor(pot * 0.05);
-  return { pot, fee, payout: pot - fee };
-}
-
 function fossilReward(m: Match, win: boolean): number {
   const perfects = m.player.shifts.filter((g) => g === "perfeito").length;
-  if (m.player.redlight) return 24;
+  if (m.player.redlight) return 0;
   if (!win) return 48 + perfects * 6;
   let n = 96 + perfects * 12;
   if (m.player.reaction != null && m.player.reaction >= 0 && m.player.reaction < 0.12) n += 18;
@@ -182,7 +212,11 @@ function statsOf(car: NftCar, pilot?: string, kit?: Save["kit"]) {
 }
 
 function rivalStats(phase: StoryPhase, you: StatBlock) {
-  return levelBand(you, storyRivalStats(phase), levelForChapter(phase.chapter));
+  const level = levelForChapter(phase.chapter);
+  const banded = levelBand(you, storyRivalStats(phase), level);
+  const pace = level === "facil" ? 0.9 : level === "medio" ? 1 : 1.06;
+  const pull = level === "facil" ? 0.92 : level === "medio" ? 1 : 1.04;
+  return { ...banded, vmax: Math.round(you.vmax * pace), accel: Math.round(you.accel * pull) };
 }
 
 function rivalUpgrades(sim: Match): Upgrades {
@@ -197,19 +231,24 @@ function rivalUpgrades(sim: Match): Upgrades {
 }
 
 function launchLabel(grade: LaunchGrade | null | undefined, auto = false): string {
-  if (auto) return "AUTO";
+  if (auto) {
+    if (grade === "patinou") return "AUTO · GIRO ALTO";
+    if (grade === "morreu") return "AUTO · GIRO BAIXO";
+    if (grade === "atrasou") return "AUTO · TARDE";
+    return "AUTO · SEM GIRO";
+  }
   if (grade === "perfeito") return "PERFEITO";
   if (grade === "ok") return "OK";
   if (grade === "patinou") return "GIRO ALTO";
   if (grade === "morreu") return "GIRO BAIXO";
-  if (grade === "queimou") return "QUEIMOU";
+  if (grade === "queimou") return "LARGOU ANTES";
   if (grade === "atrasou") return "ATRASOU";
   return "—";
 }
 
 function shiftLabel(grade: Grade | undefined): string {
   if (grade === "perfeito") return "PERFEITO";
-  if (grade === "corte") return "CORTE";
+  if (grade === "corte") return "NO LIMITE";
   if (grade === "cedo") return "CEDO";
   if (grade === "tarde") return "TARDE";
   if (grade === "ok") return "BOM";
@@ -260,8 +299,12 @@ function ResultCard({
       <p className={`font-display text-5xl leading-none ${place === 1 ? "text-primary" : "text-muted"}`}>{place}º</p>
       <h2 className="mt-1 font-display text-4xl leading-none">{name}</h2>
       <p className="text-sm text-muted">{car}</p>
-      <p className="mt-2 font-display text-4xl leading-none">{et != null ? `${et.toFixed(3)}s` : wrecked ? "QUEBRADO" : "DNF"}</p>
-      {wrecked && et == null && <p className="mt-1 text-xs text-danger">Parou antes da linha. Sem tempo.</p>}
+      <p className="mt-2 font-display text-4xl leading-none">{et != null ? `${et.toFixed(3)}s` : wrecked ? "QUEBROU" : "NÃO CHEGOU"}</p>
+      {et == null && (
+        <p className="mt-1 text-xs text-danger">
+          {wrecked ? "Parou antes da linha. Sem tempo." : "Não cruzou a linha. Ainda tinha vida quando a pista fechou."}
+        </p>
+      )}
       {hpMax != null && hp != null && (
         <div className="mt-2">
           <div className="h-3 bg-black">
@@ -271,14 +314,20 @@ function ResultCard({
         </div>
       )}
       <p className="mt-1 text-sm text-muted">
-        reação {auto ? "AUTO" : launch === "queimou" || (reaction != null && reaction < 0) ? "QUEIMOU" : reaction == null ? "—" : `${Math.round(reaction * 1000)} ms`} · trap {trap == null ? "—" : `${Math.round(mph(trap))} mph`}
+        reação {auto ? "AUTO" : launch === "queimou" || (reaction != null && reaction < 0) ? "LARGOU ANTES" : reaction == null ? "—" : `${Math.round(reaction * 1000)} ms`} · trap {trap == null ? "—" : `${Math.round(mph(trap) * 1.60934)} km/h`}
       </p>
-      {trap != null && (launch === "morreu" || launch === "patinou" || launch === "atrasou" || auto) && (
-        <p className="mt-1 text-xs text-[#ffb020]">{launchLabel(launch, !!auto)} segurou a velocidade final</p>
+      {auto && (
+        <p className="mt-1 text-xs text-[#ffb020]">
+          Segurou o freio depois do VAI. O carro saiu sozinho
+          {launch === "morreu" ? " com o giro baixo." : launch === "patinou" ? " com o giro alto." : ", tarde demais."}
+        </p>
+      )}
+      {!auto && trap != null && (launch === "morreu" || launch === "patinou" || launch === "atrasou") && (
+        <p className="mt-1 text-xs text-[#ffb020]">{launchLabel(launch)} manteve a velocidade final</p>
       )}
       <div className="mt-3 grid gap-1" style={{ gridTemplateColumns: `repeat(${boxes + 1}, minmax(0, 1fr))` }}>
         <div className={`px-1 py-2 text-center ${auto ? "bg-[#ffb020] text-ink" : cellTone(launch)}`}>
-          <p className="font-display text-lg leading-none">LARG</p>
+          <p className="font-display text-lg leading-none">LARGADA</p>
           <p className="mt-1 text-[10px] font-semibold tracking-widest">{launchLabel(launch, !!auto)}</p>
         </div>
         {Array.from({ length: boxes }, (_, i) => (
@@ -296,6 +345,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [save, setSave] = useState<Save>(freshSave);
   const [screen, setScreen] = useState<Screen>("menu");
+  const [introKey, setIntroKey] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
   const [ready, setReady] = useState(false);
   const saveRef = useRef(save);
@@ -329,7 +379,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
   const bootRef = useRef<(strip: number) => void>(() => undefined);
   const queueTicket = useRef(0);
   const [pvpPeer, setPvpPeer] = useState("");
-  const [pvpLink, setPvpLink] = useState("escolhe a aposta");
+  const [pvpLink, setPvpLink] = useState("escolha o duelo");
   const [pvpHunt, setPvpHunt] = useState(false);
   const [pvpStake, setPvpStake] = useState(100);
   const [pvpBet, setPvpBet] = useState(false);
@@ -710,7 +760,6 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 const firstClear = win && chapter === (saveRef.current.storyClear ?? 0) + 1;
                 const stake = sim.pvp ? netRef.current.stake : 0;
                 const bet = sim.pvp && stake > 0;
-                const table = potOf(stake);
                 const finished = sim.player.finishTime != null;
                 const stars: [boolean, boolean, boolean] = [
                   sim.player.launchGrade === "perfeito" && (sim.player.reaction ?? 9) <= 0.2,
@@ -725,37 +774,38 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   const drop = rollLoot(streetCar.rarity);
                   if (drop) gainedId = drop;
                 }
-                const baseWin = bet ? 0 : phase ? phase.fossil : streetCar ? STREET_PRIZE[streetCar.rarity] : 100;
-                const pay = bet ? null : purse(baseWin, draw ? "draw" : win ? "win" : "loss", sim);
-                const paid = bet ? (draw ? stake : win ? table.payout : 0) : (pay?.total ?? 0);
+                const levelMul = sim.rival?.bot?.level === "dificil" ? 1.5 : sim.rival?.bot?.level === "medio" ? 1 : 0.7;
+                const baseWin = phase ? 0 : streetCar ? Math.round(STREET_PRIZE[streetCar.rarity] * levelMul) : sim.pvp ? 100 : 100;
+                const storyWin = !!phase && win && !sim.player.redlight;
+                const loot = storyWin ? rollStoryLoot(phase.chapter) : [];
+                const pay = phase || sim.pvp ? null : purse(baseWin, draw ? "draw" : win ? "win" : "loss", sim);
+                const paid = sim.player.redlight ? 0 : phase ? 0 : sim.pvp ? (draw ? 70 : win ? 100 : 40) : (pay?.total ?? 0);
                 if (pay) {
                   const stats = raceStatsOf(sim, paid, win, pay.base, pay.cap);
                   window.dispatchEvent(new CustomEvent("raceStats", { detail: stats }));
                 }
                 const burnedNote = sim.player.redlight
-                  ? "Queimou a largada: desclassificado. Sair antes do VAI perde a corrida."
+                  ? "Largou antes do VAI: fora da corrida. Espere o VAI para soltar."
                   : "";
                 const note = draw
-                  ? "EMPATE / DNF DUPLO"
-                  : bet
-                  ? win
-                    ? `Pote ${table.pot}. A casa ficou com ${table.fee}.`
-                    : `A aposta de ${stake} ficou na mesa.`
+                  ? "EMPATE"
                   : sim.pvp
                       ? win
-                        ? "Sem aposta. O fóssil é o da corrida."
-                        : "Sem aposta. A derrota paga menos."
+                        ? `Você levou o prêmio fixo: ${paid}.`
+                        : `Quem perde leva 40% de 100 = ${paid}.`
                       : boss
                         ? win
                           ? boss.win
                           : !finished && sim.player.dist < 40
-                            ? "Você não saiu da largada. Segura o espaço e solta no VAI."
+                            ? "Você não largou. Segure o ESPAÇO e solte no VAI."
                             : (sim.player.taken.mine ?? 0) > 0
                               ? boss.loss
                               : sim.player.wrecked
                                 ? boss.loss
                                 : "Ele chegou primeiro."
                         : undefined;
+                const crossed = !sim.player.wrecked && sim.player.finishTime != null;
+                const xpGain = raceXp(sim.mode === "free" ? crossed : win, sim.mode);
                 const shownNote = [burnedNote, note].filter(Boolean).join(" ");
                 const oldRival = !streetCar && streetKey ? RIVALS.find((item) => item.id === streetKey) : undefined;
                 const rivalName = sim.pvp
@@ -780,6 +830,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   trap: sim.player.trap,
                   grades: sim.player.shifts.slice(),
                   fossil: paid,
+                  parts: phase ? loot.map((id) => partById(id)?.name ?? id) : undefined,
                   part: firstClear ? phase!.part.name : gainedId ? (partById(gainedId)?.name ?? gainedId) : null,
                   redlight: sim.player.redlight,
                   rivalName,
@@ -790,6 +841,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   rivalTrap: sim.rival?.trap ?? 0,
                   rivalGrades: sim.rival?.shifts.slice() ?? [],
                   youPlace: win || draw ? 1 : 2,
+                  xpGain,
                   rivalPlace: draw || !win ? 1 : 2,
                   hp: sim.player.hp,
                   hpMax: sim.player.hpMax,
@@ -800,7 +852,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   rivalHpMax: sim.rival?.hpMax,
                   stars,
                   note: shownNote || undefined,
-                  mission: missionReady({ ...saveRef.current, daily }) ? "Missão do dia pronta. Recolhe o fóssil na preparação." : null,
+                  mission: missionReady({ ...saveRef.current, daily }) ? "Missão do dia pronta! Pegue os fósseis na preparação." : null,
                   bonusPct: pay?.cap ?? 0,
                   bonusLines: pay?.lines.map((line) => line.label) ?? [],
                   baseFossil: pay?.base ?? paid,
@@ -833,11 +885,16 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   }
                   if (firstClear && phase) next.storyClear = chapter;
                   if (gainedId) next.bin = { ...(next.bin ?? {}), [gainedId]: (next.bin?.[gainedId] ?? 0) + 1 };
+                  if (loot.length) {
+                    const bin = { ...(next.bin ?? {}) };
+                    for (const id of loot) bin[id] = (bin[id] ?? 0) + 1;
+                    next.bin = bin;
+                  }
                   next.cars = next.cars.map((car) => {
                     if (car.tokenId !== next.selected) return car;
                     return {
                       ...car,
-                      xp: (car.xp ?? 0) + raceXp(win),
+                      xp: (car.xp ?? 0) + xpGain,
                       upgrades: firstClear && phase ? grantStoryPart(car.upgrades, phase.part) : car.upgrades,
                       hull: { hp: sim.player.hp, max: sim.player.hpMax, wrecked: sim.player.wrecked, at: Date.now() },
                     };
@@ -889,9 +946,9 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                   sim.phase === "race"
                     ? sim.player.launched
                       ? sim.player.launchGrade === "perfeito"
-                        ? "BOA"
+                        ? "BOA!"
                         : sim.player.launchGrade === "ok"
-                          ? "FOI"
+                          ? "FOI!"
                           : sim.player.launchGrade === "atrasou"
                             ? "ATRASOU"
                             : sim.player.launchGrade === "patinou"
@@ -899,9 +956,9 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                             : sim.player.launchGrade === "morreu"
                               ? "GIRO BAIXO"
                               : sim.player.launchGrade === "queimou"
-                                ? "QUEIMOU"
+                                ? "LARGOU ANTES"
                                 : "VAI"
-                      : "SOLTA"
+                      : "SOLTA!"
                     : sim.phase === "tree"
                       ? sim.t < 1
                         ? "3"
@@ -923,7 +980,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 if (grade) {
                   grade.style.visibility = prep ? "visible" : "hidden";
                   grade.textContent = word;
-                  grade.style.color = word === "QUEIMOU" ? "#ff3b1f" : "#d6ff3f";
+                  grade.style.color = word === "LARGOU ANTES" ? "#ff3b1f" : "#d6ff3f";
                 }
               }
             }
@@ -1052,6 +1109,8 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     const level = levelForChapter(phase.chapter);
     const bot = botForLevel(level);
     bot.aim = Math.max(bot.aim ?? 0, load.aim);
+    bot.reaction = Math.min(0.58, Math.max(0.16, bot.reaction * (0.88 + Math.random() * 0.24)));
+    if (Math.random() < 0.5) bot.nitroGear = Math.max(2, (bot.nitroGear ?? 3) + (Math.random() < 0.5 ? -1 : 1));
     const gears = gearsFor(c.rarity);
     simRef.current = arm(
       createDuel(
@@ -1077,7 +1136,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     const you = statsOf(c, saveRef.current.pilot, saveRef.current.kit);
     const picked = saveRef.current.ai === "medio" || saveRef.current.ai === "dificil" ? saveRef.current.ai : "facil";
     const bot = botForLevel(picked);
-    const them = bandStats(you, resolveStats(car.driver, car.rarity, streetBuild(car.rarity), car.id));
+    const them = levelBand(you, resolveStats(car.driver, car.rarity, streetBuild(car.rarity), car.id), picked);
     const gears = gearsFor(c.rarity);
     simRef.current = arm(
       createDuel(
@@ -1120,9 +1179,24 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
 
   function finishIntro() {
     markPrologue();
-    videoRef.current?.pause();
-    screenRef.current = "rivals";
-    setScreen("rivals");
+    const phase = STORY[0];
+    if (phase) goStory(phase);
+    else {
+      screenRef.current = "rivals";
+      setScreen("rivals");
+    }
+  }
+
+  function replayIntro() {
+    try {
+      localStorage.removeItem(PROLOGUE_KEY);
+    } catch {
+      /* navegador bloqueou o armazenamento */
+    }
+    unlock();
+    setIntroKey((n) => n + 1);
+    screenRef.current = "intro";
+    setScreen("intro");
   }
 
   function openStory() {
@@ -1143,7 +1217,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       if (!room || netRef.current.started) return;
       const peer = room.peerList().find((item) => item.connectionState === "connected");
       if (!peer) {
-        setPvpLink("procurando o outro piloto");
+        setPvpLink("Procurando outro piloto…");
         return;
       }
       netRef.current.rivalId = peer.id;
@@ -1159,7 +1233,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         bootRef.current(strip);
         setPvpLink("largada");
       } else {
-        setPvpLink("conectado · esperando a largada");
+        setPvpLink("Conectado · esperando a largada");
       }
     }, 200);
     return () => window.clearInterval(timer);
@@ -1170,24 +1244,8 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     unlock();
     screenRef.current = "pvp";
     setScreen("pvp");
-    stakeIn(0);
-  }
-
-  function openBet() {
-    queueTicket.current += 1;
-    roomRef.current?.close();
-    roomRef.current = null;
-    netRef.current.started = false;
-    netRef.current.paid = false;
-    netRef.current.stake = 0;
-    setPvpBet(true);
-    setPvpStake((current) => (STAKES.includes(current) ? current : 100));
+    setPvpLink("escolha o duelo");
     setPvpHunt(false);
-    setPvpPeer("");
-    setPvpLink("escolhe a aposta");
-    unlock();
-    screenRef.current = "pvp";
-    setScreen("pvp");
   }
 
   function enterRoom(roomId: string, stake: number) {
@@ -1208,7 +1266,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     });
     roomRef.current = room;
     void room.join();
-    setPvpLink(stake > 0 ? "aposta aceita" : "piloto encontrado");
+    setPvpLink("Entrando no duelo…");
   }
 
   const enterRef = useRef(enterRoom);
@@ -1238,7 +1296,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     setPvpStake(stake);
     setPvpHunt(true);
     setPvpPeer("");
-    setPvpLink(stake > 0 ? `procurando aposta de ${stake}` : "procurando piloto");
+    setPvpLink("Procurando um duelo…");
     const hunt = async () => {
       while (queueTicket.current === ticket && !netRef.current.started) {
         try {
@@ -1279,7 +1337,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
     netRef.current.rivalId = "";
     netRef.current.roll = rollPvp();
     setPvpPeer(table.name);
-    setPvpLink(`entrando na mesa de ${table.stake}`);
+    setPvpLink("Entrando no duelo…");
     try {
       const res = await fetch("/api/rtc", {
         method: "POST",
@@ -1402,12 +1460,8 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
       }
     }
     if (again.kind === "pvp") {
-      if (again.stake > 0) {
-        openBet();
-        stakeIn(again.stake);
-        return;
-      }
       openPvp();
+      stakeIn(0);
       return;
     }
     goFree();
@@ -1467,119 +1521,47 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
         <p data-grade className="mt-2 text-center font-display text-4xl leading-none" />
       </div>
       {!ready && (
-        <p className="absolute bottom-6 left-6 font-display text-4xl text-primary">Acendendo o giro…</p>
+        <p className="absolute bottom-6 left-6 font-display text-4xl text-primary">Esquentando o motor…</p>
       )}
 
       {screen === "intro" && (
-        <section className="absolute inset-0 z-40 bg-black">
-          <video
-            ref={videoRef}
-            src="/game/prologue-cave.mp4?v=3"
-            className="h-full w-full object-contain"
-            playsInline
-            onEnded={finishIntro}
-          />
-          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
-            <p className="text-xs font-semibold tracking-widest text-primary">PRÓLOGO · A ARMA VIVA</p>
-            <button
-              type="button"
-              className="min-h-11 bg-primary px-4 font-display text-3xl leading-none text-ink"
-              onClick={finishIntro}
-            >
-              Pular
-            </button>
-          </div>
-        </section>
+        <Prologue key={introKey} mode="story" name={save.callsign} onDone={finishIntro} />
       )}
 
       {screen === "menu" && ready && (
         <Prep save={save} ready={ready} treino={treino} onCommit={commit} onRun={treino ? goFree : () => {
           const c = selectedCar(saveRef.current);
           goStreet(streetNear(c.rarity, saveRef.current.races ?? 0));
-        }} onStory={openStory} onPvp={openPvp} onBet={openBet} />
+        }} onStory={openStory} onPvp={openPvp} />
       )}
 
       {screen === "pvp" && (
         <section className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-bg/92 p-6 text-center">
-          <p className="text-xs font-semibold tracking-widest text-primary">{pvpBet ? "PVP · APOSTA" : "PVP"}</p>
-          {pvpHunt && !pvpBet ? (
+          <p className="text-xs font-semibold tracking-widest text-primary">Duelo</p>
+          {pvpHunt ? (
             <>
-              <h2 className="mt-3 font-display text-6xl leading-none text-fg sm:text-8xl">Procurando</h2>
+              <h2 className="mt-3 font-display text-6xl leading-none text-fg sm:text-8xl">Procurando…</h2>
               <p className="mt-4 font-display text-3xl text-primary">{pvpLink}{pvpPeer ? ` · ${pvpPeer}` : ""}</p>
               <p className="mt-3 max-w-md text-pretty text-muted">
-                Corrida contra outro piloto. Sem mesa e sem pote. Quem chega primeiro leva o fóssil da corrida.
-              </p>
-            </>
-          ) : pvpHunt ? (
-            <>
-              <h2 className="mt-3 font-display text-6xl leading-none text-fg sm:text-8xl">Procurando</h2>
-              <p className="mt-4 font-display text-3xl text-primary">{pvpLink}{pvpPeer ? ` · ${pvpPeer}` : ""}</p>
-              <p className="mt-3 max-w-md text-pretty text-muted">
-                Mesa de {pvpStake} fóssil. O outro entra com o mesmo valor. O carro da vez é {netRef.current.roll?.name ?? "aleatório"}.
+                Escolha um duelo aberto ou crie o seu. O prêmio é fixo e ninguém paga para entrar.
               </p>
             </>
           ) : (
             <>
-              <h2 className="mt-3 font-display text-6xl leading-none text-fg sm:text-8xl">Aposta</h2>
+              <h2 className="mt-3 font-display text-6xl leading-none text-fg sm:text-8xl">Duelo</h2>
               <p className="mt-3 max-w-md text-pretty text-muted">
-                Escolhe o valor e abre uma mesa, ou entra numa que já está aberta. Quem ganha leva o pote. A casa fica com 5%.
+                Sem taxa de entrada. Quem ganha leva 100 fósseis. Quem perde leva 40. Empate, 70 para cada um.
               </p>
-              <div className="mt-5 w-full max-w-md text-left">
-                <p className="text-xs font-semibold tracking-widest text-primary">MESAS ABERTAS</p>
-                {tables.filter((table) => table.stake > 0).length === 0 ? (
-                  <p className="mt-2 text-sm text-muted">Nenhuma mesa aberta agora.</p>
-                ) : (
-                  <ul className="mt-2 grid gap-2">
-                    {tables.filter((table) => table.stake > 0).map((table) => {
-                      const short = save.fossil < table.stake;
-                      return (
-                        <li key={table.id}>
-                          <button
-                            type="button"
-                            disabled={short}
-                            onClick={() => void sit(table)}
-                            className="flex min-h-11 w-full items-center justify-between border border-border bg-black/45 px-3 text-left disabled:opacity-40"
-                          >
-                            <span className="text-sm text-fg">{table.name}</span>
-                            <span className="font-display text-2xl text-primary">{table.stake} fóssil</span>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-              <div className="mt-6 flex flex-wrap justify-center gap-2">
-                {STAKES.map((stake) => {
-                  const table = potOf(stake);
-                  const short = save.fossil < stake;
-                  const on = pvpStake === stake;
-                  return (
-                    <button
-                      key={stake}
-                      type="button"
-                      disabled={short}
-                      onClick={() => setPvpStake(stake)}
-                      className="min-h-11 border px-3 text-left disabled:opacity-40"
-                      style={{ borderColor: on ? "#d6ff3f" : "transparent", background: "rgba(0,0,0,0.45)" }}
-                    >
-                      <span className="block font-display text-3xl leading-none text-primary">{stake}</span>
-                      <span className="block text-[10px] text-muted">leva {table.payout}</span>
-                    </button>
-                  );
-                })}
-              </div>
               <button
                 type="button"
-                disabled={pvpStake <= 0 || save.fossil < pvpStake}
-                className="mt-6 min-h-11 bg-primary px-4 font-display text-3xl leading-none text-ink disabled:opacity-40"
-                onClick={() => stakeIn(pvpStake)}
+                className="mt-6 min-h-11 bg-primary px-4 font-display text-3xl leading-none text-ink"
+                onClick={() => stakeIn(0)}
               >
-                Apostar {pvpStake}
+                Correr o duelo
               </button>
             </>
           )}
-          <p className="mt-4 text-sm text-muted">Na conta {Math.round(save.fossil).toLocaleString("pt-BR")} fóssil</p>
+          <p className="mt-4 text-sm text-muted">Na conta {Math.round(save.fossil).toLocaleString("pt-BR")} fósseis</p>
           <button type="button" className="mt-6 inline-flex min-h-11 items-center gap-2 border border-border px-4 text-fg" onClick={backMenu}>
             <ChevronLeft className="size-5" />
             Cancelar
@@ -1595,30 +1577,55 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
           </button>
           <h2 className="font-display text-5xl leading-none">Modo história</h2>
           <p className="mt-2 max-w-xl text-sm text-pretty text-muted">
-            A arma não era pedra. Era osso, samambaia e gosma. Os líderes vestiram sucata de nave, vigia, antena e visor rachado. Cada fase escolhe o carro e o nível. A briga é a mesma da rua: ele corre colado, troca de faixa e revida.
+            Um cometa verde acordou os dinos. Cada fase tem um rival, um carro e um jeito de correr. No fim da estrada, Rex Navalha espera como VEX-REX.
           </p>
-          <button type="button" className="mt-3 text-sm text-primary" onClick={openStory}>
+          <button type="button" className="mt-3 text-sm text-primary" onClick={replayIntro}>
             Ver o prólogo de novo
           </button>
+          {(() => {
+            const youLive = liveStats(car, save.pilot, save.kit);
+            const youNaked = resolveStats(car.driverId, car.rarity, car.upgrades, car.exclusive?.modelId);
+            const yours = loadPower(youNaked, youLive, [armedDef(save.arm, save.frontal), armedRear(save.rearArm, save.rear)]);
+            const items = Math.max(0, yours.total - yours.base);
+            return (
+              <p className="mt-3 max-w-xl text-sm text-fg">
+                Seu poder {yours.total}. O carro vale {yours.base}. Peças, piloto e armas somam {items}.
+              </p>
+            );
+          })()}
           <ul className="mt-4 grid max-w-3xl gap-3">
             {STORY.map((phase) => {
               const d = driverById(phase.driver);
               const open = storyOpen(save.storyClear ?? 0, phase.chapter);
               const done = (save.storyClear ?? 0) >= phase.chapter;
+              const hiddenBoss = phase.driver === "vex" && !open;
+              const youLive = liveStats(car, save.pilot, save.kit);
+              const youNaked = resolveStats(car.driverId, car.rarity, car.upgrades, car.exclusive?.modelId);
+              const yours = loadPower(youNaked, youLive, [armedDef(save.arm, save.frontal), armedRear(save.rearArm, save.rear)]);
+              const them = rivalStats(phase, youLive);
+              const rivalPower = statPower(them) + gunPower(weaponById("missile")) + gunPower(weaponById("mine"));
+              const ahead = rivalPower >= Math.round(yours.total * 1.08);
               return (
                 <li key={phase.chapter} className={`flex flex-wrap items-center gap-3 border bg-surface p-3 ${open ? "border-border" : "border-border opacity-50"}`}>
-                  <img src={`/game/pilot-${d.sprite}.png`} alt="" className="size-14 object-cover sm:size-16" />
-                  <img src={`/game/car-${d.sprite}.png`} alt="" className="size-12 object-contain sm:size-14" />
+                  <img src={`/game/pilot-${d.sprite}.png?v=8`} alt="" className={`size-14 object-contain sm:size-16 ${hiddenBoss ? "brightness-0" : ""}`} />
+                  <img src={`/game/car-${d.sprite}.png?v=8`} alt="" className={`size-12 object-contain sm:size-14 ${hiddenBoss ? "brightness-0" : ""}`} />
                   <div className="min-w-0 flex-1 basis-40">
                     <p className="font-display text-2xl leading-none sm:text-3xl">
-                      Fase {phase.chapter} · {d.name}
+                      Fase {phase.chapter} · {hiddenBoss ? "???" : d.name}
                     </p>
+                    <p className="text-sm text-muted">{hiddenBoss ? "Silhueta. Vença as fases anteriores." : d.line}</p>
+                    {!hiddenBoss && <p className="text-sm text-fg">{BOSSES[phase.chapter]?.before}</p>}
                     <p className="text-sm text-muted">
-                      {d.line}
+                      {levelForChapter(phase.chapter) === "facil" ? "Fácil" : levelForChapter(phase.chapter) === "medio" ? "Médio" : "Difícil"}
+                      {" · "}
+                      {done ? "Vencida" : open ? "Aberta" : "Bloqueada"} · peças comuns · {phase.part.grade === "monstro" ? "peça rara" : "peça comum"} {phase.part.name}
                     </p>
-                    <p className="text-sm text-muted">
-                      {done ? "Limpa" : open ? "Aberta" : "Bloqueada"} · {phase.fossil} fóssil · {phase.part.grade === "monstro" ? "peça monstro" : "peça normal"} {phase.part.name}
-                    </p>
+                    {!hiddenBoss && (
+                      <p className={`text-sm ${ahead ? "text-primary" : "text-fg"}`}>
+                        Poder {rivalPower} · {kmh(driveMph(them.vmax))} km/h · vida {Math.round(them.durability)}
+                        {ahead ? " · mais forte que o seu. Melhore o carro antes." : " · você aguenta."}
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -1626,7 +1633,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                     className="min-h-11 bg-primary px-3 font-display text-2xl leading-none text-ink disabled:opacity-40"
                     onClick={() => goStory(phase)}
                   >
-                    {open ? "Correr" : "Travada"}
+                    {open ? "Correr" : "Bloqueada"}
                   </button>
                 </li>
               );
@@ -1637,17 +1644,16 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
 
       {screen === "drive" && (
         <div className="pointer-events-none absolute inset-0 p-3">
-          {save.races === 0 && (
-            <p className="pointer-events-none absolute left-1/2 top-44 z-20 max-w-sm -translate-x-1/2 bg-bg/80 px-3 py-2 text-center text-sm text-primary">
-              {again.kind === "free"
-                ? "Segura o gás. Shift sobe a marcha quando aparecer AGORA. F atira na frente. G atira atrás."
-                : "Segura ESPAÇO e W até o giro ficar verde (GIRO CERTO). Solta o ESPAÇO no VAI. W sozinho passa de 5500 e patina. Shift só quando aparecer AGORA. F míssil. G mina."}
-            </p>
+          {again.kind === "story" && save.races < 3 && (
+            <div className="pointer-events-none absolute bottom-[9.5rem] left-3 z-40 max-w-xs bg-bg/85 px-3 py-2 text-sm lg:bottom-6">
+              <p className="text-primary">{BOSSES[again.chapter]?.before}</p>
+              <p className="mt-1 text-fg">W acelera. Espaço sobe o giro e solta no VAI. Shift no AGORA. F míssil. G mina. N nitro. E escudo. A e D trocam de faixa.</p>
+            </div>
           )}
-          <div className="pointer-events-auto absolute inset-x-3 top-3 flex items-center justify-between">
+          <div className="pointer-events-auto absolute inset-x-3 top-16 flex items-center justify-between">
             <button type="button" className="inline-flex min-h-11 items-center gap-1 bg-bg/80 px-3 text-fg" onClick={backMenu}>
               <ChevronLeft className="size-5" />
-              Pits
+              Box
             </button>
             <button
               type="button"
@@ -1655,12 +1661,12 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               aria-pressed={!!save.reduceFx}
               onClick={() => commit({ ...save, reduceFx: !save.reduceFx })}
             >
-              {save.reduceFx ? "Efeitos reduzidos" : "Reduzir efeitos"}
+              {save.reduceFx ? "Efeitos leves" : "Efeitos leves"}
             </button>
             <button
               type="button"
               className="inline-flex size-11 items-center justify-center bg-bg/80 text-fg"
-              aria-label={save.muted ? "Ligar som" : "Mutar"}
+              aria-label={save.muted ? "Ligar som" : "Desligar som"}
               onClick={() => {
                 const next = { ...save, muted: !save.muted };
                 audioRef.current?.setMuted(next.muted);
@@ -1670,6 +1676,11 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               {save.muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
             </button>
           </div>
+          {simRef.current?.briefing ? (
+            <p className="pointer-events-none absolute inset-x-3 top-[7.4rem] z-20 max-w-md bg-bg/90 px-3 py-2 text-sm leading-snug text-fg">
+              {simRef.current.briefing}
+            </p>
+          ) : null}
           <div
             className="pointer-events-auto absolute inset-x-0 bottom-0 z-30 bg-bg px-3 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] lg:hidden"
             onKeyDown={(e) => {
@@ -1678,7 +1689,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
           >
           <div className="grid grid-cols-5 gap-1">
             <div role="presentation" className="min-h-11 select-none bg-surface text-center text-fg" {...press("left")} aria-label="Faixa esquerda">
-              <span className="block text-xs">Esq</span>
+              <span className="block text-xs">Esq.</span>
               <span className="font-display text-sm leading-none">{keyLabel(readKeys(save).left)}</span>
             </div>
             <div role="presentation" className="min-h-11 select-none bg-surface text-center text-fg" {...press("gas")}>
@@ -1712,7 +1723,7 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
               <span className="text-xs">{keyLabel(readKeys(save).nitro)}</span>
             </div>
             <div role="presentation" className="min-h-11 select-none bg-surface text-center text-fg" {...press("right")} aria-label="Faixa direita">
-              <span className="block text-xs">Dir</span>
+              <span className="block text-xs">Dir.</span>
               <span className="font-display text-sm leading-none">{keyLabel(readKeys(save).right)}</span>
             </div>
             <div
@@ -1752,8 +1763,8 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
           </div>
           <p className="pointer-events-none pb-1 text-right text-xs text-muted">
             {again.kind === "free"
-              ? "Segura o gás · Shift sobe a marcha · N nitro · F frente · G traseira · A e D na faixa"
-              : "ESPAÇO sobe o giro · solta no VAI · W preso larga no verde · Shift no AGORA · N nitro · F míssil · G mina · E escudo · A/D desvia · V câmera"}
+              ? "Gás · Shift: marcha · N: nitro · F: frente · G: trás · A/D: faixa"
+              : "ESPAÇO: giro · solte no VAI · Shift no AGORA! · N: nitro · F: míssil · G: mina · E: escudo · A/D: desvia · V: câmera"}
           </p>
           </div>
         </div>
@@ -1796,26 +1807,33 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 wrecked={result.stars[1]}
               />
             </div>
-            <p className="mt-3 font-display text-3xl text-primary">
-              {result.win ? "+" : ""}
-              {result.fossil} <FossilWord />
-              <span className="ml-3 text-fg">+{raceXp(result.win)} XP · {result.youPlace}º</span>
-            </p>
+            {result.parts ? (
+              <p className="mt-3 font-display text-3xl text-primary">
+                {result.parts.length > 0 ? result.parts.join(" · ") : result.win ? "Nenhuma peça desta vez." : "Derrota não paga."}
+                <span className="ml-3 text-fg">+{result.xpGain ?? raceXp(result.win)} XP · {result.youPlace}º</span>
+              </p>
+            ) : (
+              <p className="mt-3 font-display text-3xl text-primary">
+                {result.win ? "+" : ""}
+                {result.fossil} <FossilWord />
+                <span className="ml-3 text-fg">+{result.xpGain ?? raceXp(result.win)} XP · {result.youPlace}º</span>
+              </p>
+            )}
             {result.baseFossil != null && (
               <p className="mt-1 text-sm text-muted">
                 {!result.win && !result.draw && result.winBase
-                  ? `Derrota paga 40% de ${result.winBase} = ${result.baseFossil}`
-                  : `Base ${result.baseFossil}`}
+                  ? `Quem perde leva 40% de ${result.winBase} = ${result.baseFossil}`
+                  : `Prêmio ${result.baseFossil}`}
                 {` + ${Math.round((result.bonusPct ?? 0) * 100)}% desempenho (teto 50%)`}
                 {result.bonusLines && result.bonusLines.length > 0 ? ` · ${result.bonusLines.join(", ")}` : ""}
               </p>
             )}
             <p className="mt-1 text-sm text-fg">
-              {result.hits ?? 0} acertos / {result.fired ?? 0} tiros · {result.crates ?? 0} caixas · vácuo {(result.draftTime ?? 0).toFixed(1)}s · nitro {result.nitroUsed ? "saiu" : "não saiu"} · nitro perfeito {result.nitroPerfect ?? 0} · desvios {result.dodged ?? 0}
+              {result.hits ?? 0} acertos / {result.fired ?? 0} tiros · {result.crates ?? 0} caixas · vácuo {(result.draftTime ?? 0).toFixed(1)}s · nitro {result.nitroUsed ? "saiu" : "não largou"} · nitro perfeito {result.nitroPerfect ?? 0} · desvios {result.dodged ?? 0}
             </p>
             {result.mission && <p className="mt-1 text-sm text-primary">{result.mission}</p>}
             <p className="mt-2 text-sm text-fg">
-              {["Largada limpa", "Rival zerado", "Sem dano"].map((label, i) => (
+              {["Largada limpa", "Rival sem vida", "Sem dano"].map((label, i) => (
                 <span key={label} className={result.stars[i] ? "mr-3 text-primary" : "mr-3 text-muted"}>
                   {result.stars[i] ? "★" : "☆"} {label}
                 </span>
@@ -1837,13 +1855,13 @@ export function GameApp({ rivalId, story, treino, racha, duel, selfKey }: { riva
                 </button>
               )}
               <button type="button" className="min-h-11 bg-primary px-4 font-display text-3xl leading-none text-ink" onClick={replay}>
-                De novo
+                Correr de novo
               </button>
               <Link to="/loja" className="inline-flex min-h-11 items-center border border-border px-4 font-display text-3xl leading-none text-fg">
                 Loja
               </Link>
               <button type="button" className="min-h-11 border border-border px-4 font-display text-3xl leading-none text-fg" onClick={backMenu}>
-                Pits
+                Box
               </button>
             </div>
           </div>

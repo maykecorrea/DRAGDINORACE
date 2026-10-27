@@ -69,6 +69,11 @@ export function driveMph(stat: number): number {
   return 185 + Math.min(1, Math.max(0, t)) * 40;
 }
 
+/** Só a tela. A física continua em mph. */
+export function kmh(mph: number): number {
+  return Math.round(mph * 1.60934);
+}
+
 export function accelA(vmaxMph: number): number {
   if (vmaxMph >= 210) return 28;
   if (vmaxMph >= 198) return 26.4;
@@ -86,8 +91,8 @@ export function badgeForReaction(reaction: number): RaceBadge {
 
 /** Comum, Normal e Raro: 6. Épico: 7. Lendário: 8. A marcha extra só abre mais uma janela de troca. */
 export function gearsForRarity(rarity: string | undefined): number {
-  if (rarity === "Lendário" || rarity === "Lendario" || rarity === "Meme") return 8;
-  if (rarity === "Épico" || rarity === "Epico") return 7;
+  if (rarity === "Lendário" || rarity === "Lendário" || rarity === "Meme") return 8;
+  if (rarity === "Épico" || rarity === "Épico") return 7;
   return 6;
 }
 

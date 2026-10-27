@@ -271,7 +271,7 @@ export const SIGN_KINDS = [
   "unico",
   "lomba",
   "filhote",
-  "giro",
+  "Giro",
   "mudo",
   "sucata",
   "obra",
@@ -307,7 +307,7 @@ function buildSigns(): CitySign[] {
         const spot = corners[idx]!;
         if (spot.x < 24 || spot.y < 24 || spot.x > MAP_W - 24 || spot.y > MAP_H - 24) return;
         if (rb && Math.hypot(spot.x - rb.x, spot.y - rb.y) < rb.r + 8) return;
-        const kind: SignKind = rb ? (n === 0 ? "giro" : "ceda") : n === 0 ? "pare" : SIGN_KINDS[(col * 11 + row * 7) % SIGN_KINDS.length]!;
+        const kind: SignKind = rb ? (n === 0 ? "Giro" : "ceda") : n === 0 ? "pare" : SIGN_KINDS[(col * 11 + row * 7) % SIGN_KINDS.length]!;
         out.push({ kind, x: spot.x, y: spot.y, face: spot.face });
       });
     });

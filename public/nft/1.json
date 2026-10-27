@@ -1,0 +1,33 @@
+{
+ "name": "Caixa de cabo",
+ "description": "Dino Drag Race — Caixa de cabo (Comum). +6 de casco.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/1.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "chassis"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Casco",
+   "value": 6,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "chassis-Comum",
+  "stats": "casco+6"
+ }
+}

@@ -1,0 +1,218 @@
+[
+  {
+    "id": "evento_curto",
+    "kind": "event",
+    "npc": "teo",
+    "title": "Curto-circuito",
+    "weight": 0,
+    "once": false,
+    "text": "A fiação estalou. O conserto custa caro hoje. Com o Seguro Carapaça, você paga só a parte que o seguro não cobre.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "seguro",
+        "label": "Usar seguro (400)",
+        "requires": [
+          {
+            "flag": "seguro",
+            "eq": true
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -400
+          },
+          {
+            "op": "lesson",
+            "id": "L26"
+          }
+        ],
+        "decision_impact": 1
+      },
+      {
+        "id": "pagar",
+        "label": "Consertar (2.000)",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 2000
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -2000
+          },
+          {
+            "op": "lesson",
+            "id": "L08"
+          }
+        ],
+        "decision_impact": -1
+      },
+      {
+        "id": "aguentar",
+        "label": "Remendar com arame",
+        "effects": [
+          {
+            "op": "morale",
+            "value": -8
+          },
+          {
+            "op": "lesson",
+            "id": "L26"
+          }
+        ],
+        "decision_impact": -2
+      }
+    ]
+  },
+  {
+    "id": "evento_maquina",
+    "kind": "event",
+    "npc": "brasa",
+    "title": "A máquina quebrou",
+    "weight": 0,
+    "once": false,
+    "text": "O compressor engasgou. Consertar agora custa 800. Deixar depois cansa a equipe e trava a baia.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "pagar",
+        "label": "Consertar (800)",
+        "requires": [
+          {
+            "stat": "cash",
+            "gte": 800
+          }
+        ],
+        "effects": [
+          {
+            "op": "cash",
+            "value": -800
+          },
+          {
+            "op": "lesson",
+            "id": "L08"
+          }
+        ],
+        "decision_impact": 0
+      },
+      {
+        "id": "depois",
+        "label": "Seguir assim",
+        "effects": [
+          {
+            "op": "morale",
+            "value": -6
+          }
+        ],
+        "decision_impact": -2
+      }
+    ]
+  },
+  {
+    "id": "bitossauro_saque",
+    "kind": "event",
+    "npc": "coach",
+    "title": "Taxa para sacar",
+    "weight": 0,
+    "once": true,
+    "text": "O app mostra lucro. Para sacar, pague uma taxa de 20%. Depois disso, o site pode sumir.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "pagar",
+        "label": "Pagar a taxa",
+        "effects": [
+          {
+            "op": "cash",
+            "value": -160
+          },
+          {
+            "op": "lesson",
+            "id": "L16"
+          }
+        ],
+        "scam": true,
+        "decision_impact": -4
+      },
+      {
+        "id": "largar",
+        "label": "Deixar para lá",
+        "effects": [
+          {
+            "op": "lesson",
+            "id": "L16"
+          }
+        ],
+        "decision_impact": -2
+      }
+    ]
+  },
+  {
+    "id": "prova_tico",
+    "kind": "event",
+    "npc": "tico",
+    "title": "O Tico viu",
+    "week_min": 8,
+    "week_max": 12,
+    "weight": 6,
+    "once": true,
+    "priority": 4,
+    "text": "O Tico viu a jaqueta de dentes na porta. Se você pedir, ele escreve o que viu. É uma prova.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "guardar",
+        "label": "Guardar o relato",
+        "effects": [
+          {
+            "op": "flag",
+            "key": "proof_tico",
+            "value": true
+          }
+        ],
+        "decision_impact": 2
+      },
+      {
+        "id": "medo",
+        "label": "Pedir silêncio",
+        "decision_impact": -2
+      }
+    ]
+  },
+  {
+    "id": "prova_recibo",
+    "kind": "event",
+    "npc": "comerciante",
+    "title": "Recibo da rua",
+    "week_min": 14,
+    "week_max": 20,
+    "weight": 6,
+    "once": true,
+    "priority": 4,
+    "text": "O vizinho da esquina guardou o recibo do \"pedágio\". Não é contrato, é ameaça por escrito. Serve na delegacia.",
+    "red_flags": [],
+    "options": [
+      {
+        "id": "guardar",
+        "label": "Guardar cópia",
+        "effects": [
+          {
+            "op": "flag",
+            "key": "proof_recibo",
+            "value": true
+          }
+        ],
+        "decision_impact": 2
+      },
+      {
+        "id": "medo",
+        "label": "Devolver",
+        "decision_impact": -1
+      }
+    ]
+  }
+]

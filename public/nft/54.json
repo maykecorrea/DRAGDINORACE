@@ -1,0 +1,33 @@
+{
+ "name": "Anel antigrav",
+ "description": "Dino Drag Race — Anel antigrav (Épico). +41 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/54.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "tires"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 41,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "tires-Épico-3",
+  "stats": "accel+41"
+ }
+}

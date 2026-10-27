@@ -1,0 +1,48 @@
+{
+ "name": "Anjo de sucata",
+ "description": "Dino Drag Race — Anjo de sucata (Épico). 22 de dano. 27 tiros. 0.70s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/136.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 22,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 27,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.7,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Épico",
+  "stats": "dmg=22;clip=27;cd=0.7;lock=3.4"
+ }
+}

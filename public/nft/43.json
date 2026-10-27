@@ -1,0 +1,33 @@
+{
+ "name": "Mandíbula de aço",
+ "description": "Dino Drag Race — Mandíbula de aço (Raro). +24 de potência.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/43.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "gearbox"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Potência",
+   "value": 24,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "gearbox-Raro",
+  "stats": "power+24"
+ }
+}

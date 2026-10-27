@@ -1,0 +1,6 @@
+[
+  { "id": "trike", "nome": "Carroça-Trike", "buy": 600, "ap": 6, "material": 200, "sell": [1400, 1800], "liquidity": 0.7, "level": 1, "enabled": true },
+  { "id": "seda", "nome": "Rapto-Sedã", "buy": 1500, "ap": 10, "material": 500, "sell": [3200, 4000], "liquidity": 0.5, "level": 2, "enabled": true },
+  { "id": "pickup", "nome": "Couraça-Pickup", "buy": 2800, "ap": 14, "material": 900, "sell": [5500, 7000], "liquidity": 0.35, "level": 3, "enabled": true },
+  { "id": "arrancada", "nome": "Carcaça de Arrancada", "buy": 5000, "ap": 20, "material": 2000, "sell": [11000, 14000], "liquidity": 0.3, "level": 3, "enabled": true }
+]

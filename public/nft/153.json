@@ -1,0 +1,43 @@
+{
+ "name": "Rex-míssil",
+ "description": "Dino Drag Race — Rex-míssil (Lendário). 146 de dano. 8 tiros. 0.87s. Voa reto. Em cheio dói mais. Se passar perto, estoura com menos dano.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/153.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "missile"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 146,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 8,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.87,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-missile-Lendário-3",
+  "stats": "dmg=146;clip=8;cd=0.87"
+ }
+}

@@ -22,6 +22,12 @@ const ALIAS: Record<string, string> = {
   "icon_relogio.png": "/assets/gf/v2/hud/hud_relogio_frame.png",
   "ui_telefone.png": "/assets/gf/v2/hud/btn_telefone.png",
   "ui_moldura_carta.png": "/assets/gf/v2/ui/ui_painel_9slice.png",
+  "icon_material_kit.png": "/assets/gf/v2/pecas/peca_kit.png",
+  "icon_material_oleo.png": "/assets/gf/v2/pecas/peca_oleo.png",
+  "icon_material_chapa.png": "/assets/gf/v2/pecas/peca_chapa.png",
+  "icon_material_cabo.png": "/assets/gf/v2/pecas/peca_cabo.png",
+  "icon_material_osso.png": "/assets/gf/v2/pecas/peca_osso.png",
+  "icon_material_bobina.png": "/assets/gf/v2/pecas/peca_bobina.png",
 };
 
 export function PixelFile({ file, className = "gf-ico" }: { file: string; className?: string }) {

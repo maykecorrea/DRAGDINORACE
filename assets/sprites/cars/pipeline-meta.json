@@ -1,0 +1,219 @@
+{
+  "target": "asset",
+  "mode": "sheet",
+  "prompt": "",
+  "role": "",
+  "input": "/workspace/assets/sprites/cars/raw-sheet.jpg",
+  "threshold": 100,
+  "edge_threshold": 150,
+  "duration": 200,
+  "rows": 2,
+  "cols": 3,
+  "cell_size": 128,
+  "fit_scale": 0.85,
+  "trim_border": 4,
+  "edge_clean_depth": 3,
+  "align": "center",
+  "shared_scale": true,
+  "component_mode": "all",
+  "component_padding": 0,
+  "min_component_area": 1,
+  "edge_touch_margin": 0,
+  "frame_labels": [
+    "car-1",
+    "car-2",
+    "car-3",
+    "car-4",
+    "car-5",
+    "car-6"
+  ],
+  "frames": [
+    {
+      "grid": [
+        0,
+        0
+      ],
+      "source_box": [
+        0,
+        0,
+        576,
+        576
+      ],
+      "component_mode": "all",
+      "component_count": 1,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        60,
+        182,
+        535,
+        488
+      ],
+      "edge_touch": false,
+      "output_size": [
+        104,
+        67
+      ],
+      "paste_position": [
+        12,
+        30
+      ]
+    },
+    {
+      "grid": [
+        0,
+        1
+      ],
+      "source_box": [
+        576,
+        0,
+        1152,
+        576
+      ],
+      "component_mode": "all",
+      "component_count": 1,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        50,
+        99,
+        517,
+        488
+      ],
+      "edge_touch": false,
+      "output_size": [
+        102,
+        85
+      ],
+      "paste_position": [
+        13,
+        21
+      ]
+    },
+    {
+      "grid": [
+        0,
+        2
+      ],
+      "source_box": [
+        1152,
+        0,
+        1728,
+        576
+      ],
+      "component_mode": "all",
+      "component_count": 1,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        33,
+        116,
+        500,
+        488
+      ],
+      "edge_touch": false,
+      "output_size": [
+        102,
+        81
+      ],
+      "paste_position": [
+        13,
+        23
+      ]
+    },
+    {
+      "grid": [
+        1,
+        0
+      ],
+      "source_box": [
+        0,
+        576,
+        576,
+        1152
+      ],
+      "component_mode": "all",
+      "component_count": 1,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        50,
+        72,
+        544,
+        418
+      ],
+      "edge_touch": false,
+      "output_size": [
+        108,
+        76
+      ],
+      "paste_position": [
+        10,
+        26
+      ]
+    },
+    {
+      "grid": [
+        1,
+        1
+      ],
+      "source_box": [
+        576,
+        576,
+        1152,
+        1152
+      ],
+      "component_mode": "all",
+      "component_count": 1,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        50,
+        70,
+        516,
+        418
+      ],
+      "edge_touch": false,
+      "output_size": [
+        102,
+        76
+      ],
+      "paste_position": [
+        13,
+        26
+      ]
+    },
+    {
+      "grid": [
+        1,
+        2
+      ],
+      "source_box": [
+        1152,
+        576,
+        1728,
+        1152
+      ],
+      "component_mode": "all",
+      "component_count": 1,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        30,
+        112,
+        505,
+        419
+      ],
+      "edge_touch": false,
+      "output_size": [
+        104,
+        67
+      ],
+      "paste_position": [
+        12,
+        30
+      ]
+    }
+  ],
+  "edge_touch_frames": []
+}

@@ -1,0 +1,33 @@
+{
+ "name": "Vórtice fóssil",
+ "description": "Dino Drag Race — Vórtice fóssil (Lendário). +42% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/64.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "engine"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "42%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "engine-Lendário",
+  "stats": "vmax+42%"
+ }
+}

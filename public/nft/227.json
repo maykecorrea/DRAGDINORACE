@@ -1,0 +1,33 @@
+{
+ "name": "Testa solar",
+ "description": "Dino Drag Race — Testa solar (Lendário). +45 de vida no piloto.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/227.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "cranio"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Vida",
+   "value": 45,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-cranio-Lendário-2",
+  "stats": "vida+45"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "name": "Garra de plasma",
+ "description": "Dino Drag Race — Garra de plasma (Raro). +16 de potência.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/202.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "garra"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Potência",
+   "value": 16,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-garra-Raro",
+  "stats": "power+16"
+ }
+}

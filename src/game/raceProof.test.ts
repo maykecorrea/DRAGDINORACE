@@ -184,9 +184,11 @@ test("queimar a largada segura o carro até o castigo acabar", () => {
   assert.equal(m.player.launchGrade, "queimou");
   assert.equal(m.player.redlight, true);
   assert.ok(maxSpeedDuring < 0.2, `andou cedo ${maxSpeedDuring}`);
-  assert.ok(m.player.launched);
-  assert.ok(m.player.speed > 0.2 || m.player.dist > 0.2);
+  assert.equal(m.player.launched, false);
+  assert.ok(m.player.speed < 0.2);
+  assert.equal(m.phase, "finish");
   assert.equal(raceVerdict(m), "loss");
+  assert.equal(purse(100, "loss", m).total, 0);
 });
 
 test("cinco trocas perfeitas batem cinco BOM por cerca de 0,6 s", () => {
@@ -432,10 +434,10 @@ test("foto-chegada quando os tempos empatam", () => {
     m.rival.finished = true;
     m.rival.finishTime = 10.202;
   }
-  assert.equal(raceReason(m), "FOTO-CHEGADA");
+  assert.equal(raceReason(m), "CHEGADA NA FOTO");
   m.player.finishTime = 10.2;
   if (m.rival) m.rival.finishTime = 10.48;
-  assert.match(raceReason(m), /280 ms/);
+  assert.match(raceReason(m), /280 milésimos/);
 });
 
 test("rival de rua com upgrades termina a prova", () => {
@@ -1198,10 +1200,10 @@ test("Shift no verde grava a mesma palavra do HUD", () => {
   late.player.speed = vMax * gearBox(6).frac[4]!;
   late.player.rpm = 8000;
   late.player.redlineT = 0.2;
-  assert.equal(shiftWord(shiftCall(late.player.rpm, late.player.gear)), "CORTE");
+  assert.equal(shiftWord(shiftCall(late.player.rpm, late.player.gear)), "NO LIMITE");
   stepMatch(late, { throttle: 1, steer: 0, shift: true, nitro: false, brake: false }, 1 / 60, up, up);
   assert.equal(late.player.shifts[0], "corte");
-  assert.equal(late.note, "CORTE");
+  assert.equal(late.note, "NO LIMITE");
 });
 
 test("quarto de milha de 162 mph fecha entre 10 e 12 s", () => {
@@ -1372,7 +1374,7 @@ test("sem toque o carro não larga aos 1417 ms", () => {
 
 test("depois do corte o giro cabe na marcha nova", () => {
   const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
-  const m = createDuel("giro", bot, comum, comum, 6, 6, 2);
+  const m = createDuel("Giro", bot, comum, comum, 6, 6, 2);
   m.hazards = [];
   m.crates = [];
   let brake = true;
@@ -1405,8 +1407,8 @@ test("depois do corte o giro cabe na marcha nova", () => {
     const expect = Math.min(8000, Math.max(m.player.gear === 1 ? 3800 : 1000, (m.player.speed / Math.max(0.4, vTop)) * 8000));
     assert.ok(Math.abs(m.player.rpm - expect) < 120, `g${m.player.gear} rpm ${m.player.rpm} vs ${expect}`);
     const call = shiftCall(m.player.rpm, m.player.gear);
-    if (m.banner === "AGORA — BOM") assert.equal(call, "ok");
-    if (m.banner === "AGORA — PERFEITO") assert.equal(call, "perfeito");
+    if (m.banner === "AGORA! BOM") assert.equal(call, "ok");
+    if (m.banner === "AGORA! PERFEITO") assert.equal(call, "perfeito");
     if (call === "ok" || call === "perfeito") {
       const row = rowFor(m.player.gear);
       assert.ok(m.player.rpm >= row.lo && m.player.rpm <= row.hi, `${m.player.rpm} fora de ${row.lo}-${row.hi}`);
@@ -1739,7 +1741,7 @@ test("PERFEITO da 2ª marcha dura o bastante para ver", () => {
   assert.ok(frames >= 12, `frames ${frames}`);
 });
 
-test("colado do lado é NA MIRA e o F acerta", () => {
+test("colado do lado é FORA e a mira verde fica na sua faixa", () => {
   const bot: Bot = { reaction: 9, shiftAt: 1, jitter: 0, nitroGear: 99, launch: 1, aim: 0, rubber: 0 };
   const m = createDuel("colado", bot, comum, { ...comum, durability: 50 }, 6, 6, 4);
   m.phase = "race";
@@ -1759,14 +1761,15 @@ test("colado do lado é NA MIRA e o F acerta", () => {
     m.rival.hp = 50;
     m.rival.hpMax = 50;
   }
-  assert.equal(sights(m), "mira");
+  assert.equal(sights(m), "fora");
   armWeapon(m.player, "missile", weaponById("missile"));
   const before = m.rival?.hp ?? 0;
   stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, fire: true, fireEdge: true, brake: false }, 1 / 60, up, up);
-  for (let i = 0; i < 40 && (m.rival?.hp ?? 0) >= before; i++) {
-    stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
-  }
-  assert.ok(before - (m.rival?.hp ?? before) >= 8, `colado ${m.rival?.hp}`);
+  assert.equal(m.shotCall.startsWith("ERROU"), true, m.shotCall);
+  const shot = m.shots.find((item) => item.owner === "you" && item.kind === "missil");
+  assert.equal(shot?.sure, false);
+  for (let i = 0; i < 20; i++) stepMatch(m, { throttle: 1, steer: 0, shift: false, nitro: false, brake: false }, 1 / 60, up, up);
+  assert.equal(m.rival?.hp, before);
 });
 
 test("mesma faixa na frente é NA MIRA e a outra faixa longe é FORA", () => {
@@ -1839,7 +1842,7 @@ test("freio preso até os 4 s marca largada AUTO", () => {
   assert.equal(m.player.launched, true);
   assert.equal(m.player.launchAuto, true);
   assert.equal(m.player.launchGrade, "atrasou");
-  assert.equal(m.note, "LARGADA AUTO");
+  assert.equal(m.note, "SAIU SOZINHO · TARDE");
 });
 
 test("seis mísseis no fácil deixam o rival vivo", () => {
@@ -1920,9 +1923,9 @@ test("A/D tira o carro da linha do míssil fácil", () => {
 test("história fácil fica na faixa do jogador", () => {
   const raw = { durability: 103, vmax: 204, accel: 90, nitroTime: 2, power: 80 };
   const them = levelBand(comum, raw, "facil");
-  assert.ok(them.vmax <= comum.vmax, `trap ${them.vmax}`);
-  assert.ok(them.vmax >= comum.vmax * 0.94, `trap baixo ${them.vmax}`);
-  assert.ok(them.durability <= comum.durability * 1.05 + 1, `hp ${them.durability}`);
+  assert.ok(them.vmax <= comum.vmax * 0.92 + 0.5, `trap ${them.vmax}`);
+  assert.ok(them.vmax >= comum.vmax * 0.86 - 0.5, `trap baixo ${them.vmax}`);
+  assert.ok(them.durability <= comum.durability * 0.95 + 1, `hp ${them.durability}`);
 });
 
 

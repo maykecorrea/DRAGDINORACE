@@ -1,0 +1,43 @@
+{
+ "name": "Jurássico duplo",
+ "description": "Dino Drag Race — Jurássico duplo (Lendário). 5 de dano. 219 tiros. 0.10s. A de fábrica. Duas bocas, tiro curto, 1 de dano. Pente de 125.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/148.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "mg"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 5,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 219,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.1,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-mg-Lendário",
+  "stats": "dmg=5;clip=219;cd=0.1"
+ }
+}

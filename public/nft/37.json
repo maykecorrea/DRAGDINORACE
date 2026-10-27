@@ -1,0 +1,33 @@
+{
+ "name": "Pneu de flutuação",
+ "description": "Dino Drag Race — Pneu de flutuação (Raro). +20 de aceleração.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/37.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "tires"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Aceleração",
+   "value": 20,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "tires-Raro",
+  "stats": "accel+20"
+ }
+}

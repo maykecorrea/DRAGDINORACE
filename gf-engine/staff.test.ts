@@ -58,7 +58,7 @@ describe("funcionários, ânimo e reputação", () => {
     const first = closeWeek(state);
     state = first.state;
     assert.equal(state.employees[0]?.owedWeeks, 1);
-    assert.equal(state.morale, 55);
+    assert.equal(state.morale, 88.333);
     state.cash = -400;
     const second = closeWeek(state);
     assert.equal(second.state.employees.length, 0);
@@ -69,7 +69,7 @@ describe("funcionários, ânimo e reputação", () => {
     assert.equal(debt?.weeklyBps, 0);
     assert.equal(second.events.some((event) => event.type === "QUIT"), true);
     const log = second.state.flags.repLog;
-    assert.equal(Array.isArray(log) && log.some((entry) => "reason" in entry && entry.reason === "funcionário saiu por salário" && entry.delta === -5), true);
+    assert.equal(Array.isArray(log) && log.some((entry) => "reason" in entry && entry.reason === "ajudante saiu por salário atrasado" && entry.delta === -5), true);
   });
 
   it("pagar o atrasado zera as semanas devidas", () => {
@@ -266,7 +266,7 @@ describe("funcionários, ânimo e reputação", () => {
     const fired = applyAction(worked.state, { type: "FIRE", employeeId: "brasa" }, contentV1).state;
     assert.equal(fired.employees.length, 0);
     assert.equal(fired.cash, worked.state.cash - 900);
-    assert.equal(fired.morale, 55);
+    assert.equal(fired.morale, 88.333);
     assert.equal(fired.jobs[0]?.assignedTo, "teo");
   });
 });

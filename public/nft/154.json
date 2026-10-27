@@ -1,0 +1,48 @@
+{
+ "name": "Cometa fiel",
+ "description": "Dino Drag Race — Cometa fiel (Lendário). 32 de dano. 32 tiros. 0.63s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/154.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 32,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 32,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.63,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Lendário",
+  "stats": "dmg=32;clip=32;cd=0.63;lock=3.4"
+ }
+}

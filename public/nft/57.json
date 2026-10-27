@@ -1,0 +1,33 @@
+{
+ "name": "Cálice de íon",
+ "description": "Dino Drag Race — Cálice de íon (Épico). +1.26s de nitro.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/57.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "nitro"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Nitro",
+   "value": "1.26s",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "nitro-Épico-3",
+  "stats": "nitro+1.26s"
+ }
+}

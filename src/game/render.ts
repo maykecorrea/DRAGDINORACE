@@ -1,14 +1,13 @@
 import { NEON_HEX, type Upgrades } from "./data";
 import type { RaceArt } from "./raceArt";
 import { loadRaceArt } from "./raceArt";
-import { paintBeira, paintChaseHud, paintDebug, paintParallax, paintRaceWorld } from "./raceHud";
+import { paintChaseHud, paintDebug, paintRaceWorld } from "./raceHud";
 import { weaponReach } from "./weapons";
 import {
   LANE_GAP,
   REDLINE,
   TRACK_EDGE,
   launchWindow,
-  mph,
   shiftWindow,
   sights,
   type Match,
@@ -21,6 +20,8 @@ export type Art = {
   cockpit: HTMLImageElement;
   cockpits: Record<string, HTMLImageElement>;
   sky: HTMLImageElement;
+  /** Phase backdrops, horizon to sky. Index 0 is fase 1. */
+  skies: HTMLImageElement[];
   /** Bone rear-view. Glass is transparent so the car behind can be aimed. */
   mirror: HTMLImageElement;
   cars: HTMLImageElement[];
@@ -150,7 +151,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 
 export function loadArt(): Promise<Art> {
   const keys = ["vex", "nyx", "geck", "lua", "shell", "claw", "medula", "ferrao", "coroa", "bofe", "neuro", "ronin", "trex", "pescoco", "friso", "balde", "casco", "valvula", "nave", "calha", "gancho", "escora", "tambor"];
-  return Promise.all([
+  const pack = Promise.all([
     loadImage("/game/cockpit.png"),
     loadImage("/game/skyline.jpg?v=4"),
     ...keys.map((key) => loadImage(key === "pescoco" ? "/game/cockpit/pescoco.png?v=7" : key === "ferrao" ? "/game/cockpit/ferrao.png?v=3" : key === "shell" ? "/game/cockpit/shell.png?v=3" : key === "balde" ? "/game/cockpit/balde.png?v=4" : key === "claw" ? "/game/cockpit/claw.png?v=2" : key === "valvula" ? "/game/cockpit/valvula.png?v=3" : key === "nave" ? "/game/cockpit/nave.png?v=1" : key === "casco" ? "/game/cockpit/casco.png?v=3" : key === "calha" ? "/game/cockpit/calha.png?v=2" : key === "gancho" ? "/game/cockpit/gancho.png?v=1" : key === "escora" ? "/game/cockpit/escora.png?v=1" : key === "tambor" ? "/game/cockpit/tambor.png?v=3" : key === "coroa" ? "/game/cockpit/coroa.png?v=4" : `/game/cockpit/${key}.png`)),
@@ -165,7 +166,9 @@ export function loadArt(): Promise<Art> {
     loadImage("/game/weapons/lock-plaque.png?v=1"),
     loadImage("/game/rearview.png?v=1"),
     loadRaceArt(),
-  ]).then((loaded) => {
+  ]);
+  const skies = Promise.all([1, 2, 3, 4, 5, 6].map((n) => loadImage(`/game/fases/fase${n}_fundo.jpg?v=23`)));
+  return Promise.all([pack, skies]).then(([loaded, phaseSkies]) => {
     const race = loaded.pop() as RaceArt;
     const pack = loaded as HTMLImageElement[];
     const mirror = pack.pop() as HTMLImageElement;
@@ -207,6 +210,7 @@ export function loadArt(): Promise<Art> {
       lockPlate,
       mirror,
       race,
+      skies: phaseSkies,
     };
   });
 }
@@ -216,6 +220,93 @@ const world = { flow: 0, dress: 0, clock: 0, scroll: 0 };
 
 const BIOME_SPAN = 240;
 const groundStrip: HTMLCanvasElement[] = [];
+
+/** fase-N, or 1 when the race has no chapter (treino, racha, livre). */
+function phaseOf(rivalId: string | null | undefined): number {
+  const n = Number(/^fase-(\d+)/.exec(rivalId ?? "")?.[1] ?? 0);
+  return n >= 1 && n <= 6 ? n : 1;
+}
+
+function phaseSky(art: Art, rivalId: string | null | undefined): HTMLImageElement {
+  const img = art.skies[phaseOf(rivalId) - 1];
+  if (img && img.width > 8 && img.height > 8) return img;
+  return art.sky;
+}
+
+/** Last row of the phase art. The seam fog uses this so the coded ground meets the picture. */
+const footColorOf = new WeakMap<HTMLImageElement, { r: number; g: number; b: number }>();
+
+function footColor(img: HTMLImageElement): { r: number; g: number; b: number } {
+  const cached = footColorOf.get(img);
+  if (cached) return cached;
+  const fallback = { r: 97, g: 101, b: 66 };
+  if (!img.width || !img.height) return fallback;
+  const sample = document.createElement("canvas");
+  sample.width = Math.min(img.width, 480);
+  sample.height = 1;
+  const g = sample.getContext("2d", { willReadFrequently: true });
+  if (!g) return fallback;
+  g.drawImage(img, 0, img.height - 1, img.width, 1, 0, 0, sample.width, 1);
+  let data: Uint8ClampedArray;
+  try {
+    data = g.getImageData(0, 0, sample.width, 1).data;
+  } catch {
+    return fallback;
+  }
+  let r = 0;
+  let gg = 0;
+  let b = 0;
+  let n = 0;
+  for (let i = 0; i < data.length; i += 16) {
+    r += data[i] ?? 0;
+    gg += data[i + 1] ?? 0;
+    b += data[i + 2] ?? 0;
+    n += 1;
+  }
+  const color = n ? { r: Math.round(r / n), g: Math.round(gg / n), b: Math.round(b / n) } : fallback;
+  footColorOf.set(img, color);
+  return color;
+}
+
+function paintPhaseSky(ctx: CanvasRenderingContext2D, img: HTMLImageElement, yaw: number, viewW: number, skyBottom: number) {
+  if (!img.width || !img.height) return;
+  const cover = 1440 + Math.ceil(Math.abs(yaw) * 72);
+  const scale = Math.max(cover / img.width, skyBottom / img.height);
+  const drawW = img.width * scale;
+  const drawH = img.height * scale;
+  const drawX = (viewW - drawW) / 2 - yaw * 36;
+  const drawY = skyBottom - drawH;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(-80, 0, 1440, skyBottom);
+  ctx.clip();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, 0, 0, img.width, img.height, drawX, drawY, drawW, drawH);
+  ctx.imageSmoothingEnabled = false;
+  ctx.imageSmoothingQuality = "low";
+  ctx.restore();
+}
+
+function paintHorizonFog(ctx: CanvasRenderingContext2D, color: { r: number; g: number; b: number }, horizon: number, viewW: number) {
+  const fade = ctx.createLinearGradient(0, horizon - 20, 0, horizon + 20);
+  fade.addColorStop(0, `rgba(${color.r},${color.g},${color.b},0)`);
+  fade.addColorStop(0.5, `rgba(${color.r},${color.g},${color.b},0.55)`);
+  fade.addColorStop(1, `rgba(${color.r},${color.g},${color.b},0)`);
+  ctx.fillStyle = fade;
+  ctx.fillRect(-80, horizon - 20, viewW + 160, 40);
+}
+
+const GROUND_LOOK: { src: number; mul: [number, number, number]; add: [number, number, number] }[] = [
+  { src: 0, mul: [0.7, 1.05, 0.45], add: [0, 14, 0] },
+  { src: 1, mul: [1.25, 0.62, 0.28], add: [22, 4, 0] },
+  { src: 1, mul: [0.22, 0.26, 0.34], add: [8, 12, 20] },
+  { src: 2, mul: [0.72, 0.78, 0.36], add: [6, 8, 0] },
+  { src: 0, mul: [0.2, 0.32, 0.26], add: [0, 6, 4] },
+  { src: 0, mul: [0.62, 0.28, 0.95], add: [20, 0, 36] },
+];
+
+const SHOULDER = ["#616542", "#893a31", "#6e94b3", "#44462c", "#2c3a41", "#7e44b9"];
 
 function mod(n: number, m: number) {
   return ((n % m) + m) % m;
@@ -228,25 +319,31 @@ function hash01(n: number) {
 }
 
 function ensureGround(tiles: HTMLImageElement[]) {
-  if (groundStrip.length === 3 && groundStrip.every((c) => c.width > 0)) return;
+  if (groundStrip.length === GROUND_LOOK.length && groundStrip.every((c) => c.width > 0)) return;
   groundStrip.length = 0;
-  for (let i = 0; i < 3; i++) {
-    const tile = tiles[i];
-    if (!tile?.width || !tile.height) return;
+  for (const look of GROUND_LOOK) {
+    const tile = tiles[look.src];
+    if (!tile?.width || !tile.height) {
+      groundStrip.length = 0;
+      return;
+    }
     const reps = 64;
     const c = document.createElement("canvas");
     c.width = tile.width * reps;
     c.height = tile.height;
     const g = c.getContext("2d");
-    if (!g) return;
+    if (!g) {
+      groundStrip.length = 0;
+      return;
+    }
     g.imageSmoothingEnabled = false;
     for (let r = 0; r < reps; r++) g.drawImage(tile, r * tile.width, 0);
     const pixels = g.getImageData(0, 0, c.width, c.height);
     const data = pixels.data;
     for (let i = 0; i < data.length; i += 4) {
-      data[i] = Math.min(255, data[i] * 0.72);
-      data[i + 1] = Math.min(255, data[i + 1] * 0.92 + 10);
-      data[i + 2] = Math.min(255, data[i + 2] * 0.55);
+      data[i] = Math.max(0, Math.min(255, (data[i] ?? 0) * look.mul[0] + look.add[0]));
+      data[i + 1] = Math.max(0, Math.min(255, (data[i + 1] ?? 0) * look.mul[1] + look.add[1]));
+      data[i + 2] = Math.max(0, Math.min(255, (data[i + 2] ?? 0) * look.mul[2] + look.add[2]));
     }
     g.putImageData(pixels, 0, 0);
     groundStrip.push(c);
@@ -263,9 +360,12 @@ function paintGround(
   H: number,
   dist: number,
   tiles: HTMLImageElement[],
+  phase: number,
 ) {
   ensureGround(tiles);
-  if (groundStrip.length < 3) return;
+  const image = groundStrip[phase - 1] ?? groundStrip[0];
+  if (!image) return;
+  const row = Math.floor(image.height * 0.46);
   const roadH = H - horizon;
   const span = 48;
   ctx.save();
@@ -285,8 +385,6 @@ function paintGround(
         const dw = Math.min(span, x1 - x);
         const xMid = x + dw * 0.5;
         const xWorld = lane + (xMid - vp) / (p * W * lat);
-        const image = groundStrip[0]!;
-        const row = Math.floor(image.height * 0.46);
         const srcW = Math.max(1, Math.min(96, image.width - 1));
         const srcX = mod(Math.floor(dist * 4 + xWorld * 2), image.width - srcW);
         ctx.globalAlpha = 1;
@@ -573,8 +671,8 @@ function paintRivalMark(
   const ahead = m.rival.dist - m.player.dist;
   const look = sights(m) || "longe";
   const dx = m.rival.lane - m.player.lane;
-  let dir = ahead >= 8 ? "FRENTE" : ahead <= -6 ? "ATRÁS" : dx > 0.6 ? "DIREITA" : dx < -0.6 ? "ESQUERDA" : ahead >= 0 ? "FRENTE" : "ATRÁS";
-  if (Math.abs(ahead) >= 18 && ahead > 0) dir = "FRENTE";
+  let dir = ahead >= 8 ? "Frente" : ahead <= -6 ? "ATRÁS" : dx > 0.6 ? "DIREITA" : dx < -0.6 ? "ESQUERDA" : ahead >= 0 ? "Frente" : "ATRÁS";
+  if (Math.abs(ahead) >= 18 && ahead > 0) dir = "Frente";
   if (ahead < -8) dir = "ATRÁS";
   const hot = look === "mira";
   const far = look === "longe";
@@ -608,7 +706,7 @@ function paintRivalMark(
   ctx.moveTo(0, -12);
   ctx.lineTo(0, 12);
   ctx.stroke();
-  if (dir === "FRENTE") {
+  if (dir === "Frente") {
     ctx.beginPath();
     ctx.moveTo(0, -hh - 18);
     ctx.lineTo(-12, -hh - 4);
@@ -650,14 +748,6 @@ function paintRivalMark(
   ctx.strokeText(meters, 0, hh + 22);
   ctx.fillStyle = "#efe6d2";
   ctx.fillText(meters, 0, hh + 22);
-  if (m.shotCall && m.shotCallT > 0) {
-    ctx.font = "900 28px Impact, Arial Black, sans-serif";
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = "#070806";
-    ctx.strokeText(m.shotCall, 0, hh + 50);
-    ctx.fillStyle = "#ff3b1f";
-    ctx.fillText(m.shotCall, 0, hh + 50);
-  }
   ctx.restore();
 }
 
@@ -667,7 +757,7 @@ function paintHits(ctx: CanvasRenderingContext2D, m: Match, rival: { x: number; 
   ctx.textBaseline = "middle";
   for (const num of m.floats ?? []) {
     const a = Math.max(0, num.life / num.max);
-    const big = num.dmg >= 3 || (num.label ?? "").includes("OSSADA");
+    const big = num.dmg >= 3 || (num.label ?? "").includes("QUEBROU");
     const size = big ? 48 : 28;
     const rise = (1 - a) * (big ? 28 : 14);
     const x = (num.hud ? 640 : (rival?.x ?? 640)) + (num.drift || 0);
@@ -717,9 +807,13 @@ function paintMirror(
 
   ctx.fillStyle = "#10141c";
   ctx.fillRect(gl, gt, gw, gh);
-  const sky = art.sky;
+  const sky = phaseSky(art, m.rivalId);
   if (sky?.width && sky.height) {
-    ctx.drawImage(sky, sky.width * 0.2, sky.height * 0.05, sky.width * 0.6, sky.height * 0.42, gl, gt, gw, gh * 0.42);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(sky, 0, 0, sky.width, sky.height * 0.62, gl, gt, gw, Math.max(1, gh * 0.42));
+    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingQuality = "low";
   }
 
   // Same road as the windshield, looking back: asphalt, lime lips, white dashes.
@@ -730,7 +824,7 @@ function paintMirror(
   const mvp = gl + gw * 0.5 + m.player.yaw * gw * 0.06;
   const mLat = 0.1;
   const mCam = 1.35;
-  ctx.fillStyle = "#1a3c22";
+  ctx.fillStyle = SHOULDER[phaseOf(m.rivalId) - 1] ?? "#616542";
   ctx.fillRect(gl, mHorizon, gw, mBottom - mHorizon);
   for (let y = Math.floor(mHorizon); y < mBottom; y++) {
     const p = (y - mHorizon) / mRoad;
@@ -853,31 +947,78 @@ function paintMirror(
 function paintChaseCar(ctx: CanvasRenderingContext2D, m: Match, neon: string, now: number, sprite?: CanvasImageSource) {
   const hex = NEON_HEX[neon as keyof typeof NEON_HEX] ?? "#d6ff3f";
   const tilt = m.player.laneT > 0 ? (m.player.laneGoal >= m.player.laneFrom ? 1 : -1) * ((6 * Math.PI) / 180) : 0;
+  const launching = (m.phase === "staging" || m.phase === "tree") && m.player.rpm > 2600;
+  const squat = launching ? Math.min(16, (m.player.rpm - 2600) / 160) : m.player.nitroOn > 0 ? 8 : 0;
   const x = VIEW_W * 0.5;
-  const y = 560 - (m.player.hurt > 0.05 ? 6 : 0);
+  const y = 548 - (m.player.hurt > 0.05 ? 6 : 0) + squat * 0.35;
   ctx.save();
   ctx.translate(x, y);
-  ctx.rotate(tilt);
+  ctx.rotate(tilt + (launching ? 0.07 : 0));
   const img = sprite as CanvasImageSource & { width?: number; height?: number };
-  if (img && (img.width ?? 0) > 8 && (img.height ?? 0) > 8) {
-    const src = cutMagenta(img);
-    const w = 210;
-    const h = w * ((img.height ?? 1) / (img.width ?? 1));
-    ctx.drawImage(src, -w / 2, -h * 0.78, w, h);
+  const src = img && (img.width ?? 0) > 8 && (img.height ?? 0) > 8 ? cutMagenta(img) : null;
+  const box = src ? contentBox(src) : null;
+  const bodyW = 300;
+  const bodyH = box ? bodyW * (box.h / Math.max(1, box.w)) : 92;
+  if (src && box && box.w > 8 && box.h > 8) {
+    ctx.drawImage(src, box.x, box.y, box.w, box.h, -bodyW / 2, -bodyH * 0.82, bodyW, bodyH);
   } else {
-    ctx.fillStyle = "#1a140f";
-    ctx.fillRect(-100, -28, 200, 78);
-    ctx.fillStyle = "#3a2a1c";
-    ctx.fillRect(-78, -46, 156, 28);
-    ctx.fillStyle = "#070806";
-    ctx.fillRect(-36, -40, 72, 16);
+    ctx.fillStyle = "#243028";
+    ctx.beginPath();
+    ctx.moveTo(-150, -10);
+    ctx.lineTo(-110, -48);
+    ctx.lineTo(20, -52);
+    ctx.lineTo(130, -18);
+    ctx.lineTo(150, 8);
+    ctx.lineTo(-140, 18);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#10140e";
+    ctx.fillRect(-20, -46, 52, 22);
     ctx.fillStyle = hex;
-    ctx.fillRect(-86, -6, 26, 12);
-    ctx.fillRect(60, -6, 26, 12);
+    ctx.fillRect(108, -16, 22, 8);
   }
-  ctx.fillStyle = "#8a8172";
-  ctx.fillRect(-16, 36, 10, 16);
-  ctx.fillRect(6, 36, 10, 16);
+  const spin = m.player.dist * 3.2 + now * (m.player.speed > 1 ? 0 : 0);
+  const wheel = (wx: number, wy: number, r: number) => {
+    ctx.save();
+    ctx.translate(wx, wy);
+    ctx.rotate(spin);
+    ctx.fillStyle = "#121212";
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#d7d0c2";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.strokeStyle = "#6e675c";
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.72, 0);
+    ctx.lineTo(r * 0.72, 0);
+    ctx.moveTo(0, -r * 0.72);
+    ctx.lineTo(0, r * 0.72);
+    ctx.stroke();
+    ctx.fillStyle = "#3a342c";
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+  wheel(-bodyW * 0.28, 8, 28);
+  wheel(bodyW * 0.3, 6, 28);
+  if (launching || m.player.nitroOn > 0 || m.player.speed > 8) {
+    const flick = 0.65 + 0.35 * Math.sin(now * 28);
+    const len = (launching ? 36 : 18) + (m.player.nitroOn > 0 ? 48 : 0);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = flick;
+    ctx.fillStyle = m.player.nitroOn > 0 ? "#7fd7ff" : "#ffb04a";
+    ctx.beginPath();
+    ctx.moveTo(-bodyW * 0.48, -6);
+    ctx.lineTo(-bodyW * 0.48 - len, 4);
+    ctx.lineTo(-bodyW * 0.48, 14);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
   if (m.player.hp < m.player.hpMax * 0.85) {
     const wound = Math.max(0, Math.min(1, 1 - m.player.hp / Math.max(1, m.player.hpMax)));
     const puffs = 1 + Math.round(wound * 3);
@@ -1011,31 +1152,13 @@ export function drawFrame(
   ctx.fillStyle = "#10141c";
   ctx.fillRect(-40, -40, W + 80, H + 80);
 
-  const sky = art.sky;
+  const phase = phaseOf(m.rivalId);
+  const sky = phaseSky(art, m.rivalId);
   const skyBottom = horizon + 8;
-  if (sky?.width && sky.height) {
-    // Cover the whole sky band. The jpg's last rows are a black curb — drop them
-    // so the ferns sit on the grass instead of leaving a black stripe.
-    const srcH = sky.height * 0.86;
-    const bleed = 200;
-    const destW = W + bleed * 2;
-    const destH = skyBottom + 12;
-    const scale = Math.max(destW / sky.width, destH / srcH);
-    const drawW = sky.width * scale;
-    const drawH = srcH * scale;
-    const drawX = (W - drawW) / 2 - yaw * 36;
-    const drawY = skyBottom - drawH;
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(-80, -40, W + 160, skyBottom);
-    ctx.clip();
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(sky, 0, 0, sky.width, srcH, drawX, drawY, drawW, drawH);
-    ctx.restore();
-  }
-  if (art.race) paintParallax(ctx, art.race, dist, yaw, W, horizon);
+  paintPhaseSky(ctx, sky, yaw, W, skyBottom);
+  const seam = footColor(sky);
 
-  ctx.fillStyle = "#4a341c";
+  ctx.fillStyle = SHOULDER[phase - 1] ?? "#616542";
   ctx.fillRect(-20, horizon, W + 40, H - horizon + 30);
 
   const dt = Math.min(0.05, Math.max(0, now - world.clock));
@@ -1044,7 +1167,7 @@ export function drawFrame(
   world.scroll += cruise * dt * 0.55;
   world.dress = (dist * 0.008) % 1;
 
-  paintGround(ctx, horizon, vp, lane, LAT, W, H, dist, art.ground ?? []);
+  paintGround(ctx, horizon, vp, lane, LAT, W, H, dist, art.ground ?? [], phase);
 
   for (let y = Math.floor(horizon); y < H; y++) {
     const p = (y - horizon) / (H - horizon);
@@ -1053,7 +1176,7 @@ export function drawFrame(
     const half = TRACK_EDGE * p * W * LAT;
     const center = vp - lane * p * W * LAT;
     const cell = Math.floor(ahead * 0.02 + world.scroll * 0.12);
-    const asphalt = (cell & 1) === 0 ? "#141910" : "#1b2116";
+    const asphalt = phase >= 3 ? ((cell & 1) === 0 ? "#0d1210" : "#161c18") : (cell & 1) === 0 ? "#141910" : "#1b2116";
     ctx.fillStyle = asphalt;
     ctx.fillRect(center - half, y, half * 2, 1);
     const wallW = Math.max(8, p * 36);
@@ -1071,8 +1194,8 @@ export function drawFrame(
     }
   }
 
+  paintHorizonFog(ctx, seam, horizon, W);
   paintLaneDots(ctx, horizon, vp, lane, LAT, W, H, dist);
-  if (art.race) paintBeira(ctx, art.race, dist, W, horizon, H);
   drawRoadside(ctx, horizon, vp, lane, LAT, W, H, dist, art.scenery);
 
   const airAt = (ahead: number, worldLane: number) => {
@@ -1095,7 +1218,7 @@ export function drawFrame(
     const sp = Math.min(0.48, CAM / z);
     const foot = horizon + sp * (H - horizon);
     const lanePx = LANE_GAP * sp * W * LAT;
-    const w = Math.max(64, Math.min(ahead < 22 ? 168 : 96, lanePx * 0.78));
+    const w = Math.max(110, Math.min(ahead < 22 ? 210 : 128, lanePx * 0.92));
     const img = art.cars[sprite] ?? art.cars[0];
     const h = w * ((img.height > 0 ? img.height : img.width * 0.7) / Math.max(1, img.width));
     const sep = Math.abs(ahead) < 22 ? 1.35 : 1;
@@ -1308,13 +1431,17 @@ export function drawFrame(
 
   const drawCar = (ahead: number, worldLane: number, sprite: number, nitro: boolean, shielded = false) => {
     if (ahead < -12 || ahead > 78) return;
-    const box = projectCar(ahead, worldLane, sprite);
-    const x = box.x;
-    const y = box.foot;
-    const w = box.w;
-    const h = box.h;
+    const placed = projectCar(ahead, worldLane, sprite);
+    const x = placed.x;
+    const y = placed.foot;
+    const w = placed.w;
+    const h = placed.h;
     const img = art.cars[sprite] ?? art.cars[0];
-    ctx.drawImage(img, x - w / 2, y - h * 0.92, w, h);
+    if (!img) return;
+    const src = cutMagenta(img);
+    const crop = contentBox(src);
+    if (crop) ctx.drawImage(src, crop.x, crop.y, crop.w, crop.h, x - w / 2, y - h * 0.92, w, h);
+    else ctx.drawImage(src, x - w / 2, y - h * 0.92, w, h);
     if (m.rival && m.rival.hp < m.rival.hpMax * 0.85) {
       const wound = Math.max(0, Math.min(1, 1 - m.rival.hp / Math.max(1, m.rival.hpMax)));
       ctx.save();
@@ -1375,7 +1502,7 @@ export function drawFrame(
     if (ahead < -12 || ahead > 78) {
       const pinAhead = ahead > 0 ? 8 : -6;
       const p = airAt(pinAhead, m.rival.lane);
-      const word = ahead > 12 ? "FRENTE" : ahead < -8 ? "ATRÁS" : m.rival.lane > lane + 0.8 ? "DIREITA" : m.rival.lane < lane - 0.8 ? "ESQUERDA" : ahead >= 0 ? "FRENTE" : "ATRÁS";
+      const word = ahead > 12 ? "Frente" : ahead < -8 ? "ATRÁS" : m.rival.lane > lane + 0.8 ? "DIREITA" : m.rival.lane < lane - 0.8 ? "ESQUERDA" : ahead >= 0 ? "Frente" : "ATRÁS";
       ctx.save();
       ctx.fillStyle = "#d6ff3f";
       ctx.beginPath();
@@ -1455,6 +1582,11 @@ export function drawFrame(
       ctx.beginPath();
       ctx.arc(p.x, p.y, boomR * (1.15 + (1 - a) * 0.35), 0, Math.PI * 2);
       ctx.stroke();
+      for (let i = 0; i < 8; i++) {
+        const ang = (i / 8) * Math.PI * 2 + now;
+        ctx.fillStyle = i % 2 ? "#ffd27a" : "#ff4d1a";
+        ctx.fillRect(p.x + Math.cos(ang) * boomR * 0.8, p.y + Math.sin(ang) * boomR * 0.8, 6, 6);
+      }
       ctx.restore();
       continue;
     }
@@ -1853,7 +1985,7 @@ const sweep = { rpm: 0.12, clock: 0 };
 function drawDigital(ctx: CanvasRenderingContext2D, m: Match) {
   const W = VIEW_W;
   const H = VIEW_H;
-  const readout = Math.min(99999, Math.round(mph(m.player.speed)));
+  const readout = Math.min(99999, Math.round(m.player.speed * 3.6));
   const label = String(readout).padStart(5, "0");
   const s = 4;
   const gear = String(m.player.gear);
@@ -1867,7 +1999,7 @@ function drawDigital(ctx: CanvasRenderingContext2D, m: Match) {
   ctx.fillRect(x - 10, y - 8, 3, s * 5 + 18);
   text(ctx, gear, x, y, s, m.player.band ? "#d6ff3f" : "#efe6d2");
   text(ctx, label, x + digit + 10, y, s, "#d6ff3f");
-  text(ctx, "MPH", x + digit + 10 + digit * 5 + 8, y + s, 3, "#9aa18c");
+  text(ctx, "KM/H", x + digit + 10 + digit * 5 + 8, y + s, 3, "#9aa18c");
   const frac = m.player.nitroMax > 0 ? Math.max(0, Math.min(1, m.player.nitroLeft / m.player.nitroMax)) : 0;
   const ny = y + s * 5 + 2;
   for (let i = 0; i < 10; i++) {
@@ -1925,13 +2057,13 @@ function drawCluster(ctx: CanvasRenderingContext2D, m: Match, up: Upgrades, now:
   ctx.fillStyle = "#141806";
   ctx.fillRect(cx - hub / 2, cy - hub / 2, hub, hub);
 
-  const readout = Math.min(99999, Math.round(mph(m.player.speed)));
+  const readout = Math.min(99999, Math.round(m.player.speed * 3.6));
   const label = String(readout).padStart(readout >= 1000 ? 5 : 3, "0");
   const s = Math.max(2, Math.round(rad / (label.length > 3 ? 28 : 22)));
   const tw = label.length * 4 * s;
   text(ctx, label, cx - tw / 2, cy + rad * 0.22, s, "#efe6d2");
   const sm = Math.max(2, s - 1);
-  text(ctx, "MPH", cx - 6 * sm, cy + rad * 0.22 + s * 6, sm, "#9aa18c");
+  text(ctx, "KM/H", cx - 6 * sm, cy + rad * 0.22 + s * 6, sm, "#9aa18c");
   const sg = Math.max(3, Math.round(rad / 16));
   text(ctx, String(m.player.gear), cx - rad * 0.55 - sg, cy - sg * 3, sg, "#efe6d2");
 
@@ -1981,7 +2113,7 @@ function drawCluster(ctx: CanvasRenderingContext2D, m: Match, up: Upgrades, now:
 
   if ((m.mode === "duel" || m.mode === "free") && m.rival && m.phase !== "finish") {
     const delta = Math.round(m.player.dist - m.rival.dist);
-    const where = delta < -8 ? "FRENTE" : delta > 8 ? "ATRAS" : "PERTO";
+    const where = delta < -8 ? "Frente" : delta > 8 ? "ATRÁS" : "PERTO";
     const label = `${where} ${Math.abs(delta)}M`;
     const x = W - label.length * 16 - 56;
     const y = 36;
@@ -2009,6 +2141,42 @@ function drawCluster(ctx: CanvasRenderingContext2D, m: Match, up: Upgrades, now:
 }
 
 const cutCache = new WeakMap<object, CanvasImageSource>();
+const boxCache = new WeakMap<object, { x: number; y: number; w: number; h: number } | null>();
+
+function contentBox(img: CanvasImageSource): { x: number; y: number; w: number; h: number } | null {
+  if (!(img instanceof HTMLImageElement) && !(img instanceof HTMLCanvasElement)) return null;
+  const hit = boxCache.get(img);
+  if (hit !== undefined) return hit;
+  const w = img.width;
+  const h = img.height;
+  if (!w || !h) {
+    boxCache.set(img, null);
+    return null;
+  }
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const g = c.getContext("2d", { willReadFrequently: true });
+  if (!g) return null;
+  g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, w, h).data;
+  let minX = w;
+  let minY = h;
+  let maxX = 0;
+  let maxY = 0;
+  for (let y = 0; y < h; y += 2) {
+    for (let x = 0; x < w; x += 2) {
+      if ((d[(y * w + x) * 4 + 3] ?? 0) < 24) continue;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+  }
+  const box = maxX <= minX || maxY <= minY ? null : { x: minX, y: minY, w: maxX - minX + 2, h: maxY - minY + 2 };
+  boxCache.set(img, box);
+  return box;
+}
 
 function cutMagenta(img: CanvasImageSource): CanvasImageSource {
   if (!(img instanceof HTMLImageElement) && !(img instanceof HTMLCanvasElement)) return img;
@@ -2055,7 +2223,7 @@ function drawHull(ctx: CanvasRenderingContext2D, m: Match, underStrip: boolean) 
   const rearDef = m.player.rearLoad;
   text(
     ctx,
-    `FRENTE ${frontDef.name} ${m.player.ammo}-${m.player.ammoMax}`,
+    `Frente ${frontDef.name} ${m.player.ammo}-${m.player.ammoMax}`,
     16,
     y + 22,
     2,
@@ -2099,7 +2267,7 @@ function drawStrip(
       ctx.fillRect(x1 + col * 6, y + 4 + row * 7, 6, 7);
     }
   }
-  text(ctx, "INICIO", 24, 16, 3, "#d6ff3f");
+  text(ctx, "INÍCIO", 24, 16, 3, "#d6ff3f");
   text(ctx, "FIM", W - 78, 16, 3, "#efe6d2");
   const length = Math.max(1, m.strip);
   const at = (dist: number) => x0 + Math.max(0, Math.min(1, dist / length)) * span;

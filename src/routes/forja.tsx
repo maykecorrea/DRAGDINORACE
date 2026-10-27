@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { PitFrame } from "@/components/pit";
 import type { NftCar } from "@/game/data";
+import { rarityLabel } from "@/game/data";
 import { carArt, carLabel, fuseStep, inventOfTier, specToCar } from "@/game/forge";
 import { claimForge } from "@/game/forge.functions";
 import { loadSave } from "@/game/save";
@@ -91,7 +92,7 @@ function Forja() {
       setBusy(false);
       return;
     }
-    setNote("O cadinho está comendo os três.");
+    setNote("A forja está fundindo os três…");
     const buf = new Uint32Array(1);
     crypto.getRandomValues(buf);
     const current = loadSave();
@@ -106,7 +107,7 @@ function Forja() {
       commit({ ...current, cars, selected, shards: shards + 1 });
       setSlots([]);
       setBusy(false);
-      setNote(`Comeu ${carLabel(scrap)}. Sobrou o resto. Fragmentos ${shards + 1}/3.`);
+      setNote(`Fundiu ${carLabel(scrap)}. Fragmentos: ${shards + 1}/3.`);
       setResult({ ok: false, car: scrap });
       return;
     }
@@ -116,7 +117,7 @@ function Forja() {
     const spec = inventOfTier(step.to, blocked);
     if (!spec.image) {
       setBusy(false);
-      setNote("A forja não achou um casco dessa classe.");
+      setNote("A forja não achou um carro dessa classe.");
       return;
     }
     const claimed = await claimForge({
@@ -134,7 +135,7 @@ function Forja() {
     }).catch(() => ({ ok: false as const, reason: "db" as const }));
     if (!claimed.ok) {
       setBusy(false);
-      setNote(claimed.reason === "taken" ? "Essa ficha já existe. Funde de novo." : "O banco não gravou. Os três continuam na garagem.");
+      setNote(claimed.reason === "taken" ? "Esse carro já existe. Tente fundir de novo." : "Não deu para salvar. Os três continuam na garagem.");
       return;
     }
     const nft = specToCar(spec);
@@ -172,7 +173,7 @@ function Forja() {
         <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col justify-end">
           <p className="font-display text-4xl leading-none text-white sm:text-5xl md:text-6xl">Forja</p>
           <p className="mt-1 max-w-xl text-sm text-pretty text-white/80">
-            Três do mesmo sangue. A forja tenta um de classe acima. Falhou, dois viram escória e um volta. Até o lendário.
+            Junte três carros da mesma classe para tentar um da classe acima. Se falhar, um vira sucata.
           </p>
           <ul className="mt-3 flex flex-wrap gap-1.5">
             {LADDER.map((item) => (
@@ -181,7 +182,7 @@ function Forja() {
                 className="border border-white/20 bg-black/55 px-2 py-1 text-[10px] text-white/80"
                 style={{ color: rarity === item.from ? TONE[item.to] : undefined }}
               >
-                3 {item.from} → {item.chance}% {item.to}
+                3 {rarityLabel(item.from)} → {item.chance}% {rarityLabel(item.to)}
                 <span className="text-white/45"> · garagem {stock.find((row) => row.from === item.from)?.n ?? 0}</span>
               </li>
             ))}
@@ -204,7 +205,7 @@ function Forja() {
                       </span>
                     </>
                   ) : (
-                    <span className="font-pixel text-xs tracking-[0.25em] text-white/50">VAGA {index + 1}</span>
+                    <span className="font-pixel text-xs tracking-[0.25em] text-white/50">Vaga {index + 1}</span>
                   )}
                 </button>
               );
@@ -217,9 +218,9 @@ function Forja() {
               onClick={() => void melt()}
               className="min-h-11 bg-[#ff5a1f] px-4 font-display text-2xl leading-none text-black disabled:opacity-40"
             >
-              {busy ? "Fundindo" : (save.shards ?? 0) >= 3 ? "Fundir · garantida" : step ? `Fundir · ${Math.round(step.chance * 100)}%` : "Fundir"}
+              {busy ? "Fundindo…" : (save.shards ?? 0) >= 3 ? "Fundir · garantido" : step ? `Fundir · ${Math.round(step.chance * 100)}%` : "Fundir"}
             </button>
-            <p className="text-sm text-white">Se falhar, só um carro vira sucata. Os outros dois ficam. Cada falha dá 1 fragmento. Com 3, a próxima fusão é certa. Agora: {save.shards ?? 0}/3.</p>
+            <p className="text-sm text-white">Se falhar, só um carro vira sucata e os outros dois ficam. Cada falha dá 1 fragmento. Com 3, a próxima fusão é garantida. Agora:  {save.shards ?? 0}/3.</p>
             <label className="flex min-h-11 cursor-pointer items-center gap-2 border border-white/40 bg-black/70 px-3 text-sm text-white">
               <input
                 type="checkbox"
@@ -246,7 +247,7 @@ function Forja() {
                     <img src={carArt(car)} alt="" className="h-12 w-full object-contain" />
                     <p className="truncate text-[10px] text-white">{carLabel(car)}</p>
                     <p className="text-[10px]" style={{ color: TONE[car.rarity] ?? "#efe6d2" }}>
-                      {locked ? "Teto" : car.rarity}
+                      {locked ? "Topo" : car.rarity}
                     </p>
                   </button>
                 </li>
@@ -271,7 +272,7 @@ function Forja() {
         <div className="fixed inset-0 z-40 grid place-items-center bg-black/75 p-4">
           <div className="w-full max-w-md border border-white/20 bg-black/90 p-4 text-center">
             <p className="font-pixel text-xs tracking-[0.3em]" style={{ color: result.ok ? "#d6ff3f" : "#ff5a1f" }}>
-              {result.ok ? "SUBIU" : "ESCORIA"}
+              {result.ok ? "SUBIU!" : "ESCÓRIA"}
             </p>
             <img src={carArt(result.car)} alt="" className="mx-auto mt-3 h-36 w-full object-contain" />
             <p className="mt-2 font-display text-4xl leading-none" style={{ color: TONE[result.car.rarity] }}>
@@ -279,8 +280,8 @@ function Forja() {
             </p>
             <p className="mt-1 text-sm text-white/75">
               {result.ok
-                ? `${result.car.rarity}. Entrou na garagem e já está no banco.`
-                : "O cadinho comeu dois. Este voltou do mesmo sangue."}
+                ? `${rarityLabel(result.car.rarity)} foi para a garagem e já está equipado.`
+                : "A fusão falhou. Um carro virou sucata."}
             </p>
             <button type="button" onClick={() => setResult(null)} className="mt-4 min-h-11 border border-white/30 px-4 font-display text-2xl leading-none text-white">
               Fechar

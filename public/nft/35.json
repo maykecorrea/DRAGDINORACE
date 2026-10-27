@@ -1,0 +1,33 @@
+{
+ "name": "Fole de âmbar",
+ "description": "Dino Drag Race — Fole de âmbar (Raro). +13% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/35.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "engine"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Raro"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "13%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 100,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "engine-Raro-2",
+  "stats": "vmax+13%"
+ }
+}

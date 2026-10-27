@@ -1,0 +1,33 @@
+{
+ "name": "Ampola de órbita",
+ "description": "Dino Drag Race — Ampola de órbita (Épico). +0.58s de nitro.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/223.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Kit de Piloto"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "ampola"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Épico"
+  },
+  {
+   "trait_type": "Nitro",
+   "value": "0.58s",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 40,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "kit-ampola-Épico",
+  "stats": "nitro+0.58s"
+ }
+}

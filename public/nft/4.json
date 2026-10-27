@@ -1,0 +1,33 @@
+{
+ "name": "Turbina suja",
+ "description": "Dino Drag Race — Turbina suja (Comum). +4% de velocidade máxima.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/4.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "engine"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Velocidade Máx",
+   "value": "4%",
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "engine-Comum",
+  "stats": "vmax+4%"
+ }
+}

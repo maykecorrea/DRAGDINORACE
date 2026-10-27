@@ -1,0 +1,33 @@
+{
+ "name": "Tiara de fóssil",
+ "description": "Dino Drag Race — Tiara de fóssil (Lendário). +48 de potência.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/74.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Peça"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "gearbox"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Lendário"
+  },
+  {
+   "trait_type": "Potência",
+   "value": 48,
+   "display_type": "boost_number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 10,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "gearbox-Lendário-2",
+  "stats": "power+48"
+ }
+}

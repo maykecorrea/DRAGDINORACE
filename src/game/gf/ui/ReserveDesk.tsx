@@ -47,9 +47,10 @@ export function ReserveDesk({
   return (
     <section className="gf-screen">
       <button type="button" onClick={onBack}>
-        Voltar à mesa
+        Voltar
       </button>
-      <h2 className="gf-kicker">Reserva e investimentos</h2>
+      <h2 className="gf-kicker">Cofre</h2>
+      <p>Caixa da oficina. Guardar e tirar fica aqui. O banco, com boleto e empréstimo, é o prédio escrito BANCO na cidade.</p>
       {products.map((product) => {
         const balance = state.savings[product.id];
         const yieldWeek = flagNum(state.flags, product.id === "cofrinho" ? "yieldCofrinho" : product.id === "fundo" ? "yieldFundo" : "yieldTesouro");
@@ -63,35 +64,35 @@ export function ReserveDesk({
               <PixelFile file={product.id === "cofrinho" ? GF.fossil : GF.lock} /> {product.nome}
             </h3>
             <p>Saldo {formatF(balance)}</p>
-            <p>Rendimento da última semana {formatF(yieldWeek)}</p>
-            <p>{product.liquidity === "imediato" ? "Resgate na hora." : "Resgate cai no domingo."}</p>
+            <p>Rendimento da última semana:  {formatF(yieldWeek)}</p>
+            <p>{product.liquidity === "imediato" ? "Resgate na hora." : "O resgate cai no domingo."}</p>
             <div className="gf-fields">
               <label>
                 Valor
                 <input inputMode="numeric" aria-label={`Valor no ${product.nome}`} value={draft} onChange={(event) => setDraft(event.target.value)} />
               </label>
               <button type="button" className="gf-go" disabled={busy || !whole || state.cash < amount} onClick={() => onAct({ type: "SAVE", product: product.id, value: amount })}>
-                Aplicar
+                Guardar
               </button>
               <button type="button" disabled={busy || !whole || balance < amount} onClick={() => onAct({ type: "WITHDRAW", product: product.id, value: amount })}>
-                Resgatar
+                Tirar
               </button>
             </div>
           </article>
         );
       })}
       {state.savings.pendingWithdraw.length > 0 && (
-        <p>Tesouro a caminho: {formatF(state.savings.pendingWithdraw.reduce((sum, item) => sum + item.value, 0))} no próximo domingo.</p>
+        <p>Tesouro chegando:  {formatF(state.savings.pendingWithdraw.reduce((sum, item) => sum + item.value, 0))} no próximo domingo.</p>
       )}
       <div className="gf-panel">
-        <h3>Meta da reserva</h3>
+        <h3>Meta do cofre</h3>
         <p>
-          Você tem {formatWeeks(weeks)} de {goal} semanas de custo fixo guardadas
+          Você tem {formatWeeks(weeks)} de {goal}  semanas de contas fixas guardadas
         </p>
-        <div className="gf-meter" role="progressbar" aria-valuemin={0} aria-valuemax={goal} aria-valuenow={Math.min(goal, Number.isFinite(weeks) ? weeks : goal)} aria-label="Semanas de reserva">
+        <div className="gf-meter" role="progressbar" aria-valuemin={0} aria-valuemax={goal} aria-valuenow={Math.min(goal, Number.isFinite(weeks) ? weeks : goal)} aria-label="Semanas guardadas">
           <span style={{ width: `${width}%` }} />
         </div>
-        <p className="gf-dim">A conta usa fixos + folha ({formatF(weekly)} por semana).</p>
+        <p className="gf-dim">A conta usa contas fixas + salários ({formatF(weekly)} por semana).</p>
         <label>
           Depósito automático {pct}%
           <input
@@ -107,7 +108,7 @@ export function ReserveDesk({
             onBlur={(event) => commit(Number(event.target.value))}
           />
         </label>
-        <p className="gf-dim">Cada recebimento guarda essa parte no cofrinho, sozinho.</p>
+        <p className="gf-dim">A cada pagamento recebido, essa parte vai sozinha para o cofre.</p>
       </div>
       <InterestSim mode="yield" principal={1000} rate={tesouroRate / 100} payment={100} weeks={52} />
     </section>

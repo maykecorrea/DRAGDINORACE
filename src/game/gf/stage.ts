@@ -1,3 +1,4 @@
+import { levelOf, xpOf } from "../../../gf-engine/body.ts";
 import { contentV1, type Content } from "../../../gf-engine/content.ts";
 import { quotePreview } from "../../../gf-engine/contracts.ts";
 import { formatF } from "../../../gf-engine/format.ts";
@@ -23,13 +24,13 @@ export const ART = {
 /** Retratos da história. Cliente da rua usa /assets/gf/clientes. */
 export const PORTRAIT: Record<string, string> = {
   vizinho: "/game/gf/vizinho.jpg",
-  motoboy: "/game/gf/portrait-motoboy.png",
-  comerciante: "/game/gf/portrait-comerciante.png",
-  pechincheiro: "/game/gf/portrait-pechincheiro.png",
-  frota: "/game/gf/portrait-frota.png",
-  corredor: "/game/gf/portrait-corredor.png",
-  caloteiro: "/game/gf/portrait-caloteiro.png",
-  prefeitura: "/game/gf/portrait-prefeitura.png",
+  motoboy: "/assets/gf/clientes/raio_velox.png?v=9",
+  comerciante: "/assets/gf/clientes/dona_estegolina.png?v=9",
+  pechincheiro: "/assets/gf/clientes/raimundo_cascudo.png?v=9",
+  frota: "/assets/gf/clientes/silvana_raptorlog.png?v=9",
+  corredor: "/assets/gf/clientes/nina_nitro.png?v=9",
+  caloteiro: "/assets/gf/clientes/empresario_varano.png?v=9",
+  prefeitura: "/assets/gf/clientes/secretario_burocracio.png?v=9",
   teo: "/assets/gf/npcs/teo.png?v=1",
   pai: "/assets/gf/npcs/pai.png?v=1",
   ambar: "/assets/gf/npcs/ambar.png?v=1",
@@ -46,7 +47,7 @@ export const PORTRAIT: Record<string, string> = {
   ankylo: "/assets/gf/npcs/ankylo.png?v=1",
   ze_femur: "/assets/gf/npcs/ze_femur.png?v=1",
   varano: "/assets/gf/npcs/varano.png?v=1",
-  banco: "/assets/gf/npcs/banco.png?v=1",
+  banco: "/assets/gf/npcs/banco.png?v=8",
   megaosso: "/assets/gf/npcs/megaosso.png?v=1",
 };
 
@@ -136,39 +137,39 @@ export function dayName(day: number): string {
 export const ENDINGS: Record<string, { title: string; line: string }> = {
   F1_caixa: {
     title: "O caixa secou",
-    line: "Dois domingos no vermelho além do cheque. A porta foi trancada por fora.",
+    line: "Dois domingos no vermelho além do limite do banco. A oficina fechou as portas.",
   },
   F2_banco: {
     title: "O banco tomou a garagem",
-    line: "Três boletos do seu pai sem pagamento. A garantia era o teto em que você dormia.",
+    line: "Três boletos do seu pai sem pagar. A garantia era a oficina onde você dormia.",
   },
   F3_insolvencia: {
-    title: "Dívida maior que a vida",
-    line: "O que você deve passou muito do que você tem. Não tem peça que cubra esse buraco.",
+    title: "Dívida gigante",
+    line: "Você deve muito mais do que tem. Não tem peça que tape esse buraco.",
   },
   F4_agiota: {
-    title: "Fuga da cidade",
-    line: "O Juca cobrou duas vezes. Na terceira, a cidade ficou pequena.",
+    title: "Longe da cidade",
+    line: "O Juca cobrou duas vezes. Na terceira, você teve que sair da cidade.",
   },
   F5_desistencia: {
-    title: "Téo desistiu",
-    line: "O corpo pediu ar e não teve. Duas quedas perto demais.",
+    title: "{nome} precisou parar",
+    line: "O corpo pediu descanso e não teve.\n2 Dias sem tratamentos...",
   },
   sobrevivencia: {
-    title: "Você não caiu",
-    line: "A oficina ainda está de pé. Agora aprende a subir.",
+    title: "Você ficou de pé",
+    line: "A oficina ainda funciona. Agora é aprender a crescer.",
   },
   prosperidade: {
     title: "Ferrugem & Filho",
-    line: "A placa acende. Dívida zero, reserva no osso, baia cheia.",
+    line: "A placa acende! Dívida zero, cofre cheio, baia cheia.",
   },
   liberdade: {
-    title: "A porta abre para fora",
-    line: "Nível máximo, dívida zero, reserva de oito semanas e renda que se paga. A oficina não precisa mais de você para respirar.",
+    title: "A oficina anda sozinha",
+    line: "Nível máximo, dívida zero, 8 semanas guardadas e renda que paga as contas. A oficina já não precisa de você o tempo todo.",
   },
   peao: {
-    title: "Peão da mercadoria",
-    line: "A carga passou. O nome da oficina ficou na mão de quem cobra a rua.",
+    title: "Na mão da gangue",
+    line: "As caixas passaram. Agora o nome da oficina está na mão de quem manda na rua.",
   },
 };
 
@@ -227,7 +228,7 @@ function quoteHint(state: Bay, content: Content, leadId: string, price: number, 
   if (!state.debts || !state.calendar || !state.garage) return "";
   try {
     const quote = quotePreview(state as GameState, content, leadId, price, depositPct);
-    return `Margem ${formatF(quote.margin)} · chance ${chanceLabel(quote.acceptChance)}`;
+    return `Sobra do serviço ${formatF(quote.margin)} · chance ${chanceLabel(quote.acceptChance)}`;
   } catch {
     return "";
   }
@@ -263,7 +264,7 @@ export function bayBeat(state: Bay, content: Content = contentV1, skipLead?: str
       who: "Rex Navalha",
       line: "Proteção. 250 por semana. Seu pai disse não. Olha a fuligem.",
       choices: [
-        { label: "Pagar a proteção", hint: "O valor sobe. O ânimo desce.", action: { type: "GANG", accept: true } },
+        { label: "Pagar o pedágio", hint: "O valor sobe. O ânimo desce.", action: { type: "GANG", accept: true } },
         { label: "Dizer não, como o pai", action: { type: "GANG", accept: false } },
       ],
     };
@@ -350,7 +351,7 @@ export function bayBeat(state: Bay, content: Content = contentV1, skipLead?: str
         },
         lead.record
           ? { label: "A ficha já foi aberta", hint: lead.record }
-          : { label: "Consultar a ficha", hint: "1 energia · 20 ₣", action: { type: "CHECK_RECORD", targetId: lead.id } },
+          : { label: "Ver a ficha", hint: "1 energia · 20 ₣", action: { type: "CHECK_RECORD", targetId: lead.id } },
         { label: "Prospectar a rua", hint: "1 energia · 10 ₣ · mais dois clientes na outra semana", action: { type: "PROSPECT" } },
         { label: "Atender a baia primeiro", dismiss: lead.id },
         { label: night ? "Fechar a porta" : "Encerrar o dia", action: { type: "END_DAY" } },
@@ -376,7 +377,9 @@ export function bayBeat(state: Bay, content: Content = contentV1, skipLead?: str
   const level = state.garage?.level ?? 0;
   for (const service of content.services) {
     const needLevel = service.requires.level ?? 0;
+    const patent = service.requires.patent ?? 0;
     if (needLevel > level) continue;
+    if (patent > levelOf(xpOf(state)).level) continue;
     if (service.requires.compressor && !state.garage?.hasCompressor) continue;
     if (!shelf(state, service.materials)) continue;
     choices.push({

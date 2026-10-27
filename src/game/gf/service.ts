@@ -121,9 +121,9 @@ async function sealAccount(db: Exec, accountId: string, stamp: Outcome): Promise
   );
   for (const lesson of stamp.lessons) {
     await db.query(
-      `insert into gf_lessons (account_id, lesson_id)
+      `insert into gf_lessons_seen (account_id, lesson_id)
        values ($1, $2)
-       on conflict (account_id, lesson_id) do update set times = gf_lessons.times + 1`,
+       on conflict (account_id, lesson_id) do update set times = gf_lessons_seen.times + 1`,
       [accountId, lesson],
     );
   }
@@ -297,7 +297,7 @@ export async function listUnlocks(db: Exec, accountId: string): Promise<{
   return {
     unlocks: rows.map((row) => {
       const known = sealByKey(row.unlock_key);
-      return { key: row.unlock_key, title: known?.title ?? row.unlock_key, line: known?.line ?? "Em breve no Dino Drag.", payload: row.payload ?? null };
+      return { key: row.unlock_key, title: known?.title ?? row.unlock_key, line: known?.line ?? "Em breve no Dino Drag Race.", payload: row.payload ?? null };
     }),
   };
 }

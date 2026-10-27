@@ -1,0 +1,48 @@
+{
+ "name": "Isca de gosma",
+ "description": "Dino Drag Race — Isca de gosma (Comum). 9 de dano. 14 tiros. 0.97s. Persegue. Segura o tiro até a mira travar. Solta e ele não erra.",
+ "image": "https://dinodragrace.yvion.com.br/nft/img/84.png",
+ "attributes": [
+  {
+   "trait_type": "Section",
+   "value": "Arma"
+  },
+  {
+   "trait_type": "Slot",
+   "value": "homing"
+  },
+  {
+   "trait_type": "Rarity",
+   "value": "Comum"
+  },
+  {
+   "trait_type": "Damage",
+   "value": 9,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Clip",
+   "value": 14,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Cooldown (s)",
+   "value": 0.97,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Lock",
+   "value": 3.4,
+   "display_type": "number"
+  },
+  {
+   "trait_type": "Max Supply",
+   "value": 500,
+   "display_type": "number"
+  }
+ ],
+ "properties": {
+  "catalog_id": "arm-homing-Comum-3",
+  "stats": "dmg=9;clip=14;cd=0.97;lock=3.4"
+ }
+}
